@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Flexible Bit Register</title>
+  <link rel="stylesheet" href="styles.css"> <!-- 引入外部CSS文件 -->
+</head>
+<body>
+  <div class="container" id="container">
+    <svg id="svg-line" viewBox="0 0 1600 1000" preserveAspectRatio="xMinYMin meet"></svg>
+  </div>
+
+  <script>
+    const bitCount = 32; // 可改为 4, 8, 16, 32 等
+    const boxWidth = 40;
+    const boxSpacing = 1;
+    const container = document.getElementById("container");
+    const svg = document.getElementById("svg-line");
+
+    // 模拟每个 bit 的值 (0 或 1)
+    const bits = Array.from({ length: bitCount }, () => Math.round(Math.random()));
+	
+	const updateLayout = () => {
+		const containerWidth = container.offsetWidth;
+		console.log("containerWidth: ", containerWidth)
+		container.innerHTML = '';
+		svg.innerHTML = '';
+		
+		for (let i = 0; i < bitCount; i++) {
+		  // box（bit 高位在左，低位在右）
+		  const box = document.createElement("div");
+		  box.className = "bit-box";
+		  box.textContent = bits[i];  // 显示当前 bit 的值 (0 或 1)
+		  box.style.right = `${(i * (boxWidth + boxSpacing)) + 300}px`;
+
+		  if (bits[i] === 1) box.classList.add("highlight"); // 高亮 bit 为 1
+		  container.appendChild(box);
+		  
+		  if (i === 0) {
+			bit0BoxLeft = box.getBoundingClientRect().right;
+		  }
+
+		  // name（bit0 在最上面，bitN 在最下面）
+		  const name = document.createElement("div");
+		  name.className = "bit-name";
+		  name.textContent = `bit${i}`;
+		  name.style.left = `${bit0BoxLeft}px`; // 左对齐
+		  name.style.top = `${200 + 60 + i * 20}px`; // 阶梯式向下
+		  container.appendChild(name);
+
+		  // 延迟绘制 path，等 DOM 渲染完
+		  setTimeout(() => {
+			const containerRect = container.getBoundingClientRect();
+			const boxRect = box.getBoundingClientRect();
+			const nameRect = name.getBoundingClientRect();
+
+			const startX = boxRect.left + boxRect.width / 2 - containerRect.left;
+			const startY = boxRect.bottom - containerRect.top;
+
+			const endX = nameRect.left - containerRect.left;
+			const endY = nameRect.top + nameRect.height / 2 - containerRect.top;
+
+			const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+
+			// 判断是否为 bit1，是则绘制虚线
+			const lineClass = bits[i] === 1 ? 'line-dashed' : 'line';
+
+			const d = `
+			  M ${startX} ${startY}
+			  L ${startX} ${endY}
+			  L ${endX - 5} ${endY}
+			`;
+			path.setAttribute("d", d.trim());
+			path.setAttribute("class", lineClass); // 为路径添加虚线类或普通线类
+			svg.appendChild(path);
+		  });
+		}
+	}
+	
+	updateLayout();
+	window.addEventListener("resize", updateLayout);
+	
+  </script>
+</body>
+</html>
