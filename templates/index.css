@@ -80,7 +80,7 @@ body {
 /* nav */
 .nav {
   width: 100%;
-  height: 0.6rem;
+  height: 0.4rem;
   font-size: 0.3rem;
   border: 0.01rem solid #000;
 }
@@ -163,4 +163,95 @@ body {
   stroke: black;
   stroke-width: 2;
   stroke-dasharray: 5, 5;
+}
+/* 主题变量 */
+/* 主题样式 */
+body {
+  background-color: #ffffff;
+  color: #000000;
+  transition: all 0.3s ease;
+}
+body.dark-theme {
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+body.dark-theme .nav,
+body.dark-theme .up-box,
+body.dark-theme .bit-box,
+body.dark-theme .bit-box-container {
+  border-color: #ffffff;
+}
+body.dark-theme .bit-box.bit-0:hover {
+  background-color: #333333;
+  border-color: #999999;
+}
+body.dark-theme .bit-box.bit-1:hover {
+  background-color: #1a3a5f;
+  border-color: #4d8fcc;
+}
+body.dark-theme .line,
+body.dark-theme .line-dashed {
+  stroke: #ffffff;
+}
+body.dark-theme .theme-toggle-btn {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border-color: #ffffff;
+}
+body.dark-theme .theme-toggle-btn:hover {
+  background-color: #333333;
+}
+/* 导航栏主题切换按钮 */
+.nav {
+  width: 100%;
+  height: 0.6rem;
+  font-size: 0.3rem;
+  border: 0.01rem solid #000000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+}
+.theme-switch {
+  display: flex;
+  align-items: center;
+}
+.theme-toggle-btn {
+  background: none;
+  border: 0.01rem solid #000000;
+  border-radius: 0.2rem;
+  padding: 0.1rem 0.2rem;
+  cursor: pointer;
+  font-size: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  background-color: #ffffff;
+  color: #000000;
+}
+.theme-toggle-btn:hover {
+  background-color: #f0f0f0;
+}
+.theme-toggle-btn .dark-icon {
+  display: none;
+}
+.theme-toggle-btn .light-icon {
+  display: inline;
+  user-select: none;
+}
+body.dark-theme .theme-toggle-btn .dark-icon {
+  display: inline;
+}
+body.dark-theme .theme-toggle-btn .light-icon {
+  display: none;
+}
+/* 修改现有样式以使用主题变量 */
+.up-box {
+  display: flex;
+  height: 99.4vh;
+  border: 0.01rem solid #000000;
+}
+.bit-box {
+  border: 0.01rem solid #000000;
 }

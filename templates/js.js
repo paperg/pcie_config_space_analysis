@@ -6,19 +6,41 @@ $(document).ready(function () {
         fontSize: whei / 20
     })
 
+    // 主题切换功能
+    const themeToggle = $('#themeToggle');
+
+    // 检查本地存储中的主题设置
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        $('body').addClass('dark-theme');
+    }
+
+    // 主题切换按钮点击事件
+    themeToggle.on('click', function () {
+        const body = $('body');
+        if (body.hasClass('dark-theme')) {
+            body.removeClass('dark-theme');
+            localStorage.setItem('theme', 'light');
+        } else {
+            body.addClass('dark-theme');
+            localStorage.setItem('theme', 'dark');
+        }
+    });
+
     // 更新registerName位置的函数
     function updateRegisterNamePosition() {
         const registerName = $('.register-name');
-        const bitBoxes = $('.bit-box');
-        if (bitBoxes.length > 0) {
+        const bitBoxContainers = $('.bit-box-container');
+        if (bitBoxContainers.length > 0) {
             // 使用getBoundingClientRect替代getComputedStyle以获得更准确的位置
-            const boxRect = bitBoxes[0].getBoundingClientRect();
+            const boxRect = bitBoxContainers[0].getBoundingClientRect();
             const boxWidth = boxRect.width;
+            console.log("boxWidth", boxWidth);
             // 获取当前html的fontSize
             const htmlFontSize = parseFloat($('html').css('fontSize'));
             // 将px转换为rem
             const boxWidthRem = boxWidth / htmlFontSize;
-            const leftPositionRem = boxWidthRem * (bitBoxes.length + 2);
+            const leftPositionRem = boxWidthRem * (bitBoxContainers.length + 2);
             registerName.css('left', `${leftPositionRem}rem`);
             console.log("boxWidthRem", boxWidthRem, "leftPositionRem", leftPositionRem);
         }
@@ -115,6 +137,26 @@ $(document).ready(function () {
 
         // 生成bit-box和bit-name
         for (let i = 0; i < bitCount; i++) {
+            // 创建bit-box容器
+            const bitBoxContainer = $('<div>')
+                .addClass('bit-box-container')
+                .css({
+                    'display': 'flex',
+                    'flex-direction': 'column',
+                    'align-items': 'center',
+                    'margin': '0.01rem'
+                });
+
+            // 创建bit编号标签
+            const bitNumber = $('<div>')
+                .addClass('bit-number')
+                .css({
+                    'font-size': '0.12rem',
+                    'margin-bottom': '0.02rem',
+                    'user-select': 'none'
+                })
+                .text(i); // 从31到0显示
+
             // 创建bit-box
             const bitBox = $('<div>')
                 .addClass('bit-box')
@@ -130,8 +172,11 @@ $(document).ready(function () {
                 .attr('data-bit', i)
                 .text(bitDescription);
 
+            // 将bit编号和bit-box添加到容器中
+            bitBoxContainer.append(bitNumber, bitBox);
+
             // 添加到DOM
-            registerBox.append(bitBox);
+            registerBox.append(bitBoxContainer);
             registerName.append(bitName);
         }
 
@@ -261,7 +306,7 @@ $(document).ready(function () {
 
         // 示例3：32位寄存器，带位描述
         const bitDescriptions32 = {
-            0: "Enable",
+            0: "Enablesdadsadasdasdsddasdsdasdasdasdasdsadsd",
             1: "Interrupt",
             2: "Mode",
             3: "Status",

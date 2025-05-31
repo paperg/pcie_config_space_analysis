@@ -103,7 +103,7 @@
 
 .nav {
   width: 100%;
-  height: 0.6rem;
+  height: 0.4rem;
   font-size: .3rem;
   border: @line_width solid #000;
 }
@@ -202,3 +202,128 @@
   stroke-width: 2;
   stroke-dasharray: 5, 5;
 }
+
+/* 主题变量 */
+@light-bg: #ffffff;
+@light-text: #000000;
+@light-border: #000000;
+@dark-bg: #1a1a1a;
+@dark-text: #ffffff;
+@dark-border: #ffffff;
+
+/* 主题样式 */
+body {
+  background-color: @light-bg;
+  color: @light-text;
+  transition: all 0.3s ease;
+
+  &.dark-theme {
+    background-color: @dark-bg;
+    color: @dark-text;
+
+    .nav,
+    .up-box,
+    .bit-box,
+    .bit-box-container {
+      border-color: @dark-border;
+    }
+
+    .bit-box {
+      &.bit-0:hover {
+        background-color: #333333;
+        border-color: #999999;
+      }
+
+      &.bit-1:hover {
+        background-color: #1a3a5f;
+        border-color: #4d8fcc;
+      }
+    }
+
+    .line,
+    .line-dashed {
+      stroke: @dark-text;
+    }
+
+    .theme-toggle-btn {
+      background-color: @dark-bg;
+      color: @dark-text;
+      border-color: @dark-border;
+
+      &:hover {
+        background-color: #333333;
+      }
+    }
+  }
+}
+
+/* 导航栏主题切换按钮 */
+.nav {
+  width: 100%;
+  height: 0.6rem;
+  font-size: .3rem;
+  border: @line_width solid @light-border;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.theme-switch {
+  display: flex;
+  align-items: center;
+}
+
+.theme-toggle-btn {
+  background: none;
+  border: @line_width solid @light-border;
+  border-radius: 0.2rem;
+  padding: 0.1rem 0.2rem;
+  cursor: pointer;
+  font-size: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  background-color: @light-bg;
+  color: @light-text;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+
+  .dark-icon {
+    display: none;
+  }
+
+  .light-icon {
+    display: inline;
+    user-select: none;
+  }
+}
+
+body.dark-theme {
+  .theme-toggle-btn {
+    .dark-icon {
+      display: inline;
+    }
+
+    .light-icon {
+      display: none;
+    }
+  }
+}
+
+/* 修改现有样式以使用主题变量 */
+.up-box {
+  display: flex;
+  height: 100vh - 0.6rem;
+  border: @line_width solid @light-border;
+}
+
+.bit-box {
+  border: @line_width solid @light-border;
+  // ... 保持其他样式不变 ...
+}
+
+// ... 保持其他样式不变 ...
