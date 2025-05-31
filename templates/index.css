@@ -1,0 +1,166 @@
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+*,
+body {
+  padding: 0px;
+  margin: 0px;
+  font-family: "微软雅黑";
+}
+li {
+  list-style-type: none;
+}
+i {
+  margin: 0px;
+  padding: 0px;
+  text-indent: 0px;
+}
+img {
+  border: none;
+  max-width: 100%;
+}
+a {
+  text-decoration: none;
+  color: #399bff;
+}
+a.active,
+a:focus {
+  outline: none !important;
+  text-decoration: none;
+}
+ol,
+ul,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  padding: 0;
+  margin: 0;
+}
+a:hover {
+  color: #06c;
+  text-decoration: none !important;
+}
+html,
+body {
+  height: 100%;
+}
+.clearfix:after,
+.clearfix:before {
+  display: table;
+  content: " ";
+}
+.clearfix:after {
+  clear: both;
+}
+.pulll_left {
+  float: left;
+}
+.pulll_right {
+  float: right;
+}
+/*谷哥滚动条样式*/
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+  position: absolute;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #5bc0de;
+}
+::-webkit-scrollbar-track {
+  background-color: #ddd;
+}
+/* up-box */
+/* nav */
+.nav {
+  width: 100%;
+  height: 0.6rem;
+  font-size: 0.3rem;
+  border: 0.01rem solid #000;
+}
+.up-box {
+  display: flex;
+  height: 99.4vh;
+  border: 0.01rem solid #000;
+}
+/* register */
+.register {
+  position: relative;
+  margin: auto;
+}
+/* register-box */
+.register-box {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+/* bit-box */
+.bit-box {
+  height: 0.35rem;
+  width: 0.35rem;
+  font-size: 0.16rem;
+  text-align: center;
+  line-height: 0.35rem;
+  margin: 0.01rem 0.01rem 0.01rem 0.01rem;
+  border: 0.01rem solid #000000;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.bit-box:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  z-index: 1;
+}
+.bit-box.bit-0:hover {
+  background-color: #f0f0f0;
+  border-color: #666;
+}
+.bit-box.bit-1:hover {
+  background-color: #e1f0ff;
+  border-color: #0066cc;
+}
+.register-name {
+  position: relative;
+  left: 0.35rem;
+  top: 0.35rem;
+  display: flex;
+  flex-direction: column;
+}
+/* bit-name */
+.bit-name {
+  font-size: 0.16rem;
+  margin: 0.02rem;
+  padding-left: 0.05rem;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+#svg-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+.line {
+  stroke: black;
+  stroke-width: 2;
+}
+.line-dashed {
+  stroke: black;
+  stroke-width: 2;
+  stroke-dasharray: 5, 5;
+}

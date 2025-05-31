@@ -1,0 +1,204 @@
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box
+  }
+  
+  *,
+  body {
+    padding: 0px;
+    margin: 0px;
+    font-family: "微软雅黑";
+  }
+
+  li {
+    list-style-type: none;
+  }
+
+  
+  i {
+    margin: 0px;
+    padding: 0px;
+    text-indent: 0px;
+  }
+  
+  img {
+    border: none;
+    max-width: 100%;
+  }
+  
+  a {
+    text-decoration: none;
+    color: #399bff;
+  }
+  
+  a.active,
+  a:focus {
+    outline: none !important;
+    text-decoration: none;
+  }
+  
+  ol,
+  ul,
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    padding: 0;
+    margin: 0
+  }
+  
+  a:hover {
+    color: #06c;
+    text-decoration: none !important
+  }
+  
+  html,
+  body {
+    height: 100%;
+  }
+  
+  .clearfix:after,
+  .clearfix:before {
+    display: table;
+    content: " "
+  }
+  
+  .clearfix:after {
+    clear: both
+  }
+  
+  .pulll_left {
+    float: left;
+  }
+  
+  .pulll_right {
+    float: right;
+  }
+  
+  /*谷哥滚动条样式*/
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+    position: absolute
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background-color: #5bc0de
+  }
+  
+  ::-webkit-scrollbar-track {
+    background-color: #ddd
+  }
+
+/* up-box */
+
+/* nav */
+@line_width: .01rem;
+@box_width: .35rem;
+@box_font_size: .16rem;
+
+.nav {
+  width: 100%;
+  height: 0.6rem;
+  font-size: .3rem;
+  border: @line_width solid #000;
+}
+
+.up-box {
+    display: flex;
+    height: 100vh - 0.6rem;
+    border: @line_width solid #000;
+}
+
+/* register */
+.register {
+    position: relative;
+    margin: auto;
+    // background-color: #a3866f;
+}
+
+/* register-box */
+.register-box {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    // background-color: #466ba4;
+}
+
+/* bit-box */
+.bit-box {
+  height: @box_width;
+  width: @box_width;
+  font-size: @box_font_size;
+  text-align: center;
+  line-height: @box_width;
+  margin: .01rem .01rem .01rem .01rem;
+  border: @line_width solid #000000;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    z-index: 1;
+  }
+
+  &.bit-0:hover {
+    background-color: #f0f0f0;
+    border-color: #666;
+  }
+
+  &.bit-1:hover {
+    background-color: #e1f0ff;
+    border-color: #0066cc;
+  }
+}
+
+.register-name {
+    position: relative;
+    left: @box_width;
+    top: @box_width;
+    display: flex;
+    flex-direction: column;
+    // background-color: #3cab62;
+}
+
+/* bit-name */
+.bit-name {
+  font-size: @box_font_size;
+  margin: .02rem;
+  padding-left: .05rem;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+#svg-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.line {
+  stroke: black;
+  stroke-width: 2;
+}
+
+.line-dashed {
+  stroke: black;
+  stroke-width: 2;
+  stroke-dasharray: 5, 5;
+}
