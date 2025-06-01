@@ -483,458 +483,14 @@ $(document).ready(function () {
     }
 
     // Update register display
-    function updateRegister(registerValue, bitCount, bitRanges = {}, registerInfo = {}) {
-        // Clear modified bits when register is updated
-        clearModifiedBits();
-
-        // Update global variables
-        currentRegisterValue = registerValue;
-        initialRegisterValue = registerValue;
-        currentBitRanges = bitRanges;
-        currentBitCount = bitCount;
-        currentRegisterInfo = registerInfo;
-        isValueModified = false;
-
-        // Ensure input is a valid integer
-        if (typeof registerValue !== 'number' || registerValue < 0) {
-            console.error('Invalid register value: must be a non-negative integer');
-            return;
-        }
-
-        // Calculate maximum value
-        const maxValue = Math.pow(2, bitCount) - 1;
-        if (registerValue > maxValue) {
-            console.error(`Invalid register value: must be less than or equal to ${maxValue}`);
-            return;
-        }
-
-        // Update register information
-        if (registerInfo.name) {
-            $('#register-name-value').text(registerInfo.name);
-        }
-        if (registerInfo.offset !== undefined) {
-            $('#register-offset-value').text(`0x${registerInfo.offset.toString(16).toUpperCase().padStart(4, '0')}`);
-        }
-
-        // Update all register value displays
-        const hexValue = registerValue.toString(16).toUpperCase().padStart(bitCount / 4, '0');
-        $('#register-value').text(`0x${hexValue}`);
-        $('#register-value-display').text(`0x${hexValue}`);
-
-        // Store current value for line style
-        $('.register-box').attr('data-value', registerValue);
-
-        // Regenerate bit-boxes and bit-names
-        generateRegisterBits(bitCount, bitRanges);
-
-        // Update bit descriptions
-        updateBitDescriptions(bitRanges, registerValue);
-
-        // Get all bit-box elements
-        const boxes = $('.bit-box');
-
-        // Iterate through each bit
-        for (let i = 0; i < bitCount; i++) {
-            // Get current bit value (0 or 1)
-            const bitValue = (registerValue >> i) & 1;
-
-            // Update bit-box
-            if (boxes[i]) {
-                boxes[i].textContent = bitValue;
-                // Set different styles based on value
-                boxes[i].className = `bit-box ${bitValue ? 'bit-1' : 'bit-0'}`;
-            }
-        }
-
-        // Recalculate connection lines
-        calculateCoordinates();
-
-        // Update apply button state
-        updateApplyButtonState();
-    }
-
-    function updateApplyButtonState() {
-        const modifyBtn = $('#modify-register-btn');
-        const isDifferent = currentRegisterValue !== initialRegisterValue;
-        modifyBtn.toggleClass('disabled', !isDifferent).prop('disabled', !isDifferent);
-    }
-
-    // Example: Function to update register
-    function setRegisterValue(value, bitCount = 32, bitRanges = {}, registerInfo = {}) {
-        updateRegister(value, bitCount, bitRanges, registerInfo);
-    }
-
-    // Test function: Random register value updates
-    function startRandomTest(bitCount = 32, bitRanges = {}, registerInfo = {}) {
-        // Clear any existing interval
-        if (window.randomTestInterval) {
-            clearInterval(window.randomTestInterval);
-        }
-
-        // Update with random value every 2 seconds
-        window.randomTestInterval = setInterval(() => {
-            const maxValue = Math.pow(2, bitCount) - 1;
-            const randomValue = Math.floor(Math.random() * maxValue);
-            console.log('New random value:', randomValue.toString(16)); // Display in hex
-            setRegisterValue(randomValue, bitCount, bitRanges, registerInfo);
-        }, 2000);
-    }
-
-    // Test registers data
-    const testRegisters = {
-        "pci": {
-            "DEVICE_ID": {
-                name: "Device ID Register",
-                offset: 0x0000,
-                description: "Device Identification Register",
-                bitRanges: {
-                    "31-24": {
-                        field: "DEVICE_ID_H",
-                        description: "Device ID High Byte",
-                        default: 0x12,
-                        attributes: ["RO", "Reset"]
-                    },
-                    "23-16": {
-                        field: "DEVICE_ID_L",
-                        description: "Device ID Low Byte",
-                        default: 0x34,
-                        attributes: ["RO", "Reset"]
-                    },
-                    "15-8": {
-                        field: "REVISION_ID",
-                        description: "Revision ID",
-                        default: 0x56,
-                        attributes: ["RO", "Reset"]
-                    },
-                    "7-0": {
-                        field: "CLASS_CODE",
-                        description: "Class Code",
-                        default: 0x78,
-                        attributes: ["RO", "Reset"]
-                    }
-                },
-                initialValue: 0x12345678
-            },
-            "COMMAND": {
-                name: "Command Register",
-                offset: 0x0004,
-                description: "Device Command Register",
-                bitRanges: {
-                    "31-16": {
-                        field: "Reserved",
-                        description: "Reserved",
-                        default: 0x0000,
-                        attributes: ["RO", "Reserved"]
-                    },
-                    "15-15": {
-                        field: "SERR_EN",
-                        description: "System Error Enable",
-                        default: 0,
-                        attributes: ["RW", "Reset"]
-                    },
-                    "14-14": {
-                        field: "WAIT_CYCLE_EN",
-                        description: "Wait Cycle Enable",
-                        default: 0,
-                        attributes: ["RW", "Reset"]
-                    },
-                    "13-13": {
-                        field: "INTX_DISABLE",
-                        description: "INTx Disable",
-                        default: 0,
-                        attributes: ["RW", "Reset"]
-                    },
-                    "12-10": {
-                        field: "MAX_PAYLOAD_SIZE",
-                        description: "Max Payload Size",
-                        default: 0x2,
-                        attributes: ["RW", "Reset"]
-                    },
-                    "9-8": {
-                        field: "MAX_READ_REQ_SIZE",
-                        description: "Max Read Request Size",
-                        default: 0x2,
-                        attributes: ["RW", "Reset"]
-                    },
-                    "7-7": {
-                        field: "BUS_MASTER_EN",
-                        description: "Bus Master Enable",
-                        default: 0,
-                        attributes: ["RW", "Reset"]
-                    },
-                    "6-6": {
-                        field: "MEMORY_SPACE_EN",
-                        description: "Memory Space Enable",
-                        default: 0,
-                        attributes: ["RW", "Reset"]
-                    },
-                    "5-5": {
-                        field: "IO_SPACE_EN",
-                        description: "I/O Space Enable",
-                        default: 0,
-                        attributes: ["RW", "Reset"]
-                    },
-                    "4-2": {
-                        field: "Reserved",
-                        description: "Reserved",
-                        default: 0,
-                        attributes: ["RO", "Reserved"]
-                    },
-                    "1-1": {
-                        field: "INTX_STATUS",
-                        description: "INTx Status",
-                        default: 0,
-                        attributes: ["RO", "Reset"]
-                    },
-                    "0-0": {
-                        field: "IO_ENABLE",
-                        description: "I/O Enable",
-                        default: 0,
-                        attributes: ["RW", "Reset"]
-                    }
-                },
-                initialValue: 0x00000000
-            },
-            "STATUS": {
-                name: "Status Register",
-                offset: 0x0006,
-                description: "Device Status Register",
-                bitRanges: {
-                    "31-20": {
-                        field: "Reserved",
-                        description: "Reserved",
-                        default: 0x000,
-                        attributes: ["RO", "Reserved"]
-                    },
-                    "19": {
-                        field: "UR_DETECTED",
-                        description: "Unsupported Request Detected",
-                        default: 0,
-                        attributes: ["RW1C", "Reset"]
-                    },
-                    "18": {
-                        field: "FCP_DETECTED",
-                        description: "Function Level Reset Detected",
-                        default: 0,
-                        attributes: ["RW1C", "Reset"]
-                    },
-                    "17": {
-                        field: "TX_UR_DETECTED",
-                        description: "Transmit Unsupported Request Detected",
-                        default: 0,
-                        attributes: ["RW1C", "Reset"]
-                    },
-                    "16": {
-                        field: "RX_UR_DETECTED",
-                        description: "Receive Unsupported Request Detected",
-                        default: 0,
-                        attributes: ["RW1C", "Reset"]
-                    },
-                    "15-14": {
-                        field: "Reserved",
-                        description: "Reserved",
-                        default: 0,
-                        attributes: ["RO", "Reserved"]
-                    },
-                    "13": {
-                        field: "LINK_TRAINING",
-                        description: "Link Training",
-                        default: 0,
-                        attributes: ["RO", "Reset"]
-                    },
-                    "12-9": {
-                        field: "LINK_SPEED",
-                        description: "Link Speed",
-                        default: 0x1,
-                        attributes: ["RO", "Reset"]
-                    },
-                    "8-4": {
-                        field: "LINK_WIDTH",
-                        description: "Link Width",
-                        default: 0x1,
-                        attributes: ["RO", "Reset"]
-                    },
-                    "3-3": {
-                        field: "SIGNALED_TARGET_ABORT",
-                        description: "Signaled Target Abort",
-                        default: 0,
-                        attributes: ["RW1C", "Reset"]
-                    },
-                    "2-2": {
-                        field: "RECEIVED_TARGET_ABORT",
-                        description: "Received Target Abort",
-                        default: 0,
-                        attributes: ["RW1C", "Reset"]
-                    },
-                    "1-1": {
-                        field: "RECEIVED_MASTER_ABORT",
-                        description: "Received Master Abort",
-                        default: 0,
-                        attributes: ["RW1C", "Reset"]
-                    },
-                    "0-0": {
-                        field: "DETECTED_PARITY_ERROR",
-                        description: "Detected Parity Error",
-                        default: 0,
-                        attributes: ["RW1C", "Reset"]
-                    }
-                },
-                initialValue: 0x00001000
-            }
-        },
-        "pcie": {
-            "PCIE_CAP": {
-                name: "PCIe Capability Register",
-                offset: 0x0100,
-                description: "PCIe Capability Register",
-                bitRanges: {
-                    "31-24": {
-                        field: "CAP_VERSION",
-                        description: "Capability Version",
-                        default: 0x02,
-                        attributes: ["RO", "Reset"]
-                    },
-                    "23-16": {
-                        field: "DEVICE_TYPE",
-                        description: "Device Type",
-                        default: 0x00,
-                        attributes: ["RO", "Reset"]
-                    },
-                    "15-0": {
-                        field: "CAP_ID",
-                        description: "Capability ID",
-                        default: 0x0010,
-                        attributes: ["RO", "Reset"]
-                    }
-                },
-                initialValue: 0x02000010
-            },
-            "DEVICE_CAP": {
-                name: "Device Capability Register",
-                offset: 0x0104,
-                description: "Device Capability Register",
-                bitRanges: {
-                    "31-24": {
-                        field: "MAX_PAYLOAD_SIZE",
-                        description: "Max Payload Size",
-                        default: 0x02,
-                        attributes: ["RO", "Reset"]
-                    },
-                    "23-16": {
-                        field: "MAX_READ_REQ_SIZE",
-                        description: "Max Read Request Size",
-                        default: 0x02,
-                        attributes: ["RO", "Reset"]
-                    },
-                    "15-0": {
-                        field: "DEVICE_CAPABILITIES",
-                        description: "Device Capabilities",
-                        default: 0x0001,
-                        attributes: ["RO", "Reset"]
-                    }
-                },
-                initialValue: 0x02020001
-            }
-        },
-        "pcie_ext": {
-            "EXT_CAP": {
-                name: "Extended Capability Register",
-                offset: 0x1000,
-                description: "Extended Capability Register",
-                bitRanges: {
-                    "31-20": {
-                        field: "CAP_VERSION",
-                        description: "Extended Capability Version",
-                        default: 0x001,
-                        attributes: ["RO", "Reset"]
-                    },
-                    "19-16": {
-                        field: "CAP_ID",
-                        description: "Extended Capability ID",
-                        default: 0x0001,
-                        attributes: ["RO", "Reset"]
-                    },
-                    "15-0": {
-                        field: "NEXT_CAP_PTR",
-                        description: "Next Capability Pointer",
-                        default: 0x0000,
-                        attributes: ["RO", "Reset"]
-                    }
-                },
-                initialValue: 0x00100010
-            },
-            "EXT_CTRL": {
-                name: "Extended Control Register",
-                offset: 0x1004,
-                description: "Extended Control Register",
-                bitRanges: {
-                    "31-16": {
-                        field: "EXT_CONTROL",
-                        description: "Extended Control",
-                        default: 0x0000,
-                        attributes: ["RW", "Reset"]
-                    },
-                    "15-0": {
-                        field: "EXT_STATUS",
-                        description: "Extended Status",
-                        default: 0x0000,
-                        attributes: ["RW1C", "Reset"]
-                    }
-                },
-                initialValue: 0x00000000
-            }
-        },
-        "mem": {
-            "MEM_CTRL": {
-                name: "Memory Control Register",
-                offset: 0x2000,
-                description: "Memory Control Register",
-                bitRanges: {
-                    "31-16": {
-                        field: "MEM_CONTROL",
-                        description: "Memory Control",
-                        default: 0x0000,
-                        attributes: ["RW", "Reset"]
-                    },
-                    "15-0": {
-                        field: "MEM_CONFIG",
-                        description: "Memory Configuration",
-                        default: 0x0000,
-                        attributes: ["RW", "Reset"]
-                    }
-                },
-                initialValue: 0x00000000
-            },
-            "MEM_STATUS": {
-                name: "Memory Status Register",
-                offset: 0x2004,
-                description: "Memory Status Register",
-                bitRanges: {
-                    "31-16": {
-                        field: "MEM_STATUS",
-                        description: "Memory Status",
-                        default: 0x0000,
-                        attributes: ["RO", "Reset"]
-                    },
-                    "15-0": {
-                        field: "MEM_ERROR",
-                        description: "Memory Error Status",
-                        default: 0x0000,
-                        attributes: ["RW1C", "Reset"]
-                    }
-                },
-                initialValue: 0x00000000
-            }
-        }
-    };
-
-    // Update register display when a register is selected
     function updateRegisterDisplay(register) {
         if (!register) return;
 
         // Update register info
         $('#register-name-value').text(register.label.split(' (')[0]);
-        $('#register-offset-value').text(register.offset);
+        // Remove 0x prefix if it exists in the offset value
+        const offsetValue = register.offset.replace(/^0x/i, '');
+        $('#register-offset-value').text(`0x${offsetValue}`);
 
         // Get register value from mock data
         const registerValue = MOCK_DATA.defaultValues[register.value] || 0;
@@ -1561,4 +1117,84 @@ $(document).ready(function () {
     const tooltip = $('<div>')
         .addClass('register-tooltip')
         .appendTo('body');
+
+    // Update register function
+    function updateRegister(registerValue, bitCount, bitRanges = {}, registerInfo = {}) {
+        // Clear modified bits when register is updated
+        clearModifiedBits();
+
+        // Update global variables
+        currentRegisterValue = registerValue;
+        initialRegisterValue = registerValue;
+        currentBitRanges = bitRanges;
+        currentBitCount = bitCount;
+        currentRegisterInfo = registerInfo;
+        isValueModified = false;
+
+        // Ensure input is a valid integer
+        if (typeof registerValue !== 'number' || registerValue < 0) {
+            console.error('Invalid register value: must be a non-negative integer');
+            return;
+        }
+
+        // Calculate maximum value
+        const maxValue = Math.pow(2, bitCount) - 1;
+        if (registerValue > maxValue) {
+            console.error(`Invalid register value: must be less than or equal to ${maxValue}`);
+            return;
+        }
+
+        // Update register information
+        if (registerInfo.name) {
+            $('#register-name-value').text(registerInfo.name);
+        }
+        if (registerInfo.offset !== undefined) {
+            // Remove 0x prefix if it exists in the offset value
+            const offsetValue = registerInfo.offset.toString().replace(/^0x/i, '');
+            $('#register-offset-value').text(`0x${offsetValue.toUpperCase().padStart(4, '0')}`);
+        }
+
+        // Update all register value displays
+        const hexValue = registerValue.toString(16).toUpperCase().padStart(bitCount / 4, '0');
+        $('#register-value').text(`0x${hexValue}`);
+        $('#register-value-display').text(`0x${hexValue}`);
+
+        // Store current value for line style
+        $('.register-box').attr('data-value', registerValue);
+
+        // Regenerate bit-boxes and bit-names
+        generateRegisterBits(bitCount, bitRanges);
+
+        // Update bit descriptions
+        updateBitDescriptions(bitRanges, registerValue);
+
+        // Get all bit-box elements
+        const boxes = $('.bit-box');
+
+        // Iterate through each bit
+        for (let i = 0; i < bitCount; i++) {
+            // Get current bit value (0 or 1)
+            const bitValue = (registerValue >> i) & 1;
+
+            // Update bit-box
+            if (boxes[i]) {
+                boxes[i].textContent = bitValue;
+                // Set different styles based on value
+                boxes[i].className = `bit-box ${bitValue ? 'bit-1' : 'bit-0'}`;
+            }
+        }
+
+        // Recalculate connection lines
+        calculateCoordinates();
+
+        // Update apply button state
+        updateApplyButtonState();
+    }
+
+    // Update apply button state
+    function updateApplyButtonState() {
+        const modifyBtn = $('#modify-register-btn');
+        const isDifferent = currentRegisterValue !== initialRegisterValue;
+        modifyBtn.toggleClass('disabled', !isDifferent).prop('disabled', !isDifferent);
+    }
 });
