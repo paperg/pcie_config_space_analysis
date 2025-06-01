@@ -4,7 +4,7 @@
   margin: 0;
 }
 body {
-  font-family: "微软雅黑", "Segoe UI", sans-serif;
+  font-family: "Consolas", "Microsoft YaHei", "Segoe UI", monospace;
   background-color: #ffffff;
   color: #000000;
   transition: all 0.3s ease;
@@ -463,7 +463,7 @@ body.dark-theme .register-selectors .selector-item select option {
   text-align: left;
 }
 .register-info .info-item .info-value {
-  font-family: monospace;
+  font-family: "Consolas", monospace;
   color: #666666;
   padding: 0.06rem;
   background: #ffffff;
@@ -703,11 +703,11 @@ body.dark-theme .bit-description-header .bit-attributes {
 }
 .bit-description-item .bit-value {
   text-align: center;
-  font-family: monospace;
+  font-family: "Consolas", monospace;
 }
 .bit-description-item .bit-default {
   text-align: center;
-  font-family: monospace;
+  font-family: "Consolas", monospace;
   color: #666666;
   font-weight: normal;
   background: none;
@@ -770,4 +770,13 @@ body.dark-theme .bit-description-item .bit-attributes {
   100% {
     background: rgba(102, 179, 255, 0.1);
   }
+}
+.register-tooltip .tooltip-content .tooltip-value {
+  font-family: "Consolas", monospace;
+}
+.error-dialog-message {
+  font-family: "Consolas", "Microsoft YaHei", "Segoe UI", monospace;
+}
+.error-dialog-button {
+  font-family: "Consolas", "Microsoft YaHei", "Segoe UI", monospace;
 }

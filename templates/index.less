@@ -38,7 +38,7 @@
 }
 
 body {
-    font-family: "微软雅黑", "Segoe UI", sans-serif;
+    font-family: "Consolas", "Microsoft YaHei", "Segoe UI", monospace;
     background-color: @light-theme[bg];
     color: @light-theme[text];
     transition: all 0.3s ease;
@@ -590,7 +590,7 @@ img {
         }
 
         .info-value {
-            font-family: monospace;
+            font-family: "Consolas", monospace;
             color: @light-theme[secondary];
             padding: 0.06rem;
             background: @light-theme[bg];
@@ -879,12 +879,12 @@ img {
 
     .bit-value {
         text-align: center;
-        font-family: monospace;
+        font-family: "Consolas", monospace;
     }
 
     .bit-default {
         text-align: center;
-        font-family: monospace;
+        font-family: "Consolas", monospace;
         color: @light-theme[secondary];
         font-weight: normal;
         background: none;
@@ -961,4 +961,18 @@ img {
     100% {
         background: rgba(102, 179, 255, 0.1);
     }
+}
+
+// Register Tooltip
+.register-tooltip .tooltip-content .tooltip-value {
+    font-family: "Consolas", monospace;
+}
+
+// Error Dialog
+.error-dialog-message {
+    font-family: "Consolas", "Microsoft YaHei", "Segoe UI", monospace;
+}
+
+.error-dialog-button {
+    font-family: "Consolas", "Microsoft YaHei", "Segoe UI", monospace;
 }
