@@ -8,7 +8,6 @@ $(document).ready(function () {
     let currentBitCount = 32;
     let currentRegisterInfo = {};
 
-    console.log("ready")
     var whei = $(window).width()
     $("html").css({
         fontSize: whei / 20
@@ -176,6 +175,8 @@ $(document).ready(function () {
 
         sortedRanges.forEach(([range, info]) => {
             const [start, end] = range.split('-').map(Number);
+            console.log(start, end)
+            const isSingleBit = start === end;
             // Calculate bit field value: Extract value from register value for corresponding bit field
             const fieldWidth = start - end + 1;
             const fieldValue = (registerValue >> end) & ((1 << fieldWidth) - 1);
@@ -187,7 +188,7 @@ $(document).ready(function () {
                 .append(
                     $('<span>')
                     .addClass('bit-range')
-                    .text(`[${start}:${end}]`),
+                    .text(isSingleBit ? `[${start}]` : `[${start}:${end}]`),
                     $('<span>')
                     .addClass('bit-field')
                     .html(`${info.field || ''}`),
@@ -462,43 +463,404 @@ $(document).ready(function () {
         }, 2000);
     }
 
-    // Test case
-    function runTest() {
-        // Example: 32-bit register with bit field descriptions
-        const bitRanges32 = {
-            "31-24": {
-                field: "DEVICE_ID_H",
-                description: "Device ID High Byte",
-                default: 0x12,
-                attributes: ["RO", "Reset"]
+    // Test registers data
+    const testRegisters = {
+        "pci": {
+            "DEVICE_ID": {
+                name: "Device ID Register",
+                offset: 0x0000,
+                description: "Device Identification Register",
+                bitRanges: {
+                    "31-24": {
+                        field: "DEVICE_ID_H",
+                        description: "Device ID High Byte",
+                        default: 0x12,
+                        attributes: ["RO", "Reset"]
+                    },
+                    "23-16": {
+                        field: "DEVICE_ID_L",
+                        description: "Device ID Low Byte",
+                        default: 0x34,
+                        attributes: ["RO", "Reset"]
+                    },
+                    "15-8": {
+                        field: "REVISION_ID",
+                        description: "Revision ID",
+                        default: 0x56,
+                        attributes: ["RO", "Reset"]
+                    },
+                    "7-0": {
+                        field: "CLASS_CODE",
+                        description: "Class Code",
+                        default: 0x78,
+                        attributes: ["RO", "Reset"]
+                    }
+                },
+                initialValue: 0x12345678
             },
-            "23-16": {
-                field: "DEVICE_ID_L",
-                description: "Device ID Low Byte",
-                default: 0x34,
-                attributes: ["RO", "Reset"]
+            "COMMAND": {
+                name: "Command Register",
+                offset: 0x0004,
+                description: "Device Command Register",
+                bitRanges: {
+                    "31-16": {
+                        field: "Reserved",
+                        description: "Reserved",
+                        default: 0x0000,
+                        attributes: ["RO", "Reserved"]
+                    },
+                    "15-15": {
+                        field: "SERR_EN",
+                        description: "System Error Enable",
+                        default: 0,
+                        attributes: ["RW", "Reset"]
+                    },
+                    "14-14": {
+                        field: "WAIT_CYCLE_EN",
+                        description: "Wait Cycle Enable",
+                        default: 0,
+                        attributes: ["RW", "Reset"]
+                    },
+                    "13-13": {
+                        field: "INTX_DISABLE",
+                        description: "INTx Disable",
+                        default: 0,
+                        attributes: ["RW", "Reset"]
+                    },
+                    "12-10": {
+                        field: "MAX_PAYLOAD_SIZE",
+                        description: "Max Payload Size",
+                        default: 0x2,
+                        attributes: ["RW", "Reset"]
+                    },
+                    "9-8": {
+                        field: "MAX_READ_REQ_SIZE",
+                        description: "Max Read Request Size",
+                        default: 0x2,
+                        attributes: ["RW", "Reset"]
+                    },
+                    "7-7": {
+                        field: "BUS_MASTER_EN",
+                        description: "Bus Master Enable",
+                        default: 0,
+                        attributes: ["RW", "Reset"]
+                    },
+                    "6-6": {
+                        field: "MEMORY_SPACE_EN",
+                        description: "Memory Space Enable",
+                        default: 0,
+                        attributes: ["RW", "Reset"]
+                    },
+                    "5-5": {
+                        field: "IO_SPACE_EN",
+                        description: "I/O Space Enable",
+                        default: 0,
+                        attributes: ["RW", "Reset"]
+                    },
+                    "4-2": {
+                        field: "Reserved",
+                        description: "Reserved",
+                        default: 0,
+                        attributes: ["RO", "Reserved"]
+                    },
+                    "1-1": {
+                        field: "INTX_STATUS",
+                        description: "INTx Status",
+                        default: 0,
+                        attributes: ["RO", "Reset"]
+                    },
+                    "0-0": {
+                        field: "IO_ENABLE",
+                        description: "I/O Enable",
+                        default: 0,
+                        attributes: ["RW", "Reset"]
+                    }
+                },
+                initialValue: 0x00000000
             },
-            "15-8": {
-                field: "REVISION_ID",
-                description: "Revision ID",
-                default: 0x56,
-                attributes: ["RO", "Reset"]
-            },
-            "7-0": {
-                field: "CLASS_CODE",
-                description: "Class Code",
-                default: 0x78,
-                attributes: ["RO", "Reset"]
+            "STATUS": {
+                name: "Status Register",
+                offset: 0x0006,
+                description: "Device Status Register",
+                bitRanges: {
+                    "31-20": {
+                        field: "Reserved",
+                        description: "Reserved",
+                        default: 0x000,
+                        attributes: ["RO", "Reserved"]
+                    },
+                    "19": {
+                        field: "UR_DETECTED",
+                        description: "Unsupported Request Detected",
+                        default: 0,
+                        attributes: ["RW1C", "Reset"]
+                    },
+                    "18": {
+                        field: "FCP_DETECTED",
+                        description: "Function Level Reset Detected",
+                        default: 0,
+                        attributes: ["RW1C", "Reset"]
+                    },
+                    "17": {
+                        field: "TX_UR_DETECTED",
+                        description: "Transmit Unsupported Request Detected",
+                        default: 0,
+                        attributes: ["RW1C", "Reset"]
+                    },
+                    "16": {
+                        field: "RX_UR_DETECTED",
+                        description: "Receive Unsupported Request Detected",
+                        default: 0,
+                        attributes: ["RW1C", "Reset"]
+                    },
+                    "15-14": {
+                        field: "Reserved",
+                        description: "Reserved",
+                        default: 0,
+                        attributes: ["RO", "Reserved"]
+                    },
+                    "13": {
+                        field: "LINK_TRAINING",
+                        description: "Link Training",
+                        default: 0,
+                        attributes: ["RO", "Reset"]
+                    },
+                    "12-9": {
+                        field: "LINK_SPEED",
+                        description: "Link Speed",
+                        default: 0x1,
+                        attributes: ["RO", "Reset"]
+                    },
+                    "8-4": {
+                        field: "LINK_WIDTH",
+                        description: "Link Width",
+                        default: 0x1,
+                        attributes: ["RO", "Reset"]
+                    },
+                    "3-3": {
+                        field: "SIGNALED_TARGET_ABORT",
+                        description: "Signaled Target Abort",
+                        default: 0,
+                        attributes: ["RW1C", "Reset"]
+                    },
+                    "2-2": {
+                        field: "RECEIVED_TARGET_ABORT",
+                        description: "Received Target Abort",
+                        default: 0,
+                        attributes: ["RW1C", "Reset"]
+                    },
+                    "1-1": {
+                        field: "RECEIVED_MASTER_ABORT",
+                        description: "Received Master Abort",
+                        default: 0,
+                        attributes: ["RW1C", "Reset"]
+                    },
+                    "0-0": {
+                        field: "DETECTED_PARITY_ERROR",
+                        description: "Detected Parity Error",
+                        default: 0,
+                        attributes: ["RW1C", "Reset"]
+                    }
+                },
+                initialValue: 0x00001000
             }
-        };
+        },
+        "pcie": {
+            "PCIE_CAP": {
+                name: "PCIe Capability Register",
+                offset: 0x0100,
+                description: "PCIe Capability Register",
+                bitRanges: {
+                    "31-24": {
+                        field: "CAP_VERSION",
+                        description: "Capability Version",
+                        default: 0x02,
+                        attributes: ["RO", "Reset"]
+                    },
+                    "23-16": {
+                        field: "DEVICE_TYPE",
+                        description: "Device Type",
+                        default: 0x00,
+                        attributes: ["RO", "Reset"]
+                    },
+                    "15-0": {
+                        field: "CAP_ID",
+                        description: "Capability ID",
+                        default: 0x0010,
+                        attributes: ["RO", "Reset"]
+                    }
+                },
+                initialValue: 0x02000010
+            },
+            "DEVICE_CAP": {
+                name: "Device Capability Register",
+                offset: 0x0104,
+                description: "Device Capability Register",
+                bitRanges: {
+                    "31-24": {
+                        field: "MAX_PAYLOAD_SIZE",
+                        description: "Max Payload Size",
+                        default: 0x02,
+                        attributes: ["RO", "Reset"]
+                    },
+                    "23-16": {
+                        field: "MAX_READ_REQ_SIZE",
+                        description: "Max Read Request Size",
+                        default: 0x02,
+                        attributes: ["RO", "Reset"]
+                    },
+                    "15-0": {
+                        field: "DEVICE_CAPABILITIES",
+                        description: "Device Capabilities",
+                        default: 0x0001,
+                        attributes: ["RO", "Reset"]
+                    }
+                },
+                initialValue: 0x02020001
+            }
+        },
+        "pcie_ext": {
+            "EXT_CAP": {
+                name: "Extended Capability Register",
+                offset: 0x1000,
+                description: "Extended Capability Register",
+                bitRanges: {
+                    "31-20": {
+                        field: "CAP_VERSION",
+                        description: "Extended Capability Version",
+                        default: 0x001,
+                        attributes: ["RO", "Reset"]
+                    },
+                    "19-16": {
+                        field: "CAP_ID",
+                        description: "Extended Capability ID",
+                        default: 0x0001,
+                        attributes: ["RO", "Reset"]
+                    },
+                    "15-0": {
+                        field: "NEXT_CAP_PTR",
+                        description: "Next Capability Pointer",
+                        default: 0x0000,
+                        attributes: ["RO", "Reset"]
+                    }
+                },
+                initialValue: 0x00100010
+            },
+            "EXT_CTRL": {
+                name: "Extended Control Register",
+                offset: 0x1004,
+                description: "Extended Control Register",
+                bitRanges: {
+                    "31-16": {
+                        field: "EXT_CONTROL",
+                        description: "Extended Control",
+                        default: 0x0000,
+                        attributes: ["RW", "Reset"]
+                    },
+                    "15-0": {
+                        field: "EXT_STATUS",
+                        description: "Extended Status",
+                        default: 0x0000,
+                        attributes: ["RW1C", "Reset"]
+                    }
+                },
+                initialValue: 0x00000000
+            }
+        },
+        "mem": {
+            "MEM_CTRL": {
+                name: "Memory Control Register",
+                offset: 0x2000,
+                description: "Memory Control Register",
+                bitRanges: {
+                    "31-16": {
+                        field: "MEM_CONTROL",
+                        description: "Memory Control",
+                        default: 0x0000,
+                        attributes: ["RW", "Reset"]
+                    },
+                    "15-0": {
+                        field: "MEM_CONFIG",
+                        description: "Memory Configuration",
+                        default: 0x0000,
+                        attributes: ["RW", "Reset"]
+                    }
+                },
+                initialValue: 0x00000000
+            },
+            "MEM_STATUS": {
+                name: "Memory Status Register",
+                offset: 0x2004,
+                description: "Memory Status Register",
+                bitRanges: {
+                    "31-16": {
+                        field: "MEM_STATUS",
+                        description: "Memory Status",
+                        default: 0x0000,
+                        attributes: ["RO", "Reset"]
+                    },
+                    "15-0": {
+                        field: "MEM_ERROR",
+                        description: "Memory Error Status",
+                        default: 0x0000,
+                        attributes: ["RW1C", "Reset"]
+                    }
+                },
+                initialValue: 0x00000000
+            }
+        }
+    };
 
-        const registerInfo = {
-            name: "Device ID Register",
-            offset: 0x0000,
-            description: "Device Identification Register"
-        };
+    // Update register selector options based on space type
+    function updateRegisterOptions(spaceType) {
+        const registerSelect = $('#registerSelect');
+        registerSelect.empty();
 
-        setRegisterValue(0x12345678, 32, bitRanges32, registerInfo);
+        if (testRegisters[spaceType]) {
+            Object.entries(testRegisters[spaceType]).forEach(([key, register]) => {
+                registerSelect.append(
+                    $('<option>')
+                    .val(key)
+                    .text(`${register.name} (0x${register.offset.toString(16).toUpperCase().padStart(4, '0')})`)
+                );
+            });
+        }
+
+        // Trigger change event to update display
+        registerSelect.trigger('change');
+    }
+
+    // Handle space type change
+    $('#spaceType').on('change', function () {
+        const spaceType = $(this).val();
+        updateRegisterOptions(spaceType);
+    });
+
+    // Handle register selection change
+    $('#registerSelect').on('change', function () {
+        const spaceType = $('#spaceType').val();
+        const registerKey = $(this).val();
+
+        if (testRegisters[spaceType] && testRegisters[spaceType][registerKey]) {
+            const register = testRegisters[spaceType][registerKey];
+            setRegisterValue(
+                register.initialValue,
+                32,
+                register.bitRanges, {
+                    name: register.name,
+                    offset: register.offset,
+                    description: register.description
+                }
+            );
+        }
+    });
+
+    // Update test function
+    function runTest() {
+        // Set initial space type and update register options
+        const initialSpaceType = 'pci';
+        $('#spaceType').val(initialSpaceType);
+        updateRegisterOptions(initialSpaceType);
     }
 
     // Execute test
