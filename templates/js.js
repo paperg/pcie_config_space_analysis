@@ -401,7 +401,11 @@ $(document).ready(function () {
         if (registerInfo.offset !== undefined) {
             $('#register-offset-value').text(`0x${registerInfo.offset.toString(16).toUpperCase().padStart(4, '0')}`);
         }
-        $('#register-value').text(`0x${registerValue.toString(16).toUpperCase().padStart(bitCount/4, '0')}`);
+
+        // Update all register value displays
+        const hexValue = registerValue.toString(16).toUpperCase().padStart(bitCount / 4, '0');
+        $('#register-value').text(`0x${hexValue}`);
+        $('#register-value-display').text(`0x${hexValue}`);
 
         // Store current value for line style
         $('.register-box').attr('data-value', registerValue);
@@ -810,6 +814,28 @@ $(document).ready(function () {
         }
     };
 
+    // Update register display when a register is selected
+    function updateRegisterDisplay(register) {
+        if (!register) return;
+
+        // Update register info
+        $('#register-name-value').text(register.label.split(' (')[0]);
+        $('#register-offset-value').text(register.offset);
+
+        // Get register value from mock data
+        const registerValue = MOCK_DATA.defaultValues[register.value] || 0;
+
+        // Update all displays using updateRegister function
+        updateRegister(
+            registerValue,
+            register.bitCount || 32, // Use register's bitCount or default to 32
+            register.bitRanges, {
+                name: register.label.split(' (')[0],
+                offset: register.offset
+            }
+        );
+    }
+
     // Initialize space type selector with mock data
     const spaceTypeSelect = $('#spaceType');
     MOCK_DATA.spaceTypes.forEach(spaceType => {
@@ -834,40 +860,21 @@ $(document).ready(function () {
             );
         });
 
-        // Select first register by default
+        // Select first register by default and update display
         if (registers.length > 0) {
-            registerSelect.val(registers[0].value);
-            updateRegisterDisplay(registers[0]);
+            const firstRegister = registers[0];
+            registerSelect.val(firstRegister.value);
+
+            // Update all displays using updateRegister function
+            updateRegister(
+                MOCK_DATA.defaultValues[firstRegister.value] || 0,
+                firstRegister.bitCount || 32,
+                firstRegister.bitRanges, {
+                    name: firstRegister.label.split(' (')[0],
+                    offset: firstRegister.offset
+                }
+            );
         }
-    }
-
-    // Update register display when a register is selected
-    function updateRegisterDisplay(register) {
-        if (!register) return;
-
-        // Update register info
-        $('#register-name-value').text(register.label.split(' (')[0]);
-        $('#register-offset-value').text(register.offset);
-
-        // Get register value from mock data
-        const registerValue = MOCK_DATA.defaultValues[register.value] || 0;
-        currentRegisterValue = registerValue;
-        initialRegisterValue = registerValue;
-        isValueModified = false;
-
-        // Update display
-        updateRegisterValueDisplay(registerValue);
-        generateRegisterBits(currentBitCount, register.bitRanges);
-        updateBitDescriptions(register.bitRanges, registerValue);
-        updateApplyButtonState();
-
-        // Store current register info
-        currentRegisterInfo = register;
-        currentBitRanges = register.bitRanges;
-
-        // Force reflow and redraw lines
-        $('.register').hide().show(0);
-        calculateCoordinates();
     }
 
     // Handle space type change
@@ -884,11 +891,40 @@ $(document).ready(function () {
     });
 
     // Initialize with first space type
-    updateRegisterOptions(spaceTypeSelect.val());
+    $(document).ready(function () {
+        // Initialize with first space type
+        updateRegisterOptions(spaceTypeSelect.val());
 
+        // Force initial update of all displays
+        const firstSpaceType = spaceTypeSelect.val();
+        const firstRegister = MOCK_DATA.registers[firstSpaceType][0];
+        if (firstRegister) {
+            updateRegisterDisplay(firstRegister);
+        }
+    });
+
+    // Update register value display
     function updateRegisterValueDisplay(value) {
-        const display = document.getElementById('register-value-display');
-        display.textContent = '0x' + value.toString(16).padStart(8, '0').toUpperCase();
+        const hexValue = value.toString(16).toUpperCase().padStart(currentBitCount / 4, '0');
+        $('#register-value').text(`0x${hexValue}`);
+        $('#register-value-display').text(`0x${hexValue}`);
+
+        // Update bit-boxes
+        const boxes = $('.bit-box');
+        for (let i = 0; i < currentBitCount; i++) {
+            const bitValue = (value >> i) & 1;
+            if (boxes[i]) {
+                boxes[i].textContent = bitValue;
+                boxes[i].className = `bit-box ${bitValue ? 'bit-1' : 'bit-0'}`;
+            }
+        }
+
+        // Update bit descriptions
+        updateBitDescriptions(currentBitRanges, value);
+
+        // Update connection lines
+        $('.register-box').attr('data-value', value);
+        calculateCoordinates();
 
         // Update apply button state
         updateApplyButtonState();
