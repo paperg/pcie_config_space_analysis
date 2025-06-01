@@ -190,6 +190,38 @@ body.dark-theme {
     background-color: #e1f0ff;
     border-color: #0066cc;
   }
+
+  &.highlight-box {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(57, 155, 255, 0.5);
+    border-color: #399bff;
+    z-index: 1;
+
+    &.bit-0 {
+      background-color: #e6f0ff;
+    }
+
+    &.bit-1 {
+      background-color: #cce5ff;
+    }
+  }
+}
+
+body.dark-theme {
+    .bit-box {
+        &.highlight-box {
+            box-shadow: 0 0 10px rgba(102, 179, 255, 0.5);
+            border-color: #66b3ff;
+
+            &.bit-0 {
+                background-color: #1a3a5f;
+            }
+
+            &.bit-1 {
+                background-color: #2a4a6f;
+            }
+        }
+    }
 }
 
 /* register-name */

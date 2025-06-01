@@ -322,6 +322,45 @@ $(document).ready(function () {
                 .attr('data-field-start', start)
                 .attr('data-field-end', end)
                 .html(`${field}`);
+
+            // 添加鼠标悬停事件
+            fieldName.on('mouseenter', function () {
+                // 高亮当前位域名称
+                $(this).addClass('highlight');
+                // 高亮对应的所有bit-box
+                for (let i = end; i <= start; i++) {
+                    $(`.bit-box[data-bit="${i}"]`).addClass('highlight-box');
+                }
+            }).on('mouseleave', function () {
+                // 移除位域名称的高亮
+                $(this).removeClass('highlight');
+                // 移除所有bit-box的高亮
+                $('.bit-box').removeClass('highlight-box');
+            }).on('click', function (e) {
+                // 检查是否按下了Ctrl键
+                if (e.ctrlKey) {
+                    // 构建锚点ID
+                    const anchorId = `bit-field-${start}-${end}`;
+                    // 获取目标元素
+                    const targetElement = document.getElementById(anchorId);
+                    if (targetElement) {
+                        // 平滑滚动到目标位置
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                        // 添加临时高亮效果
+                        $(targetElement).addClass('highlight-description')
+                            .delay(1000)
+                            .queue(function () {
+                                $(this).removeClass('highlight-description').dequeue();
+                            });
+                    }
+                    // 阻止默认的点击行为
+                    e.preventDefault();
+                }
+            });
+
             registerName.append(fieldName);
         });
     }
