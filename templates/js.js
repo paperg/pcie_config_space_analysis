@@ -475,7 +475,15 @@ $(document).ready(function () {
                     }
                     // Prevent default click behavior
                     e.preventDefault();
+                    return;
                 }
+
+                // Get current field value
+                const fieldWidth = start - end + 1;
+                const fieldValue = (currentRegisterValue >> end) & ((1 << fieldWidth) - 1);
+
+                // Show input dialog
+                showFieldInputDialog(start, end, field, fieldValue);
             });
 
             registerName.append(fieldName);
@@ -575,9 +583,7 @@ $(document).ready(function () {
 
     // Update register value display
     function updateRegisterValueDisplay(value) {
-        // Ensure value is treated as unsigned
-        const unsignedValue = value >>> 0;
-        const hexValue = unsignedValue.toString(16).toUpperCase().padStart(currentBitCount / 4, '0');
+        const hexValue = value.toString(16).toUpperCase().padStart(currentBitCount / 4, '0');
         const formattedValue = `0x${hexValue}`;
 
         // Update both displays and store the last value
@@ -589,37 +595,33 @@ $(document).ready(function () {
         // Update bit-boxes
         const boxes = $('.bit-box');
         for (let i = 0; i < currentBitCount; i++) {
-            const bitValue = (unsignedValue >> i) & 1;
-            const originalBitValue = (initialRegisterValue >>> 0 >> i) & 1;
+            const bitValue = (value >> i) & 1;
+            const originalBitValue = (initialRegisterValue >> i) & 1;
             if (boxes[i]) {
                 const $box = $(boxes[i]);
-                const isMismatched = bitValue !== originalBitValue;
+                const isModified = bitValue !== originalBitValue;
 
                 // Update bit value and style
                 $box.text(bitValue)
-                    .removeClass('bit-0 bit-1 error-bit')
+                    .removeClass('bit-0 bit-1')
                     .addClass(bitValue ? 'bit-1' : 'bit-0');
 
-                // Mark mismatched bits in red
-                if (isMismatched) {
-                    $box.addClass('error-bit');
-                    console.log('Marking bit', i, 'as error - current:', bitValue, 'original:', originalBitValue);
-                }
-
-                // Update modified state
-                if (isMismatched) {
+                // Mark modified bits with orange color
+                if (isModified) {
+                    $box.addClass('modified');
                     modifiedBits.add(i);
                 } else {
+                    $box.removeClass('modified');
                     modifiedBits.delete(i);
                 }
             }
         }
 
         // Update bit descriptions
-        updateBitDescriptions(currentBitRanges, unsignedValue);
+        updateBitDescriptions(currentBitRanges, value);
 
         // Update connection lines
-        $('.register-box').attr('data-value', unsignedValue);
+        $('.register-box').attr('data-value', value);
         calculateCoordinates();
 
         // Update apply button state
@@ -1205,9 +1207,13 @@ $(document).ready(function () {
         modifyBtn.toggleClass('disabled', !isDifferent).prop('disabled', !isDifferent);
     }
 
-    // Add error styles
+    // Add styles for modified and error bits
     $('<style>')
         .text(`
+            .modified {
+                border-color: #ffa500 !important;
+                background-color: rgba(255, 165, 0, 0.1) !important;
+            }
             .error-bit {
                 border-color: #ff4444 !important;
                 background-color: rgba(255, 68, 68, 0.1) !important;
@@ -1218,10 +1224,237 @@ $(document).ready(function () {
                 50% { opacity: 0.7; }
                 100% { opacity: 1; }
             }
+            body.dark-theme .modified {
+                border-color: #ffb84d !important;
+                background-color: rgba(255, 184, 77, 0.15) !important;
+            }
             body.dark-theme .error-bit {
                 border-color: #ff6b6b !important;
                 background-color: rgba(255, 107, 107, 0.15) !important;
             }
         `)
         .appendTo('head');
+
+    // Add input dialog styles
+    $('<style>')
+        .text(`
+            .input-dialog {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                z-index: 1000;
+                padding-top: 15vh;
+            }
+            .input-dialog-content {
+                background: white;
+                padding: 0.2rem;
+                border-radius: 0.08rem;
+                box-shadow: 0 0.05rem 0.2rem rgba(0, 0, 0, 0.2);
+                text-align: center;
+                min-width: 3.2rem;
+                max-width: 4.8rem;
+                border: 1px solid #e0e0e0;
+            }
+            .input-dialog-title {
+                font-size: 0.16rem;
+                color: #333;
+                margin-bottom: 0.15rem;
+                font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+            }
+            .input-dialog-input {
+                width: 100%;
+                padding: 0.1rem;
+                margin-bottom: 0.15rem;
+                border: 1px solid #e0e0e0;
+                border-radius: 0.04rem;
+                font-size: 0.14rem;
+                font-family: monospace;
+                text-align: center;
+                box-sizing: border-box;
+            }
+            .input-dialog-input:focus {
+                outline: none;
+                border-color: #399bff;
+                box-shadow: 0 0 0 2px rgba(57, 155, 255, 0.2);
+            }
+            .input-dialog-buttons {
+                display: flex;
+                justify-content: center;
+                gap: 0.1rem;
+            }
+            .input-dialog-button {
+                padding: 0.08rem 0.3rem;
+                border: none;
+                border-radius: 0.04rem;
+                cursor: pointer;
+                font-size: 0.14rem;
+                font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+                transition: all 0.2s ease;
+                min-width: 1.2rem;
+            }
+            .input-dialog-button.confirm {
+                background: #399bff;
+                color: white;
+            }
+            .input-dialog-button.cancel {
+                background: #f5f5f5;
+                color: #666;
+            }
+            .input-dialog-button:hover {
+                transform: translateY(-0.01rem);
+            }
+            .input-dialog-button:active {
+                transform: translateY(0);
+            }
+            .input-dialog-button.confirm:hover {
+                background: #2980ff;
+            }
+            .input-dialog-button.cancel:hover {
+                background: #e0e0e0;
+            }
+            .input-dialog-error {
+                color: #ff4444;
+                font-size: 0.12rem;
+                margin-top: 0.1rem;
+                display: none;
+            }
+            body.dark-theme .input-dialog-content {
+                background: #1a1a1a;
+                border-color: #333333;
+            }
+            body.dark-theme .input-dialog-title {
+                color: #fff;
+            }
+            body.dark-theme .input-dialog-input {
+                background: #2a2a2a;
+                border-color: #444444;
+                color: #fff;
+            }
+            body.dark-theme .input-dialog-button.cancel {
+                background: #333333;
+                color: #ccc;
+            }
+            body.dark-theme .input-dialog-button.cancel:hover {
+                background: #444444;
+            }
+        `)
+        .appendTo('head');
+
+    // Add function to show input dialog
+    function showFieldInputDialog(start, end, fieldName, currentValue) {
+        const fieldWidth = start - end + 1;
+        const maxValue = (1 << fieldWidth) - 1;
+        const hexWidth = Math.ceil(fieldWidth / 4);
+
+        const dialog = $('<div>')
+            .addClass('input-dialog')
+            .append(
+                $('<div>')
+                .addClass('input-dialog-content')
+                .append(
+                    $('<div>')
+                    .addClass('input-dialog-title')
+                    .text(`${fieldName} [${start}:${end}]`),
+                    $('<input>')
+                    .addClass('input-dialog-input')
+                    .attr('type', 'text')
+                    .attr('placeholder', `Enter hex value (0-${maxValue.toString(16).toUpperCase()})`)
+                    .val(currentValue.toString(16).toUpperCase()),
+                    $('<div>')
+                    .addClass('input-dialog-error'),
+                    $('<div>')
+                    .addClass('input-dialog-buttons')
+                    .append(
+                        $('<button>')
+                        .addClass('input-dialog-button confirm')
+                        .text('Confirm')
+                        .on('click', function () {
+                            const input = dialog.find('.input-dialog-input');
+                            const error = dialog.find('.input-dialog-error');
+                            const value = input.val().trim().toUpperCase();
+
+                            // Validate input
+                            if (!/^[0-9A-F]+$/.test(value)) {
+                                error.text('Please enter a valid hexadecimal value').show();
+                                return;
+                            }
+
+                            const numValue = parseInt(value, 16);
+                            if (numValue > maxValue) {
+                                error.text(`Value must be between 0 and ${maxValue.toString(16).toUpperCase()}`).show();
+                                return;
+                            }
+
+                            // Update register value
+                            const mask = ((1 << fieldWidth) - 1) << end;
+                            const newRegisterValue = (currentRegisterValue & ~mask) | (numValue << end);
+
+                            // Update all displays
+                            currentRegisterValue = newRegisterValue;
+                            isValueModified = true;
+
+                            // Update bit-boxes and mark modified bits
+                            const boxes = $('.bit-box');
+                            for (let i = end; i <= start; i++) {
+                                const bitValue = (numValue >> (i - end)) & 1;
+                                const originalBitValue = (initialRegisterValue >> i) & 1;
+                                if (boxes[i]) {
+                                    const $box = $(boxes[i]);
+                                    const isModified = bitValue !== originalBitValue;
+
+                                    // Update bit value and style
+                                    $box.text(bitValue)
+                                        .removeClass('bit-0 bit-1')
+                                        .addClass(bitValue ? 'bit-1' : 'bit-0');
+
+                                    // Mark modified bits with orange color
+                                    if (isModified) {
+                                        $box.addClass('modified');
+                                        modifiedBits.add(i);
+                                    } else {
+                                        $box.removeClass('modified');
+                                        modifiedBits.delete(i);
+                                    }
+                                }
+                            }
+
+                            // Update register value display
+                            updateRegisterValueDisplay(newRegisterValue);
+
+                            // Close dialog
+                            dialog.remove();
+                        }),
+                        $('<button>')
+                        .addClass('input-dialog-button cancel')
+                        .text('Cancel')
+                        .on('click', function () {
+                            dialog.remove();
+                        })
+                    )
+                )
+            );
+
+        // Add to body
+        $('body').append(dialog);
+
+        // Focus input and select all text
+        const input = dialog.find('.input-dialog-input');
+        input.focus();
+        input[0].select();
+
+        // Handle Enter and Escape keys
+        input.on('keydown', function (e) {
+            if (e.key === 'Enter') {
+                dialog.find('.input-dialog-button.confirm').click();
+            } else if (e.key === 'Escape') {
+                dialog.find('.input-dialog-button.cancel').click();
+            }
+        });
+    }
 });
