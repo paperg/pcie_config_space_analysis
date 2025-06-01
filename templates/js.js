@@ -1,7 +1,8 @@
 /****/
 $(document).ready(function () {
-    // 全局变量声明
+    // Global variable declarations
     let currentRegisterValue = 0;
+    let initialRegisterValue = 0;
     let isValueModified = false;
     let currentBitRanges = {};
     let currentBitCount = 32;
@@ -13,16 +14,16 @@ $(document).ready(function () {
         fontSize: whei / 20
     })
 
-    // 主题切换功能
+    // Theme toggle functionality
     const themeToggle = $('#themeToggle');
 
-    // 检查本地存储中的主题设置
+    // Check theme setting in local storage
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
         $('body').addClass('dark-theme');
     }
 
-    // 主题切换按钮点击事件
+    // Theme toggle button click event
     themeToggle.on('click', function () {
         const body = $('body');
         if (body.hasClass('dark-theme')) {
@@ -34,7 +35,7 @@ $(document).ready(function () {
         }
     });
 
-    // 添加防抖函数
+    // Add debounce function
     function debounce(func, wait) {
         let timeout;
         return function () {
@@ -47,28 +48,28 @@ $(document).ready(function () {
         };
     }
 
-    // 处理resize的函数
+    // Handle resize function
     function handleResize() {
         var whei = $(window).width();
         $("html").css({
             fontSize: whei / 20
         });
 
-        // 强制重排
+        // Force reflow
         $('.register').hide().show(0);
 
-        // 重新计算坐标
+        // Recalculate coordinates
         calculateCoordinates();
     }
 
-    // 使用防抖处理resize事件
+    // Use debounce for resize event
     const debouncedResize = debounce(handleResize, 100);
 
     $(window).resize(function () {
         debouncedResize();
     });
 
-    // 计算坐标并画线
+    // Calculate coordinates and draw lines
     function calculateCoordinates() {
         const boxes = $('.bit-box');
         const fieldNames = $('.bit-name');
@@ -76,10 +77,10 @@ $(document).ready(function () {
         const svgRect = svg[0].getBoundingClientRect();
         const registerRect = $('.register')[0].getBoundingClientRect();
 
-        // 清空之前的线
+        // Clear previous lines
         svg.empty();
 
-        // 获取所有位域的范围
+        // Get all bit field ranges
         const fieldRanges = [];
         fieldNames.each(function () {
             const start = parseInt($(this).attr('data-field-start'));
@@ -91,59 +92,59 @@ $(document).ready(function () {
             });
         });
 
-        // 为每个位域创建连接线
+        // Create connection lines for each bit field
         fieldRanges.forEach(({
             start,
             end,
             element
         }) => {
-            // 获取位域的第一个和最后一个box（注意：end是较小的数字，start是较大的数字）
+            // Get the first and last box of the bit field (note: end is the smaller number, start is the larger number)
             const firstBox = boxes.eq(end); // bit-box 0
             const lastBox = boxes.eq(start); // bit-box 7
             const fieldName = $(element);
 
             if (firstBox.length && lastBox.length && fieldName.length) {
-                // 获取box的位置和尺寸
+                // Get box position and size
                 const firstBoxRect = firstBox[0].getBoundingClientRect();
                 const lastBoxRect = lastBox[0].getBoundingClientRect();
                 const nameRect = fieldName[0].getBoundingClientRect();
 
-                // 计算左右两边垂直线的起点（box下边沿的中点）
+                // Calculate the starting points of the vertical lines on both sides (midpoints of the box bottom edge)
                 const leftX = lastBoxRect.left - registerRect.left + lastBoxRect.width / 2;
                 const rightX = firstBoxRect.left - registerRect.left + firstBoxRect.width / 2;
                 const startY = firstBoxRect.top - registerRect.top + firstBoxRect.height;
 
-                // 计算连接线的终点坐标
+                // Calculate the ending coordinates of the connection line
                 const nameX = nameRect.left - registerRect.left;
                 const nameY = nameRect.top - registerRect.top + nameRect.height / 2;
                 const vLineEndY = startY + 20;
 
-                // 获取位域的值（使用最高位的值来决定线的样式）
+                // Get bit field value (use the value of the highest bit to determine line style)
                 const highBitValue = (parseInt($('.register-box').attr('data-value') || '0') >> start) & 1;
                 const lineClass = highBitValue ? "line-dashed" : "line";
 
-                // 创建左垂直线
+                // Create left vertical line
                 const leftVLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 const leftVLineD = `M ${leftX} ${startY} V ${vLineEndY}`;
                 leftVLine.setAttribute("d", leftVLineD);
                 leftVLine.setAttribute("class", lineClass);
                 svg.append(leftVLine);
 
-                // 创建右垂直线
+                // Create right vertical line
                 const rightVLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 const rightVLineD = `M ${rightX} ${startY} V ${vLineEndY}`;
                 rightVLine.setAttribute("d", rightVLineD);
                 rightVLine.setAttribute("class", lineClass);
                 svg.append(rightVLine);
 
-                // 连接左右垂直线
+                // Connect left and right vertical lines
                 const hLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 const hLineD = `M ${leftX} ${vLineEndY} H ${rightX}`;
                 hLine.setAttribute("d", hLineD);
                 hLine.setAttribute("class", lineClass);
                 svg.append(hLine);
 
-                // 中点起始 svg 画垂直线
+                // Midpoint starting svg draw vertical line
                 const midStartX = (leftX + rightX) / 2;
                 const midLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 const midLineD = `M ${midStartX} ${vLineEndY} V ${nameY}`;
@@ -151,7 +152,7 @@ $(document).ready(function () {
                 midLine.setAttribute("class", lineClass);
                 svg.append(midLine);
 
-                // 创建水平连接线（从两条垂直线的中点开始）
+                // Create horizontal connection line (start from the midpoint of the two vertical lines)
                 const hPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 const hd = `M ${midStartX} ${nameY} H ${nameX}`;
                 hPath.setAttribute("d", hd);
@@ -161,24 +162,24 @@ $(document).ready(function () {
         });
     }
 
-    // 更新位描述列表
+    // Update bit description list
     function updateBitDescriptions(bitRanges, registerValue) {
         const descriptionList = $('#bit-description-list');
         descriptionList.empty();
 
-        // 按位范围升序排序（低位在前）
+        // Sort bit field ranges in ascending order (low to high)
         const sortedRanges = Object.entries(bitRanges).sort((a, b) => {
             const [startA] = a[0].split('-').map(Number);
             const [startB] = b[0].split('-').map(Number);
-            return startA - startB; // 升序排列
+            return startA - startB; // Ascending order
         });
 
         sortedRanges.forEach(([range, info]) => {
             const [start, end] = range.split('-').map(Number);
-            // 计算位域的值：从寄存器值中提取对应位域的值
+            // Calculate bit field value: Extract value from register value for corresponding bit field
             const fieldWidth = start - end + 1;
             const fieldValue = (registerValue >> end) & ((1 << fieldWidth) - 1);
-            const hexWidth = Math.ceil(fieldWidth / 4); // 计算需要的十六进制位数
+            const hexWidth = Math.ceil(fieldWidth / 4); // Calculate needed hexadecimal digits
 
             const item = $('<div>')
                 .addClass('bit-description-item')
@@ -207,16 +208,16 @@ $(document).ready(function () {
         });
     }
 
-    // 生成bit-box和bit-name
+    // Generate bit-box and bit-name
     function generateRegisterBits(bitCount, bitRanges = {}) {
         const registerBox = $('.register-box');
         const registerName = $('.register-name');
 
-        // 清空现有内容
+        // Clear existing content
         registerBox.empty();
         registerName.empty();
 
-        // 创建位域映射和位域范围数组
+        // Create bit field mapping and bit field range array
         const bitFieldMap = new Map();
         const fieldRanges = [];
         Object.entries(bitRanges).forEach(([range, info]) => {
@@ -231,12 +232,12 @@ $(document).ready(function () {
             }
         });
 
-        // 按起始位升序排序位域（低位在前）
+        // Sort bit fields in ascending order (low to high)
         fieldRanges.sort((a, b) => a.start - b.start);
 
-        // 生成bit-box
+        // Generate bit-box
         for (let i = 0; i < bitCount; i++) {
-            // 创建bit-box容器
+            // Create bit-box container
             const bitBoxContainer = $('<div>')
                 .addClass('bit-box-container')
                 .css({
@@ -246,7 +247,7 @@ $(document).ready(function () {
                     'margin': '0.01rem'
                 });
 
-            // 创建bit编号标签
+            // Create bit number label
             const bitNumber = $('<div>')
                 .addClass('bit-number')
                 .css({
@@ -256,7 +257,7 @@ $(document).ready(function () {
                 })
                 .text(i);
 
-            // 创建bit-box
+            // Create bit-box
             const bitBox = $('<div>')
                 .addClass('bit-box')
                 .attr('data-bit', i)
@@ -289,32 +290,32 @@ $(document).ready(function () {
                     updateBitDescriptionValue(bitIndex, newBitValue);
                 });
 
-            // 添加鼠标悬停事件
+            // Add mouse hover event
             bitBox.on('mouseenter', function () {
-                // 找到包含当前bit的所有位域
+                // Find all bit fields containing the current bit
                 fieldRanges.forEach(({
                     start,
                     end,
                     field
                 }) => {
                     if (i >= end && i <= start) {
-                        // 找到对应的位域名称元素并高亮
+                        // Find corresponding bit field name element and highlight
                         $(`.bit-name[data-field-start="${start}"][data-field-end="${end}"]`).addClass('highlight');
                     }
                 });
             }).on('mouseleave', function () {
-                // 移除所有位域名称的高亮
+                // Remove all bit field name highlights
                 $('.bit-name').removeClass('highlight');
             });
 
-            // 将bit编号和bit-box添加到容器中
+            // Add bit number and bit-box to container
             bitBoxContainer.append(bitNumber, bitBox);
 
-            // 添加到DOM
+            // Add to DOM
             registerBox.append(bitBoxContainer);
         }
 
-        // 生成位域名称（低位在上）
+        // Generate bit field name (low to high)
         fieldRanges.forEach(({
             start,
             end,
@@ -327,40 +328,40 @@ $(document).ready(function () {
                 .attr('data-field-end', end)
                 .html(`${field}`);
 
-            // 添加鼠标悬停事件
+            // Add mouse hover event
             fieldName.on('mouseenter', function () {
-                // 高亮当前位域名称
+                // Highlight current bit field name
                 $(this).addClass('highlight');
-                // 高亮对应的所有bit-box
+                // Highlight all corresponding bit-boxes
                 for (let i = end; i <= start; i++) {
                     $(`.bit-box[data-bit="${i}"]`).addClass('highlight-box');
                 }
             }).on('mouseleave', function () {
-                // 移除位域名称的高亮
+                // Remove bit field name highlight
                 $(this).removeClass('highlight');
-                // 移除所有bit-box的高亮
+                // Remove all bit-box highlights
                 $('.bit-box').removeClass('highlight-box');
             }).on('click', function (e) {
-                // 检查是否按下了Ctrl键
+                // Check if Ctrl key is pressed
                 if (e.ctrlKey) {
-                    // 构建锚点ID
+                    // Build anchor ID
                     const anchorId = `bit-field-${start}-${end}`;
-                    // 获取目标元素
+                    // Get target element
                     const targetElement = document.getElementById(anchorId);
                     if (targetElement) {
-                        // 平滑滚动到目标位置
+                        // Smooth scroll to target position
                         targetElement.scrollIntoView({
                             behavior: 'smooth',
                             block: 'center'
                         });
-                        // 添加临时高亮效果
+                        // Add temporary highlight effect
                         $(targetElement).addClass('highlight-description')
                             .delay(1000)
                             .queue(function () {
                                 $(this).removeClass('highlight-description').dequeue();
                             });
                     }
-                    // 阻止默认的点击行为
+                    // Prevent default click behavior
                     e.preventDefault();
                 }
             });
@@ -369,29 +370,30 @@ $(document).ready(function () {
         });
     }
 
-    // 更新寄存器显示
+    // Update register display
     function updateRegister(registerValue, bitCount, bitRanges = {}, registerInfo = {}) {
-        // 更新全局变量
+        // Update global variables
         currentRegisterValue = registerValue;
+        initialRegisterValue = registerValue;
         currentBitRanges = bitRanges;
         currentBitCount = bitCount;
         currentRegisterInfo = registerInfo;
         isValueModified = false;
 
-        // 确保输入是有效的整数
+        // Ensure input is a valid integer
         if (typeof registerValue !== 'number' || registerValue < 0) {
             console.error('Invalid register value: must be a non-negative integer');
             return;
         }
 
-        // 计算最大值
+        // Calculate maximum value
         const maxValue = Math.pow(2, bitCount) - 1;
         if (registerValue > maxValue) {
             console.error(`Invalid register value: must be less than or equal to ${maxValue}`);
             return;
         }
 
-        // 更新寄存器信息
+        // Update register information
         if (registerInfo.name) {
             $('#register-name-value').text(registerInfo.name);
             $('.register-title').text(registerInfo.name);
@@ -401,77 +403,68 @@ $(document).ready(function () {
         }
         $('#register-value').text(`0x${registerValue.toString(16).toUpperCase().padStart(bitCount/4, '0')}`);
 
-        // 存储当前值用于线段样式
+        // Store current value for line style
         $('.register-box').attr('data-value', registerValue);
 
-        // 重新生成bit-box和bit-name
+        // Regenerate bit-boxes and bit-names
         generateRegisterBits(bitCount, bitRanges);
 
-        // 更新位描述列表
+        // Update bit descriptions
         updateBitDescriptions(bitRanges, registerValue);
 
-        // 获取所有bit-box元素
+        // Get all bit-box elements
         const boxes = $('.bit-box');
 
-        // 遍历每一位
+        // Iterate through each bit
         for (let i = 0; i < bitCount; i++) {
-            // 获取当前位的值 (0 或 1)
+            // Get current bit value (0 or 1)
             const bitValue = (registerValue >> i) & 1;
 
-            // 更新bit-box
+            // Update bit-box
             if (boxes[i]) {
                 boxes[i].textContent = bitValue;
-                // 根据值设置不同的样式
+                // Set different styles based on value
                 boxes[i].className = `bit-box ${bitValue ? 'bit-1' : 'bit-0'}`;
             }
         }
 
-        // 重新计算连接线
+        // Recalculate connection lines
         calculateCoordinates();
+
+        // Update apply button state
+        updateApplyButtonState();
     }
 
-    // 示例：更新寄存器的函数
+    function updateApplyButtonState() {
+        const modifyBtn = $('#modify-register-btn');
+        const isDifferent = currentRegisterValue !== initialRegisterValue;
+        modifyBtn.toggleClass('disabled', !isDifferent).prop('disabled', !isDifferent);
+    }
+
+    // Example: Function to update register
     function setRegisterValue(value, bitCount = 32, bitRanges = {}, registerInfo = {}) {
         updateRegister(value, bitCount, bitRanges, registerInfo);
     }
 
-    // 测试函数：随机更新寄存器值
+    // Test function: Random register value updates
     function startRandomTest(bitCount = 32, bitRanges = {}, registerInfo = {}) {
-        // 清除可能存在的旧定时器
+        // Clear any existing interval
         if (window.randomTestInterval) {
             clearInterval(window.randomTestInterval);
         }
 
-        // 每2秒更新一次随机值
+        // Update with random value every 2 seconds
         window.randomTestInterval = setInterval(() => {
             const maxValue = Math.pow(2, bitCount) - 1;
             const randomValue = Math.floor(Math.random() * maxValue);
-            console.log('New random value:', randomValue.toString(16)); // 以16进制显示
+            console.log('New random value:', randomValue.toString(16)); // Display in hex
             setRegisterValue(randomValue, bitCount, bitRanges, registerInfo);
         }, 2000);
     }
 
-    // 如果需要从后端获取数据，可以添加一个函数
-    function fetchRegisterValue() {
-        // 这里添加实际的API调用
-        // 例如：
-        // $.ajax({
-        //     url: '/api/register',
-        //     method: 'GET',
-        //     success: function(response) {
-        //         setRegisterValue(response.value);
-        //     }
-        // });
-    }
-
-    // 导出函数供外部使用
-    window.setRegisterValue = setRegisterValue;
-    window.fetchRegisterValue = fetchRegisterValue;
-    window.startRandomTest = startRandomTest;
-
-    // 测试用例
+    // Test case
     function runTest() {
-        // 示例：32位寄存器，带位域描述
+        // Example: 32-bit register with bit field descriptions
         const bitRanges32 = {
             "31-24": {
                 field: "DEVICE_ID_H",
@@ -508,38 +501,30 @@ $(document).ready(function () {
         setRegisterValue(0x12345678, 32, bitRanges32, registerInfo);
     }
 
-    // 执行测试
+    // Execute test
     runTest();
 
     function updateRegisterValueDisplay(value) {
         const display = document.getElementById('register-value-display');
-        const modifyBtn = document.getElementById('modify-register-btn');
+        display.textContent = '0x' + value.toString(16).padStart(8, '0').toUpperCase();
 
-        // Format value as hex with leading zeros
-        const hexValue = '0x' + value.toString(16).padStart(8, '0').toUpperCase();
-        display.textContent = hexValue;
-
-        // Update modify button state
-        if (isValueModified) {
-            modifyBtn.classList.remove('disabled');
-        } else {
-            modifyBtn.classList.add('disabled');
-        }
+        // Update apply button state
+        updateApplyButtonState();
     }
 
     function updateBitDescriptionValue(bitIndex, value) {
-        // 遍历所有位域
+        // Iterate through all bit fields
         Object.entries(currentBitRanges).forEach(([range, info]) => {
             const [start, end] = range.split('-').map(Number);
-            // 检查当前位是否在这个位域范围内
+            // Check if current bit is within bit field range
             if (bitIndex >= end && bitIndex <= start) {
                 const descriptionItem = document.getElementById(`bit-field-${start}-${end}`);
                 if (descriptionItem) {
                     const valueElement = descriptionItem.querySelector('.bit-value');
                     if (valueElement) {
-                        // 计算位域的值
+                        // Calculate bit field value
                         const fieldValue = (currentRegisterValue >> end) & ((1 << (start - end + 1)) - 1);
-                        // 更新显示
+                        // Update display
                         valueElement.textContent = `0x${fieldValue.toString(16).toUpperCase().padStart(Math.ceil((start - end + 1) / 4), '0')}`;
                     }
                 }
@@ -576,33 +561,274 @@ $(document).ready(function () {
 
         // Update bit values in descriptions
         updateBitDescriptionValue(bitIndex, newBitValue);
+
+        // Update apply button state
+        updateApplyButtonState();
     }
 
-    function applyRegisterChanges() {
-        if (!isValueModified) return;
+    // Add style class
+    function addErrorStyles(mismatchedBits) {
+        // Remove all existing error styles
+        removeErrorStyles();
 
-        // Here you would typically make an API call to update the register value
-        // For now, we'll just log it
-        console.log('Applying register changes:', {
-            value: currentRegisterValue,
-            hexValue: '0x' + currentRegisterValue.toString(16).padStart(8, '0').toUpperCase(),
-            bitCount: currentBitCount,
-            registerInfo: currentRegisterInfo
+        // Mark mismatched bit-boxes
+        mismatchedBits.forEach(bit => {
+            $(`.bit-box[data-bit="${bit}"]`).addClass('error-bit');
         });
 
-        // Reset modification state
-        isValueModified = false;
-        updateRegisterValueDisplay(currentRegisterValue);
-
-        // Update the register display with the new value
-        updateRegister(currentRegisterValue, currentBitCount, currentBitRanges, currentRegisterInfo);
+        // Mark mismatched bit field names
+        Object.entries(currentBitRanges).forEach(([range, info]) => {
+            const [start, end] = range.split('-').map(Number);
+            // Check if this bit field contains any mismatched bits
+            const hasMismatchedBit = mismatchedBits.some(bit => bit >= end && bit <= start);
+            if (hasMismatchedBit) {
+                $(`.bit-name[data-field-start="${start}"][data-field-end="${end}"]`).addClass('error-name');
+                // Mark corresponding down-box row
+                $(`#bit-field-${start}-${end}`).addClass('error-row');
+            }
+        });
     }
 
-    // Add event listener for modify button
-    document.addEventListener('DOMContentLoaded', function () {
-        const modifyBtn = document.getElementById('modify-register-btn');
+    function removeErrorStyles() {
+        // Remove all error styles
+        $('.bit-box').removeClass('error-bit');
+        $('.bit-name').removeClass('error-name');
+        $('.bit-description-item').removeClass('error-row');
+    }
+
+    function showErrorDialog(message) {
+        // Create dialog
+        const dialog = $('<div>')
+            .addClass('error-dialog')
+            .append(
+                $('<div>')
+                .addClass('error-dialog-content')
+                .append(
+                    $('<div>')
+                    .addClass('error-dialog-message')
+                    .text(message),
+                    $('<button>')
+                    .addClass('error-dialog-button')
+                    .text('Confirm')
+                    .on('click', function () {
+                        dialog.remove();
+                        // Remove error styles
+                        removeErrorStyles();
+                        // Update display to backend returned value
+                        updateRegister(currentRegisterValue, currentBitCount, currentBitRanges, currentRegisterInfo);
+                    })
+                )
+            );
+
+        // Add to body
+        $('body').append(dialog);
+    }
+
+    async function applyRegisterChanges() {
+        if (!isValueModified) return;
+
+        // Disable apply button
+        const modifyBtn = $('#modify-register-btn');
+        modifyBtn.addClass('disabled').prop('disabled', true);
+
+        try {
+            // Simulate backend response
+            // Randomly generate a test scenario
+            const testScenario = Math.floor(Math.random() * 3); // 0, 1, or 2
+            let responseData;
+
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            switch (testScenario) {
+                case 0:
+                    // Scenario 1: Success, value unchanged
+                    responseData = {
+                        success: true,
+                        value: currentRegisterValue
+                    };
+                    break;
+                case 1:
+                    // Scenario 2: Success, value modified
+                    // Generate a random value different from current value
+                    const maxValue = Math.pow(2, currentBitCount) - 1;
+                    const randomValue = Math.floor(Math.random() * maxValue);
+                    responseData = {
+                        success: true,
+                        value: randomValue
+                    };
+                    break;
+                case 2:
+                    // Scenario 3: Failure, other error
+                    responseData = {
+                        success: false,
+                        message: 'Failed: Register access denied'
+                    };
+                    break;
+            }
+
+            // Simulate API response
+            console.log('Simulated backend response:', responseData);
+
+            if (responseData.success) {
+                // If successful
+                if (responseData.value === currentRegisterValue) {
+                    // Value unchanged, update display directly
+                    updateRegister(responseData.value, currentBitCount, currentBitRanges, currentRegisterInfo);
+                } else {
+                    // Calculate which bits have changed
+                    const mismatchedBits = [];
+                    for (let i = 0; i < currentBitCount; i++) {
+                        const originalBit = (currentRegisterValue >> i) & 1;
+                        const newBit = (responseData.value >> i) & 1;
+                        if (originalBit !== newBit) {
+                            mismatchedBits.push(i);
+                        }
+                    }
+
+                    // Show error and mark mismatched bits
+                    addErrorStyles(mismatchedBits);
+                    showErrorDialog('Failed: Register value does not match expected value');
+
+                    // Update current value to backend returned value
+                    currentRegisterValue = responseData.value;
+
+                    // Update all display locations
+                    // 1. Update register info display
+                    $('#register-value').text(`0x${responseData.value.toString(16).toUpperCase().padStart(currentBitCount/4, '0')}`);
+
+                    // 2. Update register value display
+                    updateRegisterValueDisplay(responseData.value);
+
+                    // 3. Update all bit-box values, maintain error styles
+                    const boxes = $('.bit-box');
+                    for (let i = 0; i < currentBitCount; i++) {
+                        const bitValue = (responseData.value >> i) & 1;
+                        if (boxes[i]) {
+                            const $box = $(boxes[i]);
+                            const isError = mismatchedBits.includes(i);
+                            $box.text(bitValue)
+                                .removeClass('bit-0 bit-1')
+                                .addClass(bitValue ? 'bit-1' : 'bit-0')
+                                .toggleClass('error-bit', isError);
+                        }
+                    }
+
+                    // 4. Update bit field descriptions
+                    updateBitDescriptions(currentBitRanges, responseData.value);
+
+                    // 5. Update connection line styles
+                    $('.register-box').attr('data-value', responseData.value);
+                    calculateCoordinates();
+                }
+            } else {
+                // Handle other error cases
+                addErrorStyles([]);
+                showErrorDialog(responseData.message || 'Failed: Unknown error');
+            }
+        } catch (error) {
+            // Handle network errors etc.
+            console.error('Error updating register:', error);
+            addErrorStyles([]);
+            showErrorDialog('Failed: Network error');
+        } finally {
+            // Reset modification state
+            isValueModified = false;
+            // Re-enable apply button
+            modifyBtn.removeClass('disabled').prop('disabled', false);
+        }
+    }
+
+    // Add error dialog styles
+    $('<style>')
+        .text(`
+            .error-dialog {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            }
+            .error-dialog-content {
+                background: white;
+                padding: 0.3rem;
+                border-radius: 0.1rem;
+                box-shadow: 0 0.05rem 0.2rem rgba(0, 0, 0, 0.2);
+                text-align: center;
+                min-width: 4rem;
+                max-width: 6rem;
+            }
+            .error-dialog-message {
+                margin-bottom: 0.3rem;
+                color: #ff4444;
+                font-size: 0.25rem;
+                line-height: 1.4;
+                padding: 0 0.2rem;
+            }
+            .error-dialog-button {
+                padding: 0.1rem 0.4rem;
+                background: #399bff;
+                color: white;
+                border: none;
+                border-radius: 0.05rem;
+                cursor: pointer;
+                font-size: 0.25rem;
+                transition: all 0.3s ease;
+            }
+            .error-dialog-button:hover {
+                background: #2980ff;
+                transform: translateY(-0.02rem);
+            }
+            .error-dialog-button:active {
+                transform: translateY(0);
+            }
+            .error-bit {
+                border-color: #ff4444 !important;
+                background-color: rgba(255, 68, 68, 0.1) !important;
+                animation: error-pulse 1s ease-in-out;
+            }
+            .error-name {
+                color: #ff4444 !important;
+                animation: error-pulse 1s ease-in-out;
+            }
+            .error-row {
+                background-color: rgba(255, 68, 68, 0.05) !important;
+                animation: error-pulse 1s ease-in-out;
+            }
+            @keyframes error-pulse {
+                0% { opacity: 1; }
+                50% { opacity: 0.7; }
+                100% { opacity: 1; }
+            }
+            body.dark-theme .error-dialog-content {
+                background: #1a1a1a;
+                color: #fff;
+                box-shadow: 0 0.05rem 0.2rem rgba(0, 0, 0, 0.4);
+            }
+            body.dark-theme .error-dialog-button {
+                background: #66b3ff;
+            }
+            body.dark-theme .error-dialog-button:hover {
+                background: #4d99ff;
+            }
+            body.dark-theme .error-row {
+                background-color: rgba(255, 68, 68, 0.1) !important;
+            }
+        `)
+        .appendTo('head');
+
+    // Update event listeners
+    $(document).ready(function () {
+        const modifyBtn = $('#modify-register-btn');
         if (modifyBtn) {
-            modifyBtn.addEventListener('click', applyRegisterChanges);
+            modifyBtn.on('click', applyRegisterChanges);
+            // Set initial state to disabled
+            modifyBtn.addClass('disabled').prop('disabled', true);
         }
     });
 });
