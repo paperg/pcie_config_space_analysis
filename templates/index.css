@@ -137,14 +137,14 @@ body.dark-theme .register {
 }
 .bit-name {
   font-size: 0.16rem;
-  height: 0.45rem;
-  line-height: 0.45rem;
-  margin: 0.01rem;
+  height: 0.27rem;
+  line-height: 0.27rem;
   padding-left: 0.05rem;
   user-select: none;
   white-space: nowrap;
   transition: all 0.3s ease;
   color: #666666;
+  margin: 0.01rem 0;
 }
 .bit-name.highlight {
   color: #399bff;
