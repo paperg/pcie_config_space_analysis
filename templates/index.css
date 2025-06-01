@@ -584,7 +584,7 @@ body.dark-theme .bit-description-item .bit-attributes {
 }
 .register-selectors .selector-item label {
   font-size: 0.14rem;
-  color: #666666;
+  color: #399bff;
   white-space: nowrap;
   min-width: 1rem;
   font-weight: bold;
@@ -596,7 +596,7 @@ body.dark-theme .bit-description-item .bit-attributes {
   border: 1px solid #e0e0e0;
   border-radius: 0.04rem;
   background: #ffffff;
-  color: #333333;
+  color: #666666;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -611,7 +611,7 @@ body.dark-theme .bit-description-item .bit-attributes {
 }
 .register-selectors .selector-item select option {
   background: #ffffff;
-  color: #333333;
+  color: #666666;
 }
 /* Register Info Component */
 .register-info {
@@ -641,7 +641,7 @@ body.dark-theme .bit-description-item .bit-attributes {
 }
 .register-info .info-item .info-label {
   font-size: 0.14rem;
-  color: #666666;
+  color: #399bff;
   font-weight: bold;
   user-select: none;
   -webkit-user-select: none;
@@ -650,7 +650,7 @@ body.dark-theme .bit-description-item .bit-attributes {
 }
 .register-info .info-item .info-value {
   font-family: monospace;
-  color: #399bff;
+  color: #666666;
   padding: 0.06rem;
   background: #ffffff;
   border-radius: 0.04rem;
@@ -847,12 +847,12 @@ body.dark-theme .register-selectors .selector-item:hover {
   background: #333333;
 }
 body.dark-theme .register-selectors .selector-item label {
-  color: #999999;
+  color: #66b3ff;
 }
 body.dark-theme .register-selectors .selector-item select {
   background: #1a1a1a;
   border-color: #333333;
-  color: #e0e0e0;
+  color: #999999;
 }
 body.dark-theme .register-selectors .selector-item select:hover {
   border-color: #66b3ff;
@@ -864,7 +864,7 @@ body.dark-theme .register-selectors .selector-item select:focus {
 }
 body.dark-theme .register-selectors .selector-item select option {
   background: #1a1a1a;
-  color: #e0e0e0;
+  color: #999999;
 }
 body.dark-theme .register-info .info-item {
   background: #262626;
@@ -873,10 +873,10 @@ body.dark-theme .register-info .info-item:hover {
   background: #333333;
 }
 body.dark-theme .register-info .info-item .info-label {
-  color: #999999;
+  color: #66b3ff;
 }
 body.dark-theme .register-info .info-item .info-value {
-  color: #66b3ff;
+  color: #999999;
   background: #1a1a1a;
   border-color: #333333;
 }
