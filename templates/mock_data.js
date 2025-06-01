@@ -16,6 +16,10 @@ const MOCK_DATA = {
         {
             value: 'mem',
             label: 'Memory Space'
+        },
+        {
+            value: 'config',
+            label: 'Configuration Space'
         }
     ],
 
@@ -243,7 +247,207 @@ const MOCK_DATA = {
                     }
                 }
             }
-        ]
+        ],
+        'config': [{
+            value: 'config_status',
+            label: 'Configuration Status Register',
+            offset: '0x04',
+            bitCount: 32,
+            bitRanges: {
+                '31-31': {
+                    field: 'CAP66',
+                    default: 0,
+                    description: '66MHz Capable',
+                    attributes: ['RO']
+                },
+                '30-30': {
+                    field: 'UDF',
+                    default: 0,
+                    description: 'User Definable Field',
+                    attributes: ['RW']
+                },
+                '29-29': {
+                    field: 'FBB',
+                    default: 0,
+                    description: 'Fast Back-to-Back Capable',
+                    attributes: ['RO']
+                },
+                '28-28': {
+                    field: 'MDPE',
+                    default: 0,
+                    description: 'Master Data Parity Error',
+                    attributes: ['RW1C']
+                },
+                '27-27': {
+                    field: 'DSS',
+                    default: 0,
+                    description: 'Device Select Speed',
+                    attributes: ['RO']
+                },
+                '26-26': {
+                    field: 'SIG',
+                    default: 0,
+                    description: 'Signaled System Error',
+                    attributes: ['RW1C']
+                },
+                '25-25': {
+                    field: 'RMA',
+                    default: 0,
+                    description: 'Received Master-Abort',
+                    attributes: ['RW1C']
+                },
+                '24-24': {
+                    field: 'RTA',
+                    default: 0,
+                    description: 'Received Target-Abort',
+                    attributes: ['RW1C']
+                },
+                '23-23': {
+                    field: 'STA',
+                    default: 0,
+                    description: 'Signaled Target-Abort',
+                    attributes: ['RW1C']
+                },
+                '22-22': {
+                    field: 'DPE',
+                    default: 0,
+                    description: 'Detected Parity Error',
+                    attributes: ['RW1C']
+                },
+                '21-21': {
+                    field: 'DEVSEL',
+                    default: 0,
+                    description: 'Device Select Timing',
+                    attributes: ['RO']
+                },
+                '20-20': {
+                    field: 'MDP',
+                    default: 0,
+                    description: 'Master Data Parity Error',
+                    attributes: ['RW1C']
+                },
+                '19-19': {
+                    field: 'SERR',
+                    default: 0,
+                    description: 'System Error',
+                    attributes: ['RW1C']
+                },
+                '18-18': {
+                    field: 'FAT',
+                    default: 0,
+                    description: 'Fast Back-to-Back Enable',
+                    attributes: ['RW']
+                },
+                '17-17': {
+                    field: 'DPR',
+                    default: 0,
+                    description: 'Device Reset',
+                    attributes: ['RW']
+                },
+                '16-16': {
+                    field: 'INTD',
+                    default: 0,
+                    description: 'Interrupt Disable',
+                    attributes: ['RW']
+                },
+                '15-15': {
+                    field: 'INTC',
+                    default: 0,
+                    description: 'Interrupt Status',
+                    attributes: ['RO']
+                },
+                '14-14': {
+                    field: 'INTB',
+                    default: 0,
+                    description: 'Interrupt Status',
+                    attributes: ['RO']
+                },
+                '13-13': {
+                    field: 'INTA',
+                    default: 0,
+                    description: 'Interrupt Status',
+                    attributes: ['RO']
+                },
+                '12-12': {
+                    field: 'MRL',
+                    default: 0,
+                    description: 'Memory Request Line',
+                    attributes: ['RW']
+                },
+                '11-11': {
+                    field: 'MRLS',
+                    default: 0,
+                    description: 'Memory Request Line Status',
+                    attributes: ['RO']
+                },
+                '10-10': {
+                    field: 'MLR',
+                    default: 0,
+                    description: 'Memory Line Request',
+                    attributes: ['RW']
+                },
+                '9-9': {
+                    field: 'MLRS',
+                    default: 0,
+                    description: 'Memory Line Request Status',
+                    attributes: ['RO']
+                },
+                '8-8': {
+                    field: 'CAP',
+                    default: 0,
+                    description: 'Capabilities List',
+                    attributes: ['RO']
+                },
+                '7-7': {
+                    field: '66MHz',
+                    default: 0,
+                    description: '66MHz Operation',
+                    attributes: ['RO']
+                },
+                '6-6': {
+                    field: 'FAST',
+                    default: 0,
+                    description: 'Fast Back-to-Back Capable',
+                    attributes: ['RO']
+                },
+                '5-5': {
+                    field: 'MED',
+                    default: 0,
+                    description: 'Medium DEVSEL',
+                    attributes: ['RO']
+                },
+                '4-4': {
+                    field: 'SLOW',
+                    default: 0,
+                    description: 'Slow DEVSEL',
+                    attributes: ['RO']
+                },
+                '3-3': {
+                    field: 'MRLS',
+                    default: 0,
+                    description: 'Memory Request Line Status',
+                    attributes: ['RO']
+                },
+                '2-2': {
+                    field: 'MLRS',
+                    default: 0,
+                    description: 'Memory Line Request Status',
+                    attributes: ['RO']
+                },
+                '1-1': {
+                    field: 'CAPS',
+                    default: 0,
+                    description: 'Capabilities List Status',
+                    attributes: ['RO']
+                },
+                '0-0': {
+                    field: 'INT',
+                    default: 0,
+                    description: 'Interrupt Status',
+                    attributes: ['RO']
+                }
+            }
+        }]
     },
 
     // Default register values
@@ -256,7 +460,8 @@ const MOCK_DATA = {
         'EXT_CAP': 0x00010000,
         'EXT_CTRL': 0x00000000,
         'MEM_CTRL': 0x20000000,
-        'MEM_STATUS': 0x00000000
+        'MEM_STATUS': 0x00000000,
+        'config_status': 0x00000000
     }
 };
 
