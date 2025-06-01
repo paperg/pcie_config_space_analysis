@@ -156,7 +156,7 @@ $(document).ready(function () {
 
     // 更新位描述列表
     function updateBitDescriptions(bitRanges, registerValue) {
-        const descriptionList = $('.bit-description-list');
+        const descriptionList = $('#bit-description-list');
         descriptionList.empty();
 
         // 按位范围升序排序（低位在前）
@@ -172,6 +172,7 @@ $(document).ready(function () {
 
             const item = $('<div>')
                 .addClass('bit-description-item')
+                .attr('id', `bit-field-${start}-${end}`) // 添加锚点ID
                 .append(
                     $('<span>')
                     .addClass('bit-range')
@@ -268,6 +269,38 @@ $(document).ready(function () {
             }).on('mouseleave', function () {
                 // 移除所有位域名称的高亮
                 $('.bit-name').removeClass('highlight');
+            }).on('click', function (e) {
+                // 检查是否按下了Ctrl键
+                if (e.ctrlKey) {
+                    // 找到包含当前bit的所有位域
+                    fieldRanges.forEach(({
+                        start,
+                        end,
+                        field
+                    }) => {
+                        if (i >= end && i <= start) {
+                            // 构建锚点ID
+                            const anchorId = `bit-field-${start}-${end}`;
+                            // 获取目标元素
+                            const targetElement = document.getElementById(anchorId);
+                            if (targetElement) {
+                                // 平滑滚动到目标位置
+                                targetElement.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'center'
+                                });
+                                // 添加临时高亮效果
+                                $(targetElement).addClass('highlight-description')
+                                    .delay(1000)
+                                    .queue(function () {
+                                        $(this).removeClass('highlight-description').dequeue();
+                                    });
+                            }
+                        }
+                    });
+                    // 阻止默认的点击行为
+                    e.preventDefault();
+                }
             });
 
             // 将bit编号和bit-box添加到容器中
@@ -398,7 +431,25 @@ $(document).ready(function () {
                 default: 0x56,
                 attributes: ["RO", "Reset"]
             },
-            "7-0": {
+            "7-6": {
+                field: "DEVICE_ID_H",
+                description: "Device ID High Byte",
+                default: 0x12,
+                attributes: ["RO", "Reset"]
+            },
+            "5-4": {
+                field: "DEVICE_ID_H",
+                description: "Device ID High Byte",
+                default: 0x12,
+                attributes: ["RO", "Reset"]
+            },
+            "3-2": {
+                field: "DEVICE_ID_H",
+                description: "Device ID High Byte",
+                default: 0x12,
+                attributes: ["RO", "Reset"]
+            },
+            "1-0": {
                 field: "CLASS_CODE",
                 description: "Class Code",
                 default: 0x78,

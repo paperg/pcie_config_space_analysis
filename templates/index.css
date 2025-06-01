@@ -369,6 +369,11 @@ body.dark-theme .bit-description-header {
 .bit-description-item:hover {
   background-color: rgba(57, 155, 255, 0.1);
 }
+.bit-description-item.highlight-description {
+  background-color: rgba(57, 155, 255, 0.2);
+  transform: scale(1.02);
+  box-shadow: 0 0 10px rgba(57, 155, 255, 0.3);
+}
 .bit-description-item .bit-range {
   font-weight: bold;
   color: #399bff;
@@ -415,6 +420,10 @@ body.dark-theme .bit-description-item {
 }
 body.dark-theme .bit-description-item:hover {
   background-color: rgba(57, 155, 255, 0.15);
+}
+body.dark-theme .bit-description-item.highlight-description {
+  background-color: rgba(102, 179, 255, 0.2);
+  box-shadow: 0 0 10px rgba(102, 179, 255, 0.3);
 }
 body.dark-theme .bit-description-item .bit-range {
   color: #66b3ff;
