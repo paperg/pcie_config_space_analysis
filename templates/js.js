@@ -215,19 +215,13 @@ $(document).ready(function () {
 
                     // Add event listeners to hit area
                     $(hitArea).on('mouseenter', function () {
-                        // Highlight field name
-                        $(`.bit-name[data-field-start="${start}"][data-field-end="${end}"]`).addClass('highlight');
-                        // Highlight all corresponding bit-boxes
-                        for (let i = end; i <= start; i++) {
-                            $(`.bit-box[data-bit="${i}"]`).addClass('highlight-box');
-                        }
-                        // Highlight the line
-                        $(this).siblings('path').addClass('highlight-line');
+                        const start = parseInt($(this).closest('.field-lines').attr('data-field-start'));
+                        const end = parseInt($(this).closest('.field-lines').attr('data-field-end'));
+                        highlightField(start, end);
                     }).on('mouseleave', function () {
-                        // Remove highlights
-                        $(`.bit-name[data-field-start="${start}"][data-field-end="${end}"]`).removeClass('highlight');
-                        $('.bit-box').removeClass('highlight-box');
-                        $(this).siblings('path').removeClass('highlight-line');
+                        const start = parseInt($(this).closest('.field-lines').attr('data-field-start'));
+                        const end = parseInt($(this).closest('.field-lines').attr('data-field-end'));
+                        clearFieldHighlight(start, end);
                     }).on('click', function (e) {
                         if (e.ctrlKey) {
                             // Ctrl+click: scroll to description
@@ -285,6 +279,14 @@ $(document).ready(function () {
             const item = $('<div>')
                 .addClass('bit-description-item')
                 .attr('id', `bit-field-${start}-${end}`)
+                .attr('data-field-start', start)
+                .attr('data-field-end', end)
+                .on('mouseenter', function () {
+                    highlightField(start, end);
+                })
+                .on('mouseleave', function () {
+                    clearFieldHighlight(start, end);
+                })
                 .append(
                     $('<span>')
                     .addClass('bit-range')
@@ -549,21 +551,13 @@ $(document).ready(function () {
 
             // Add mouse hover event
             fieldName.on('mouseenter', function () {
-                // Get field range from data attributes
                 const start = parseInt($(this).attr('data-field-start'));
                 const end = parseInt($(this).attr('data-field-end'));
-
-                // Highlight current bit field name
-                $(this).addClass('highlight');
-                // Highlight all corresponding bit-boxes
-                for (let i = end; i <= start; i++) {
-                    $(`.bit-box[data-bit="${i}"]`).addClass('highlight-box');
-                }
+                highlightField(start, end);
             }).on('mouseleave', function () {
-                // Remove bit field name highlight
-                $(this).removeClass('highlight');
-                // Remove all bit-box highlights
-                $('.bit-box').removeClass('highlight-box');
+                const start = parseInt($(this).attr('data-field-start'));
+                const end = parseInt($(this).attr('data-field-end'));
+                clearFieldHighlight(start, end);
             }).on('click', function (e) {
                 // Get field range from data attributes
                 const start = parseInt($(this).attr('data-field-start'));
@@ -1641,4 +1635,42 @@ $(document).ready(function () {
             }
         `)
         .appendTo('head');
+
+    // Add highlight row style
+    $('<style>')
+        .text(`
+            .bit-description-item.highlight-row {
+                background-color: rgba(57, 155, 255, 0.1);
+                border-radius: 0.04rem;
+            }
+            body.dark-theme .bit-description-item.highlight-row {
+                background-color: rgba(102, 179, 255, 0.15);
+            }
+        `)
+        .appendTo('head');
+
+    // Add common highlight function
+    function highlightField(start, end) {
+        // Highlight field name
+        $(`.bit-name[data-field-start="${start}"][data-field-end="${end}"]`).addClass('highlight');
+        // Highlight bit boxes
+        for (let i = end; i <= start; i++) {
+            $(`.bit-box[data-bit="${i}"]`).addClass('highlight-box');
+        }
+        // Highlight down-box row
+        $(`#bit-field-${start}-${end}`).addClass('highlight-row');
+        // Highlight SVG lines
+        $(`.field-lines[data-field-start="${start}"][data-field-end="${end}"] path`).addClass('highlight-line');
+    }
+
+    function clearFieldHighlight(start, end) {
+        // Clear field name highlight
+        $(`.bit-name[data-field-start="${start}"][data-field-end="${end}"]`).removeClass('highlight');
+        // Clear bit boxes highlight
+        $('.bit-box').removeClass('highlight-box');
+        // Clear down-box row highlight
+        $(`#bit-field-${start}-${end}`).removeClass('highlight-row');
+        // Clear SVG lines highlight
+        $(`.field-lines[data-field-start="${start}"][data-field-end="${end}"] path`).removeClass('highlight-line');
+    }
 });
