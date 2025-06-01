@@ -263,7 +263,38 @@ $(document).ready(function () {
                 .addClass('bit-box')
                 .attr('data-bit', i)
                 .text('0')
-                .on('click', function () {
+                .on('click', function (e) {
+                    // Check if Ctrl key is pressed
+                    if (e.ctrlKey) {
+                        // Find the bit field containing this bit
+                        Object.entries(currentBitRanges).forEach(([range, info]) => {
+                            const [start, end] = range.split('-').map(Number);
+                            if (i >= end && i <= start) {
+                                // Build anchor ID
+                                const anchorId = `bit-field-${start}-${end}`;
+                                // Get target element
+                                const targetElement = document.getElementById(anchorId);
+                                if (targetElement) {
+                                    // Smooth scroll to target position
+                                    targetElement.scrollIntoView({
+                                        behavior: 'smooth',
+                                        block: 'center'
+                                    });
+                                    // Add temporary highlight effect
+                                    $(targetElement).addClass('highlight-description')
+                                        .delay(1000)
+                                        .queue(function () {
+                                            $(this).removeClass('highlight-description').dequeue();
+                                        });
+                                }
+                            }
+                        });
+                        // Prevent default click behavior
+                        e.preventDefault();
+                        return;
+                    }
+
+                    // Normal click - toggle bit value
                     const bitIndex = $(this).data('bit');
                     const currentBitValue = $(this).hasClass('bit-1');
                     const newBitValue = !currentBitValue;
