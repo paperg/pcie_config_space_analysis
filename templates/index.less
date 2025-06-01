@@ -1,150 +1,165 @@
+// Variables
+@line-width: .01rem;
+@box-width: .45rem;
+@box-font-size: .16rem;
+
+// Theme Colors
+@light-theme: {
+    bg: #ffffff;
+    text: #000000;
+    border: #000000;
+    primary: #399bff;
+    secondary: #666666;
+    hover: #f0f0f0;
+    highlight: #e3f2fd;
+    error: #ff4444;
+    warning: #ff9800;
+    success: #5bc0de;
+};
+
+@dark-theme: {
+    bg: #1a1a1a;
+    text: #ffffff;
+    border: #ffffff;
+    primary: #66b3ff;
+    secondary: #999999;
+    hover: #333333;
+    highlight: #1a3a5f;
+    error: #ff8080;
+    warning: #ffb74d;
+    success: #66b3ff;
+};
+
+// Reset & Base Styles
 * {
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box
-  }
-  
-  *,
-  body {
-    padding: 0px;
-    margin: 0px;
-    font-family: "微软雅黑";
-  }
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
 
-  li {
-    list-style-type: none;
-  }
+body {
+    font-family: "微软雅黑", "Segoe UI", sans-serif;
+    background-color: @light-theme[bg];
+    color: @light-theme[text];
+    transition: all 0.3s ease;
+    overflow-x: hidden;
 
-  
-  i {
-    margin: 0px;
-    padding: 0px;
-    text-indent: 0px;
-  }
-  
-  img {
+    &.dark-theme {
+        background-color: @dark-theme[bg];
+        color: @dark-theme[text];
+    }
+}
+
+// Common Elements
+a {
+    text-decoration: none;
+    color: @light-theme[primary];
+
+    &:hover {
+        color: #06c;
+        text-decoration: none !important;
+    }
+
+    &.active,
+    &:focus {
+        outline: none !important;
+        text-decoration: none;
+    }
+}
+
+img {
     border: none;
     max-width: 100%;
-  }
-  
-  a {
-    text-decoration: none;
-    color: #399bff;
-  }
-  
-  a.active,
-  a:focus {
-    outline: none !important;
-    text-decoration: none;
-  }
-  
-  ol,
-  ul,
-  p,
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    padding: 0;
-    margin: 0
-  }
-  
-  a:hover {
-    color: #06c;
-    text-decoration: none !important
-  }
-  
-  .clearfix:after,
-  .clearfix:before {
-    display: table;
-    content: " "
-  }
-  
-  .clearfix:after {
-    clear: both
-  }
-  
-  .pulll_left {
-    float: left;
-  }
-  
-  .pulll_right {
-    float: right;
-  }
-  
-  /*谷哥滚动条样式*/
-  ::-webkit-scrollbar {
+}
+
+// Scrollbar
+::-webkit-scrollbar {
     width: 5px;
     height: 5px;
-    position: absolute
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    background-color: #5bc0de
-  }
-  
-  ::-webkit-scrollbar-track {
-    background-color: #ddd
-  }
+    position: absolute;
 
-/* up-box */
+    &-thumb {
+        background-color: @light-theme[success];
+    }
 
-/* nav */
-@line_width: .01rem;
-@box_width: .45rem;
-@box_font_size: .16rem;
-
-.body {
-    overflow-x: hidden;
+    &-track {
+        background-color: #ddd;
+    }
 }
 
-
+// Layout Components
 .nav {
-  width: 100%;
-  height: 0.4rem;
-  font-size: .3rem;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
-/* Up Box Component */
-.up-box {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
     width: 100%;
-    padding: 0.3rem;
-    background: linear-gradient(to bottom, rgba(57, 155, 255, 0.02), rgba(57, 155, 255, 0.05));
-    border-radius: 0.2rem;
-    position: relative;
-    overflow: hidden;
+    height: 0.6rem;
+    font-size: .3rem;
+    border: @line-width solid @light-theme[border];
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+    user-select: none;
 
-    &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(to right, transparent, rgba(57, 155, 255, 0.2), transparent);
-    }
-
-    &::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(to right, transparent, rgba(57, 155, 255, 0.2), transparent);
+    body.dark-theme & {
+        border-color: @dark-theme[border];
     }
 }
 
-/* register */
+// Theme Toggle
+.theme-switch {
+    display: flex;
+    align-items: center;
+}
+
+.theme-toggle-btn {
+    background: @light-theme[bg];
+    color: @light-theme[text];
+    border: @line-width solid @light-theme[border];
+    border-radius: 0.2rem;
+    padding: 0.1rem 0.2rem;
+    cursor: pointer;
+    font-size: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background-color: @light-theme[hover];
+    }
+
+    .dark-icon,
+    .light-icon {
+        user-select: none;
+    }
+
+    .dark-icon {
+        display: none;
+    }
+
+    .light-icon {
+        display: inline;
+    }
+
+    body.dark-theme & {
+        background: @dark-theme[bg];
+        color: @dark-theme[text];
+        border-color: @dark-theme[border];
+
+        &:hover {
+            background-color: @dark-theme[hover];
+        }
+
+        .dark-icon {
+            display: inline;
+        }
+
+        .light-icon {
+            display: none;
+        }
+    }
+}
+
+// Register Component
 .register {
     position: relative;
     margin: auto;
@@ -158,163 +173,194 @@
     border-radius: 0.5rem;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
     backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
     min-height: fit-content;
-}
 
-.register-title {
-    position: absolute;
-    top: -0.4rem;
-    left: 0;
-    font-size: @box_font_size;
-    font-weight: bold;
-    color: #399bff;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    white-space: nowrap;
-    z-index: 1;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    padding: 0.2rem 0.5rem;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 0.3rem;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-}
-
-body.dark-theme {
-    .up-box {
-        background: linear-gradient(to bottom, rgba(102, 179, 255, 0.02), rgba(102, 179, 255, 0.05));
-
-        &::before, &::after {
-            background: linear-gradient(to right, 
-                transparent,
-                rgba(102, 179, 255, 0.2),
-                transparent
-            );
-        }
-    }
-
-    .register {
+    body.dark-theme & {
         background: rgba(26, 26, 26, 0.8);
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
     }
-
-    .register-title {
-        color: #66b3ff;
-        background: rgba(26, 26, 26, 0.9);
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    }
 }
 
-/* register-box */
+// Register Box Component
 .register-box {
     display: flex;
     flex-direction: row-reverse;
     justify-content: flex-end;
     flex-shrink: 0;
     min-height: fit-content;
-    // background-color: #466ba4;
+    margin-right: 0.2rem;
 }
 
-/* bit-box */
+// Register Name Component
+.register-name {
+    position: relative;
+    top: @box-width * 2;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    min-width: max-content;
+    margin-right: -0.2rem;
+}
+
+.bit-name {
+    font-size: @box-font-size;
+    height: @box-width;
+    line-height: @box-width;
+    margin: .01rem;
+    padding-left: .05rem;
+    user-select: none;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+    color: @light-theme[secondary];
+
+    &.highlight {
+        color: @light-theme[primary];
+        font-weight: bold;
+        transform: scale(1.1);
+        text-shadow: 0 0 5px rgba(57, 155, 255, 0.3);
+    }
+
+    body.dark-theme & {
+        color: @dark-theme[secondary];
+
+        &.highlight {
+            color: @dark-theme[primary];
+            text-shadow: 0 0 5px rgba(102, 179, 255, 0.3);
+        }
+    }
+}
+
+// SVG Lines
+#svg-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+}
+
+.line,
+.line-dashed {
+    stroke: @light-theme[border];
+    stroke-width: 2;
+    pointer-events: none;
+
+    &.highlight {
+        stroke: @light-theme[primary];
+        stroke-width: 3;
+        filter: drop-shadow(0 0 2px rgba(57, 155, 255, 0.3));
+    }
+
+    body.dark-theme & {
+        stroke: @dark-theme[border];
+
+        &.highlight {
+            stroke: @dark-theme[primary];
+            filter: drop-shadow(0 0 2px rgba(102, 179, 255, 0.3));
+        }
+    }
+}
+
+.line-dashed {
+    stroke-dasharray: 5, 5;
+}
+
+// Bit Box Component
 .bit-box {
-  height: @box_width;
-  width: @box_width;
-  font-size: @box_font_size;
-  text-align: center;
-  line-height: @box_width;
-  margin: .01rem .01rem .01rem .01rem;
-  border: @line_width solid #000000;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  position: relative;
+    height: @box-width;
+    width: @box-width;
+    font-size: @box-font-size;
+    text-align: center;
+    line-height: @box-width;
+    margin: .01rem;
+    border: @line-width solid @light-theme[border];
+    user-select: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
 
-  &:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    z-index: 1;
-  }
-
-  &.bit-0:hover {
-    background-color: #f0f0f0;
-    border-color: #666;
-  }
-
-  &.bit-1:hover {
-    background-color: #e1f0ff;
-    border-color: #0066cc;
-  }
-
-  &.highlight-box {
-    transform: scale(1.1);
-    box-shadow: 0 0 10px rgba(57, 155, 255, 0.5);
-    border-color: #399bff;
-    z-index: 1;
-
-    &.bit-0 {
-      background-color: #e6f0ff;
+    &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        z-index: 1;
     }
 
-    &.bit-1 {
-      background-color: #cce5ff;
-    }
-  }
-
-  &.modified {
-    &::after {
-      content: '';
-      position: absolute;
-      top: -0.02rem;
-      right: -0.02rem;
-      width: 0.08rem;
-      height: 0.08rem;
-      background-color: #ff9800;
-      border-radius: 50%;
-      border: 0.01rem solid #fff;
-      box-shadow: 0 0 0.02rem rgba(0, 0, 0, 0.2);
+    &.bit-0:hover {
+        background-color: @light-theme[hover];
+        border-color: @light-theme[secondary];
     }
 
-    &.bit-0 {
-      border-color: #ff9800;
-      background-color: rgba(255, 152, 0, 0.1);
+    &.bit-1:hover {
+        background-color: #e1f0ff;
+        border-color: #0066cc;
     }
 
-    &.bit-1 {
-      border-color: #ff9800;
-      background-color: rgba(255, 152, 0, 0.15);
-    }
-  }
-}
+    &.highlight-box {
+        transform: scale(1.1);
+        box-shadow: 0 0 10px rgba(57, 155, 255, 0.5);
+        border-color: @light-theme[primary];
+        z-index: 1;
 
-body.dark-theme {
-    .bit-box {
+        &.bit-0 {
+            background-color: #e6f0ff;
+        }
+
+        &.bit-1 {
+            background-color: #cce5ff;
+        }
+    }
+
+    &.modified {
+        &::after {
+            content: '';
+            position: absolute;
+            top: -0.02rem;
+            right: -0.02rem;
+            width: 0.08rem;
+            height: 0.08rem;
+            background-color: @light-theme[warning];
+            border-radius: 50%;
+            border: 0.01rem solid #fff;
+            box-shadow: 0 0 0.02rem rgba(0, 0, 0, 0.2);
+        }
+
+        &.bit-0,
+        &.bit-1 {
+            border-color: @light-theme[warning];
+            background-color: rgba(255, 152, 0, 0.1);
+        }
+
+        &.bit-1 {
+            background-color: rgba(255, 152, 0, 0.15);
+        }
+    }
+
+    body.dark-theme & {
+        border-color: @dark-theme[border];
+
         &.modified {
             &::after {
-                background-color: #ffb74d;
-                border-color: #1a1a1a;
+                background-color: @dark-theme[warning];
+                border-color: @dark-theme[bg];
                 box-shadow: 0 0 0.02rem rgba(0, 0, 0, 0.4);
             }
 
-            &.bit-0 {
-                border-color: #ffb74d;
+            &.bit-0,
+            &.bit-1 {
+                border-color: @dark-theme[warning];
                 background-color: rgba(255, 183, 77, 0.15);
             }
 
             &.bit-1 {
-                border-color: #ffb74d;
                 background-color: rgba(255, 183, 77, 0.2);
             }
         }
 
         &.highlight-box {
             box-shadow: 0 0 10px rgba(102, 179, 255, 0.5);
-            border-color: #66b3ff;
+            border-color: @dark-theme[primary];
 
             &.bit-0 {
                 background-color: #1a3a5f;
@@ -324,414 +370,20 @@ body.dark-theme {
                 background-color: #2a4a6f;
             }
         }
-    }
-}
 
-/* register-name */
-.register-name {
-    position: relative;
-    top: @box_width * 2;
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    min-width: max-content;
-    // background-color: #3cab62;
-}
+        &.bit-0:hover {
+            background-color: @dark-theme[hover];
+            border-color: @dark-theme[secondary];
+        }
 
-/* bit-name */
-.bit-name {
-    font-size: @box_font_size;
-    margin: .02rem;
-    padding-left: .05rem;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    white-space: nowrap;
-    transition: all 0.3s ease;
-    color: #666;
-
-    &.highlight {
-        color: #399bff;
-        font-weight: bold;
-        transform: scale(1.1);
-        text-shadow: 0 0 5px rgba(57, 155, 255, 0.3);
-    }
-}
-
-body.dark-theme {
-    .bit-name {
-        color: #ccc;
-
-        &.highlight {
-            color: #66b3ff;
-            text-shadow: 0 0 5px rgba(102, 179, 255, 0.3);
+        &.bit-1:hover {
+            background-color: #1a3a5f;
+            border-color: #4d8fcc;
         }
     }
 }
 
-#svg-line {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  overflow: visible;
-}
-
-.line {
-  stroke: black;
-  stroke-width: 2;
-}
-
-.line-dashed {
-  stroke: black;
-  stroke-width: 2;
-  stroke-dasharray: 5, 5;
-}
-
-/* 主题变量 */
-@light-bg: #ffffff;
-@light-text: #000000;
-@light-border: #000000;
-@dark-bg: #1a1a1a;
-@dark-text: #ffffff;
-@dark-border: #ffffff;
-
-/* 主题样式 */
-body {
-  background-color: @light-bg;
-  color: @light-text;
-  transition: all 0.3s ease;
-
-  &.dark-theme {
-    background-color: @dark-bg;
-    color: @dark-text;
-
-    .nav,
-    .up-box,
-    .bit-box,
-    .bit-box-container {
-      border-color: @dark-border;
-    }
-
-    .bit-box {
-      &.bit-0:hover {
-        background-color: #333333;
-        border-color: #999999;
-      }
-
-      &.bit-1:hover {
-        background-color: #1a3a5f;
-        border-color: #4d8fcc;
-      }
-    }
-
-    .line,
-    .line-dashed {
-      stroke: @dark-text;
-    }
-
-    .theme-toggle-btn {
-      background-color: @dark-bg;
-      color: @dark-text;
-      border-color: @dark-border;
-
-      &:hover {
-        background-color: #333333;
-      }
-    }
-  }
-}
-
-/* 导航栏主题切换按钮 */
-.nav {
-  width: 100%;
-  height: 0.6rem;
-  font-size: .3rem;
-  border: @line_width solid @light-border;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 1rem;
-}
-
-.theme-switch {
-  display: flex;
-  align-items: center;
-}
-
-.theme-toggle-btn {
-  background: none;
-  border: @line_width solid @light-border;
-  border-radius: 0.2rem;
-  padding: 0.1rem 0.2rem;
-  cursor: pointer;
-  font-size: 0.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  background-color: @light-bg;
-  color: @light-text;
-
-  &:hover {
-    background-color: #f0f0f0;
-  }
-
-  .dark-icon {
-    display: none;
-    user-select: none;
-  }
-
-  .light-icon {
-    display: inline;
-    user-select: none;
-  }
-}
-
-body.dark-theme {
-  .theme-toggle-btn {
-    .dark-icon {
-      display: inline;
-    }
-
-    .light-icon {
-      display: none;
-    }
-  }
-}
-
-/* 修改现有样式以使用主题变量 */
-.down-box {
-    width: 100%;
-    padding: 0.2rem;
-    background: #ffffff;
-    border: 1px solid #e0e0e0;
-    border-radius: 0.08rem;
-    box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.05);
-    user-select: none;
-}
-
-.down-box-title {
-    font-size: @box_font_size;
-    font-weight: bold;
-    color: #399bff;
-    margin-bottom: 0.2rem;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-}
-
-.bit-description-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.08rem;
-    padding: 0.1rem;
-}
-
-.bit-description-header,
-.bit-description-item {
-    .bit-range,
-    .bit-field,
-    .bit-value {
-        color: #399bff;
-        font-weight: bold;
-    }
-}
-
-.bit-description-header {
-    display: grid;
-    grid-template-columns: 1.5rem 2rem 1rem 1rem 1fr 1.5rem;
-    align-items: center;
-    padding: 0.1rem 0.2rem;
-    margin-bottom: 0.1rem;
-    font-size: @box_font_size;
-    font-weight: bold;
-    color: #399bff;
-    gap: 0.2rem;
-    background: #f5f5f5;
-    border-radius: 0.04rem;
-    border: 1px solid #e0e0e0;
-
-    .bit-range,
-    .bit-field,
-    .bit-value {
-        color: #399bff;
-    }
-
-    .bit-default,
-    .bit-description {
-        color: #399bff;
-    }
-
-    .bit-range {
-        text-align: right;
-    }
-
-    .bit-field {
-        text-align: left;
-    }
-
-    .bit-value, .bit-default {
-        text-align: center;
-    }
-
-    .bit-description {
-        padding: 0 0.1rem;
-    }
-
-    .bit-attributes {
-        text-align: left;
-    }
-}
-
-body.dark-theme {
-    .bit-description-header {
-        color: #66b3ff;
-        border-color: @dark-border;
-    }
-}
-
-.bit-description-item {
-    display: grid;
-    grid-template-columns: 1.5rem 2rem 1rem 1rem 1fr 1.5rem;
-    align-items: center;
-    padding: 0.1rem 0.2rem;
-    background: #f5f5f5;
-    border-radius: 0.04rem;
-    font-size: @box_font_size;
-    transition: all 0.3s ease;
-    line-height: 1.5;
-    gap: 0.2rem;
-    border: 1px solid #e0e0e0;
-
-    &:hover {
-        background: #eeeeee;
-    }
-
-    &.highlight-description {
-        background: #e3f2fd;
-        border-color: #399bff;
-    }
-
-    .bit-range,
-    .bit-field,
-    .bit-value {
-        color: #399bff;
-        font-weight: bold;
-        background: none;
-        padding: 0;
-        border: none;
-        border-radius: 0;
-        transition: none;
-
-        &:hover {
-            border: none;
-            background: none;
-        }
-    }
-
-    .bit-range {
-        text-align: right;
-    }
-
-    .bit-value {
-        text-align: center;
-        font-family: monospace;
-    }
-
-    .bit-default {
-        text-align: center;
-        font-family: monospace;
-        color: #666666;
-        font-weight: normal;
-        background: none;
-        padding: 0;
-        border: none;
-        border-radius: 0;
-        transition: none;
-
-        &:hover {
-            border: none;
-            background: none;
-        }
-    }
-
-    .bit-description {
-        color: #666666;
-        padding: 0 0.1rem;
-        font-weight: normal;
-    }
-
-    .bit-attributes {
-        color: #ff6b6b;
-        font-size: 0.9em;
-        white-space: nowrap;
-    }
-}
-
-body.dark-theme {
-    .down-box {
-        background: #1a1a1a;
-        border-color: #333333;
-        box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.2);
-    }
-
-    .down-box-title {
-        color: #66b3ff;
-    }
-
-    .bit-description-item {
-        background: #262626;
-        border-color: #333333;
-
-        &:hover {
-            background: #333333;
-        }
-
-        &.highlight-description {
-            background: #1a3a5f;
-            border-color: #66b3ff;
-        }
-
-        .bit-range,
-        .bit-field,
-        .bit-value {
-            color: #66b3ff;
-            background: none;
-            border: none;
-
-            &:hover {
-                border: none;
-                background: none;
-            }
-        }
-
-        .bit-default {
-            color: #999999;
-            background: none;
-            border: none;
-
-            &:hover {
-                border: none;
-                background: none;
-            }
-        }
-
-        .bit-description {
-            color: #999999;
-        }
-
-        .bit-attributes {
-            color: #ff8080;
-        }
-    }
-}
-
-/* Register Controls Container */
+// Register Controls
 .register-controls {
     display: flex;
     flex-direction: row;
@@ -741,20 +393,26 @@ body.dark-theme {
     width: 100%;
     padding: 0.1rem;
     margin-bottom: 0.15rem;
-    background: #ffffff;
+    background: @light-theme[bg];
     border-radius: 0.08rem;
     border: 1px solid #e0e0e0;
     box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.05);
+
+    body.dark-theme & {
+        background: @dark-theme[bg];
+        border-color: #333333;
+        box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.2);
+    }
 }
 
-/* Register Selectors Component */
+// Register Selectors
 .register-selectors {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 0.08rem;
     padding: 0.1rem;
-    background: #ffffff;
+    background: @light-theme[bg];
     border-radius: 0.08rem;
     border: 1px solid #e0e0e0;
     min-width: 5rem;
@@ -777,7 +435,7 @@ body.dark-theme {
 
         label {
             font-size: 0.14rem;
-            color: #399bff;
+            color: @light-theme[primary];
             white-space: nowrap;
             min-width: 1rem;
             font-weight: bold;
@@ -789,38 +447,76 @@ body.dark-theme {
             padding: 0.06rem;
             border: 1px solid #e0e0e0;
             border-radius: 0.04rem;
-            background: #ffffff;
-            color: #666666;
+            background: @light-theme[bg];
+            color: @light-theme[secondary];
             cursor: pointer;
             transition: all 0.3s ease;
 
             &:hover {
-                border-color: #399bff;
+                border-color: @light-theme[primary];
                 background: #f5f5f5;
             }
 
             &:focus {
                 outline: none;
-                border-color: #399bff;
+                border-color: @light-theme[primary];
                 box-shadow: 0 0 0 1px rgba(57, 155, 255, 0.2);
             }
 
             option {
-                background: #ffffff;
-                color: #666666;
+                background: @light-theme[bg];
+                color: @light-theme[secondary];
+            }
+        }
+    }
+
+    body.dark-theme & {
+        background: @dark-theme[bg];
+        border-color: #333333;
+
+        .selector-item {
+            background: #262626;
+
+            &:hover {
+                background: #333333;
+            }
+
+            label {
+                color: @dark-theme[primary];
+            }
+
+            select {
+                background: @dark-theme[bg];
+                border-color: #333333;
+                color: @dark-theme[secondary];
+
+                &:hover {
+                    border-color: @dark-theme[primary];
+                    background: #262626;
+                }
+
+                &:focus {
+                    border-color: @dark-theme[primary];
+                    box-shadow: 0 0 0 1px rgba(102, 179, 255, 0.2);
+                }
+
+                option {
+                    background: @dark-theme[bg];
+                    color: @dark-theme[secondary];
+                }
             }
         }
     }
 }
 
-/* Register Info Component */
+// Register Info
 .register-info {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 0.08rem;
     padding: 0.1rem;
-    background: #ffffff;
+    background: @light-theme[bg];
     border-radius: 0.08rem;
     border: 1px solid #e0e0e0;
     min-width: 5rem;
@@ -842,19 +538,16 @@ body.dark-theme {
 
         .info-label {
             font-size: 0.14rem;
-            color: #399bff;
+            color: @light-theme[primary];
             font-weight: bold;
             user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
         }
 
         .info-value {
             font-family: monospace;
-            color: #666666;
+            color: @light-theme[secondary];
             padding: 0.06rem;
-            background: #ffffff;
+            background: @light-theme[bg];
             border-radius: 0.04rem;
             transition: all 0.3s ease;
             text-align: center;
@@ -862,7 +555,7 @@ body.dark-theme {
             border: 1px solid #e0e0e0;
 
             &:hover {
-                border-color: #399bff;
+                border-color: @light-theme[primary];
                 background: #f5f5f5;
             }
 
@@ -872,13 +565,13 @@ body.dark-theme {
                 outline: none;
 
                 &:hover {
-                    border-color: #399bff;
+                    border-color: @light-theme[primary];
                     background: #f5f5f5;
                 }
 
                 &:focus {
-                    border-color: #399bff;
-                    background: #ffffff;
+                    border-color: @light-theme[primary];
+                    background: @light-theme[bg];
                     box-shadow: 0 0 0 1px rgba(57, 155, 255, 0.2);
                 }
 
@@ -887,7 +580,7 @@ body.dark-theme {
                 }
 
                 &.error {
-                    border-color: #ff4444;
+                    border-color: @light-theme[error];
                     background: #fff5f5;
                 }
             }
@@ -900,7 +593,7 @@ body.dark-theme {
         background: #f5f5f5;
         border: 1px solid #e0e0e0;
         border-radius: 0.04rem;
-        color: #399bff;
+        color: @light-theme[primary];
         font-size: 0.14rem;
         cursor: pointer;
         transition: all 0.3s ease;
@@ -911,7 +604,7 @@ body.dark-theme {
 
         &:hover {
             background: #eeeeee;
-            border-color: #399bff;
+            border-color: @light-theme[primary];
             color: #2980ff;
         }
 
@@ -925,36 +618,113 @@ body.dark-theme {
             pointer-events: none;
             background: #f5f5f5;
             border-color: #e0e0e0;
-            color: #999999;
+            color: @light-theme[secondary];
         }
 
         .modify-icon {
             font-size: 0.16rem;
         }
     }
+
+    body.dark-theme & {
+        background: @dark-theme[bg];
+        border-color: #333333;
+
+        .info-item {
+            background: #262626;
+
+            &:hover {
+                background: #333333;
+            }
+
+            .info-label {
+                color: @dark-theme[primary];
+            }
+
+            .info-value {
+                color: @dark-theme[secondary];
+                background: @dark-theme[bg];
+                border-color: #333333;
+
+                &:hover {
+                    border-color: @dark-theme[primary];
+                    background: #262626;
+                }
+
+                &.register-value-display {
+                    &:hover {
+                        border-color: @dark-theme[primary];
+                        background: #262626;
+                    }
+
+                    &:focus {
+                        border-color: @dark-theme[primary];
+                        background: @dark-theme[bg];
+                        box-shadow: 0 0 0 1px rgba(102, 179, 255, 0.2);
+                    }
+
+                    &.error {
+                        border-color: @dark-theme[error];
+                        background: #331a1a;
+                    }
+                }
+            }
+        }
+
+        .modify-btn {
+            background: #262626;
+            border-color: #333333;
+            color: @dark-theme[primary];
+
+            &:hover {
+                background: #333333;
+                border-color: @dark-theme[primary];
+                color: #99ccff;
+            }
+
+            &:active {
+                background: #404040;
+            }
+
+            &.disabled {
+                background: #262626;
+                border-color: #333333;
+                color: @dark-theme[secondary];
+            }
+        }
+    }
 }
 
-/* Down Box Component */
+// Down Box Component
 .down-box {
     width: 100%;
     padding: 0.2rem;
-    background: #ffffff;
+    background: @light-theme[bg];
     border: 1px solid #e0e0e0;
     border-radius: 0.08rem;
     box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.05);
+    user-select: none;
+
+    body.dark-theme & {
+        background: @dark-theme[bg];
+        border-color: #333333;
+        box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.2);
+    }
 }
 
 .down-box-title {
-    font-size: @box_font_size;
+    font-size: @box-font-size;
     font-weight: bold;
-    color: #399bff;
+    color: @light-theme[primary];
     margin-bottom: 0.2rem;
     user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
+
+    body.dark-theme & {
+        color: @dark-theme[primary];
+    }
 }
 
+// Bit Description List
 .bit-description-list {
     display: flex;
     flex-direction: column;
@@ -962,26 +732,30 @@ body.dark-theme {
     padding: 0.1rem;
 }
 
-.bit-description-header {
+.bit-description-header,
+.bit-description-item {
     display: grid;
     grid-template-columns: 1.5rem 2rem 1rem 1rem 1fr 1.5rem;
     align-items: center;
     padding: 0.1rem 0.2rem;
-    margin-bottom: 0.1rem;
-    font-size: @box_font_size;
-    font-weight: bold;
-    color: #399bff;
     gap: 0.2rem;
-    background: #f5f5f5;
     border-radius: 0.04rem;
+    font-size: @box-font-size;
     border: 1px solid #e0e0e0;
+}
+
+.bit-description-header {
+    margin-bottom: 0.1rem;
+    font-weight: bold;
+    color: @light-theme[primary];
+    background: #f5f5f5;
 
     .bit-range,
     .bit-field,
     .bit-value,
     .bit-default,
     .bit-attributes {
-        color: #399bff;
+        color: @light-theme[primary];
     }
 
     .bit-range {
@@ -992,7 +766,8 @@ body.dark-theme {
         text-align: left;
     }
 
-    .bit-value, .bit-default {
+    .bit-value,
+    .bit-default {
         text-align: center;
     }
 
@@ -1003,34 +778,40 @@ body.dark-theme {
     .bit-attributes {
         text-align: left;
     }
+
+    body.dark-theme & {
+        background: #262626;
+        border-color: #333333;
+        color: @dark-theme[primary];
+
+        .bit-range,
+        .bit-field,
+        .bit-value,
+        .bit-default,
+        .bit-attributes {
+            color: @dark-theme[primary];
+        }
+    }
 }
 
 .bit-description-item {
-    display: grid;
-    grid-template-columns: 1.5rem 2rem 1rem 1rem 1fr 1.5rem;
-    align-items: center;
-    padding: 0.1rem 0.2rem;
     background: #f5f5f5;
-    border-radius: 0.04rem;
-    font-size: @box_font_size;
     transition: all 0.3s ease;
     line-height: 1.5;
-    gap: 0.2rem;
-    border: 1px solid #e0e0e0;
 
     &:hover {
         background: #eeeeee;
     }
 
     &.highlight-description {
-        background: #e3f2fd;
-        border-color: #399bff;
+        background: @light-theme[highlight];
+        border-color: @light-theme[primary];
     }
 
     .bit-range,
     .bit-field,
     .bit-value {
-        color: #399bff;
+        color: @light-theme[primary];
         font-weight: bold;
         background: none;
         padding: 0;
@@ -1056,7 +837,7 @@ body.dark-theme {
     .bit-default {
         text-align: center;
         font-family: monospace;
-        color: #666666;
+        color: @light-theme[secondary];
         font-weight: normal;
         background: none;
         padding: 0;
@@ -1071,148 +852,18 @@ body.dark-theme {
     }
 
     .bit-description {
-        color: #666666;
+        color: @light-theme[secondary];
         padding: 0 0.1rem;
         font-weight: normal;
     }
 
     .bit-attributes {
-        color: #ff6b6b;
+        color: @light-theme[error];
         font-size: 0.9em;
         white-space: nowrap;
     }
-}
 
-// Dark theme styles
-body.dark-theme {
-    .register-controls {
-        background: #1a1a1a;
-        border-color: #333333;
-        box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.2);
-    }
-
-    .register-selectors, .register-info {
-        background: #1a1a1a;
-        border-color: #333333;
-    }
-
-    .register-selectors {
-        .selector-item {
-            background: #262626;
-
-            &:hover {
-                background: #333333;
-            }
-
-            label {
-                color: #66b3ff;
-            }
-
-            select {
-                background: #1a1a1a;
-                border-color: #333333;
-                color: #999999;
-
-                &:hover {
-                    border-color: #66b3ff;
-                    background: #262626;
-                }
-
-                &:focus {
-                    border-color: #66b3ff;
-                    box-shadow: 0 0 0 1px rgba(102, 179, 255, 0.2);
-                }
-
-                option {
-                    background: #1a1a1a;
-                    color: #999999;
-                }
-            }
-        }
-    }
-
-    .register-info {
-        .info-item {
-            background: #262626;
-
-            &:hover {
-                background: #333333;
-            }
-
-            .info-label {
-                color: #66b3ff;
-            }
-
-            .info-value {
-                color: #999999;
-                background: #1a1a1a;
-                border-color: #333333;
-
-                &:hover {
-                    border-color: #66b3ff;
-                    background: #262626;
-                }
-
-                &.register-value-display {
-                    &:hover {
-                        border-color: #66b3ff;
-                        background: #262626;
-                    }
-
-                    &:focus {
-                        border-color: #66b3ff;
-                        background: #1a1a1a;
-                        box-shadow: 0 0 0 1px rgba(102, 179, 255, 0.2);
-                    }
-
-                    &.error {
-                        border-color: #ff8080;
-                        background: #331a1a;
-                    }
-                }
-            }
-        }
-
-        .modify-btn {
-            background: #262626;
-            border-color: #333333;
-            color: #66b3ff;
-
-            &:hover {
-                background: #333333;
-                border-color: #66b3ff;
-                color: #99ccff;
-            }
-
-            &:active {
-                background: #404040;
-            }
-
-            &.disabled {
-                background: #262626;
-                border-color: #333333;
-                color: #666666;
-            }
-        }
-    }
-
-    .down-box {
-        background: #1a1a1a;
-        border-color: #333333;
-        box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.2);
-    }
-
-    .down-box-title {
-        color: #66b3ff;
-    }
-
-    .bit-description-header {
-        background: #262626;
-        border-color: #333333;
-        color: #66b3ff;
-    }
-
-    .bit-description-item {
+    body.dark-theme & {
         background: #262626;
         border-color: #333333;
 
@@ -1221,45 +872,31 @@ body.dark-theme {
         }
 
         &.highlight-description {
-            background: #1a3a5f;
-            border-color: #66b3ff;
+            background: @dark-theme[highlight];
+            border-color: @dark-theme[primary];
         }
 
         .bit-range,
         .bit-field,
         .bit-value {
-            color: #66b3ff;
-            background: none;
-            border: none;
-
-            &:hover {
-                border: none;
-                background: none;
-            }
+            color: @dark-theme[primary];
         }
 
         .bit-default {
-            color: #999999;
-            background: none;
-            border: none;
-
-            &:hover {
-                border: none;
-                background: none;
-            }
+            color: @dark-theme[secondary];
         }
 
         .bit-description {
-            color: #999999;
+            color: @dark-theme[secondary];
         }
 
         .bit-attributes {
-            color: #ff8080;
+            color: @dark-theme[error];
         }
     }
 }
 
-// 值更新动画
+// Animations
 @keyframes valueUpdate {
     0% {
         background: rgba(57, 155, 255, 0.3);
@@ -1269,7 +906,6 @@ body.dark-theme {
     }
 }
 
-// 暗色主题值更新动画
 @keyframes valueUpdateDark {
     0% {
         background: rgba(102, 179, 255, 0.3);
