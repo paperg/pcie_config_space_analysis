@@ -1618,4 +1618,18 @@ $(document).ready(function () {
             }
         `)
         .appendTo('head');
+
+    // Add styles for description and tooltip text
+    $('<style>')
+        .text(`
+            .bit-description {
+                white-space: pre-wrap;
+                line-height: 1.4;
+            }
+            .register-tooltip .tooltip-content .tooltip-value {
+                white-space: pre-wrap;
+                line-height: 1.4;
+            }
+        `)
+        .appendTo('head');
 });

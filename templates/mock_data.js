@@ -29,13 +29,13 @@ const MOCK_DATA = {
                     '31-16': {
                         field: 'Device ID',
                         default: 0x1234,
-                        description: 'Device identification number',
+                        description: 'Device identification number ask巨大石块ask觉得阿凯打开深刻的阿斯达克奥斯卡打赏的卡士达深刻的ask的卡斯柯打算考虑到ask老大上课大大叔控阿喀琉斯的卡上的卡上打卡快乐看来是宽度爱上了阿达阿斯顿ask的阿克苏达阔大叔控打算打卡数据的咯撒肯定撒的卡萨丁阿克苏达阔打赏 asddskkdakdakdkasj',
                         attributes: ['RO']
                     },
                     '15-0': {
                         field: 'Vendor ID',
                         default: 0x5678,
-                        description: 'Vendor identification number',
+                        description: 'Vendor identification number sdsd s d ad as \n dassad ad a dasdasdasda sa \n dfds sdf sdf\n',
                         attributes: ['RO']
                     }
                 }
