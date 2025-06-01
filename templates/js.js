@@ -271,19 +271,17 @@ $(document).ready(function () {
         sortedRanges.forEach(([range, info]) => {
             const [start, end] = range.split('-').map(Number);
             const isSingleBit = start === end;
-            // Calculate bit field value: Extract value from register value for corresponding bit field
             const fieldWidth = start - end + 1;
             const fieldValue = (registerValue >> end) & ((1 << fieldWidth) - 1);
-            const hexWidth = Math.ceil(fieldWidth / 4); // Calculate needed hexadecimal digits
+            const hexWidth = Math.ceil(fieldWidth / 4);
 
-            // Check if any bits in this field are modified
-            let isFieldModified = false;
-            for (let i = end; i <= start; i++) {
-                if (modifiedBits.has(i)) {
-                    isFieldModified = true;
-                    break;
-                }
-            }
+            // Get modified bits for this field, relative to the field's start position
+            const modifiedBitsInField = new Set(
+                Array.from(modifiedBits)
+                .filter(bit => bit >= end && bit <= start)
+                .map(bit => bit - end) // Convert to field-relative position
+            );
+            const isFieldModified = modifiedBitsInField.size > 0;
 
             const item = $('<div>')
                 .addClass('bit-description-item')
@@ -297,10 +295,23 @@ $(document).ready(function () {
                     clearFieldHighlight(start, end);
                 });
 
-            // Add modified class if the field has modified bits
             if (isFieldModified) {
                 item.addClass('modified-row');
             }
+
+            const hexValue = fieldValue.toString(16).toUpperCase().padStart(hexWidth, '0');
+            let valueHtml = '0x';
+
+            // Use highlightHexDigits with field-relative bit positions
+            valueHtml += highlightHexDigits(hexValue, modifiedBitsInField, fieldWidth);
+
+            const valueSpan = $('<span>')
+                .addClass('bit-value')
+                .css('cursor', 'pointer')
+                .html(valueHtml)
+                .on('click', function (e) {
+                    showFieldInputDialog(start, end, info.field || '', fieldValue);
+                });
 
             item.append(
                 $('<span>')
@@ -309,17 +320,7 @@ $(document).ready(function () {
                 $('<span>')
                 .addClass('bit-field')
                 .html(`${info.field || ''}`),
-                $('<span>')
-                .addClass('bit-value')
-                .text(`0x${fieldValue.toString(16).toUpperCase().padStart(hexWidth, '0')}`)
-                .css('cursor', 'pointer')
-                .on('click', function (e) {
-                    // Get current field value
-                    const fieldWidth = start - end + 1;
-                    const fieldValue = (currentRegisterValue >> end) & ((1 << fieldWidth) - 1);
-                    // Show input dialog
-                    showFieldInputDialog(start, end, info.field || '', fieldValue);
-                }),
+                valueSpan,
                 $('<span>')
                 .addClass('bit-default')
                 .text(`0x${info.default.toString(16).toUpperCase().padStart(hexWidth, '0')}`),
@@ -710,17 +711,18 @@ $(document).ready(function () {
         const hexValue = value.toString(16).toUpperCase().padStart(currentBitCount / 4, '0');
         const formattedValue = `0x${hexValue}`;
 
-        // Update both displays and store the last value
-        $('#register-value').text(formattedValue);
-        const display = $('#register-value-display');
-        display.text(formattedValue);
-        display.attr('data-last-value', formattedValue);
-
         // Clear all modified states first
         $('.bit-box').removeClass('modified');
         $('.bit-name').removeClass('modified-field-name');
         $('.bit-description-item').removeClass('modified-row');
+        $('.bit-value').removeClass('modified-byte');
         modifiedBits.clear();
+
+        // Reset register value display to default color
+        $('#register-value').text(formattedValue);
+        const display = $('#register-value-display');
+        display.text(formattedValue);
+        display.attr('data-last-value', formattedValue);
 
         // Update bit-boxes and track modified fields
         const boxes = $('.bit-box');
@@ -741,7 +743,7 @@ $(document).ready(function () {
                     $box.addClass('modified');
                     modifiedBits.add(i);
 
-                    // Find and mark the corresponding field name
+                    // Find and mark the corresponding field name and value
                     Object.entries(currentBitRanges).forEach(([range, info]) => {
                         const [start, end] = range.split('-').map(Number);
                         if (i >= end && i <= start) {
@@ -752,7 +754,14 @@ $(document).ready(function () {
             }
         }
 
-        // Update bit descriptions (this will now handle the down-box row highlighting)
+        // If there are modified bits, update register value display with highlighted digits
+        if (modifiedBits.size > 0) {
+            const highlightedValue = highlightHexDigits(hexValue, modifiedBits, currentBitCount);
+            $('#register-value').html(`0x${highlightedValue}`);
+            display.html(`0x${highlightedValue}`);
+        }
+
+        // Update bit descriptions
         updateBitDescriptions(currentBitRanges, value);
 
         // Update connection lines
@@ -774,9 +783,24 @@ $(document).ready(function () {
                     const valueElement = descriptionItem.querySelector('.bit-value');
                     if (valueElement) {
                         // Calculate bit field value
-                        const fieldValue = (currentRegisterValue >> end) & ((1 << (start - end + 1)) - 1);
-                        // Update display
-                        valueElement.textContent = `0x${fieldValue.toString(16).toUpperCase().padStart(Math.ceil((start - end + 1) / 4), '0')}`;
+                        const fieldWidth = start - end + 1;
+                        const fieldValue = (currentRegisterValue >> end) & ((1 << fieldWidth) - 1);
+                        const hexWidth = Math.ceil(fieldWidth / 4);
+                        const hexValue = fieldValue.toString(16).toUpperCase().padStart(hexWidth, '0');
+
+                        // Get modified bits for this field, relative to the field's start position
+                        const modifiedBitsInField = new Set(
+                            Array.from(modifiedBits)
+                            .filter(bit => bit >= end && bit <= start)
+                            .map(bit => bit - end) // Convert to field-relative position
+                        );
+
+                        // Use highlightHexDigits with field-relative bit positions
+                        let valueHtml = '0x';
+                        valueHtml += highlightHexDigits(hexValue, modifiedBitsInField, fieldWidth);
+
+                        // Update display with highlighted value
+                        valueElement.innerHTML = valueHtml;
                     }
                 }
             }
@@ -889,6 +913,13 @@ $(document).ready(function () {
         $('.bit-box').removeClass('modified');
         $('.bit-name').removeClass('modified-field-name');
         $('.bit-description-item').removeClass('modified-row');
+        $('.bit-value').removeClass('modified-byte');
+
+        // Reset register value display to default color
+        const hexValue = currentRegisterValue.toString(16).toUpperCase().padStart(currentBitCount / 4, '0');
+        const formattedValue = `0x${hexValue}`;
+        $('#register-value').text(formattedValue);
+        $('#register-value-display').text(formattedValue);
     }
 
     async function applyRegisterChanges() {
@@ -1714,5 +1745,36 @@ $(document).ready(function () {
         $(`#bit-field-${start}-${end}`).removeClass('highlight-row');
         // Clear SVG lines highlight
         $(`.field-lines[data-field-start="${start}"][data-field-end="${end}"] path`).removeClass('highlight-line');
+    }
+
+    // Add styles for modified bytes
+    $('<style>')
+        .text(`
+            .modified-byte {
+                color: #ffa500 !important;
+                font-weight: bold;
+            }
+            body.dark-theme .modified-byte {
+                color: #ffb84d !important;
+            }
+        `)
+        .appendTo('head');
+
+    // Add a common function to highlight hex digits
+    function highlightHexDigits(hexValue, modifiedBits, totalBits) {
+        const digits = hexValue.split('');
+        const highlightedDigits = digits.map((digit, digitIndex) => {
+            // Calculate the bit range for this hex digit (4 bits per digit)
+            const startBit = totalBits - 1 - (digitIndex * 4);
+            const endBit = Math.max(startBit - 3, 0);
+
+            // Check if any modified bits fall within this digit's range
+            const isModified = Array.from(modifiedBits).some(bit =>
+                bit <= startBit && bit >= endBit
+            );
+
+            return isModified ? `<span class="modified-byte">${digit}</span>` : digit;
+        });
+        return highlightedDigits.join('');
     }
 });
