@@ -366,7 +366,7 @@ $(document).ready(function () {
     }
 
     // 更新寄存器显示
-    function updateRegister(registerValue, bitCount, bitRanges = {}) {
+    function updateRegister(registerValue, bitCount, bitRanges = {}, registerInfo = {}) {
         // 确保输入是有效的整数
         if (typeof registerValue !== 'number' || registerValue < 0) {
             console.error('Invalid register value: must be a non-negative integer');
@@ -379,6 +379,16 @@ $(document).ready(function () {
             console.error(`Invalid register value: must be less than or equal to ${maxValue}`);
             return;
         }
+
+        // 更新寄存器信息
+        if (registerInfo.name) {
+            $('#register-name-value').text(registerInfo.name);
+            $('.register-title').text(registerInfo.name);
+        }
+        if (registerInfo.offset !== undefined) {
+            $('#register-offset-value').text(`0x${registerInfo.offset.toString(16).toUpperCase().padStart(4, '0')}`);
+        }
+        $('#register-value').text(`0x${registerValue.toString(16).toUpperCase().padStart(bitCount/4, '0')}`);
 
         // 存储当前值用于线段样式
         $('.register-box').attr('data-value', registerValue);
@@ -410,12 +420,12 @@ $(document).ready(function () {
     }
 
     // 示例：更新寄存器的函数
-    function setRegisterValue(value, bitCount = 32, bitRanges = {}) {
-        updateRegister(value, bitCount, bitRanges);
+    function setRegisterValue(value, bitCount = 32, bitRanges = {}, registerInfo = {}) {
+        updateRegister(value, bitCount, bitRanges, registerInfo);
     }
 
     // 测试函数：随机更新寄存器值
-    function startRandomTest(bitCount = 32, bitRanges = {}) {
+    function startRandomTest(bitCount = 32, bitRanges = {}, registerInfo = {}) {
         // 清除可能存在的旧定时器
         if (window.randomTestInterval) {
             clearInterval(window.randomTestInterval);
@@ -426,7 +436,7 @@ $(document).ready(function () {
             const maxValue = Math.pow(2, bitCount) - 1;
             const randomValue = Math.floor(Math.random() * maxValue);
             console.log('New random value:', randomValue.toString(16)); // 以16进制显示
-            setRegisterValue(randomValue, bitCount, bitRanges);
+            setRegisterValue(randomValue, bitCount, bitRanges, registerInfo);
         }, 2000);
     }
 
@@ -470,25 +480,7 @@ $(document).ready(function () {
                 default: 0x56,
                 attributes: ["RO", "Reset"]
             },
-            "7-6": {
-                field: "DEVICE_ID_H",
-                description: "Device ID High Byte",
-                default: 0x12,
-                attributes: ["RO", "Reset"]
-            },
-            "5-4": {
-                field: "DEVICE_ID_H",
-                description: "Device ID High Byte",
-                default: 0x12,
-                attributes: ["RO", "Reset"]
-            },
-            "3-2": {
-                field: "DEVICE_ID_H",
-                description: "Device ID High Byte",
-                default: 0x12,
-                attributes: ["RO", "Reset"]
-            },
-            "1-0": {
+            "7-0": {
                 field: "CLASS_CODE",
                 description: "Class Code",
                 default: 0x78,
@@ -496,7 +488,13 @@ $(document).ready(function () {
             }
         };
 
-        setRegisterValue(0x12345678, 32, bitRanges32);
+        const registerInfo = {
+            name: "Device ID Register",
+            offset: 0x0000,
+            description: "Device Identification Register"
+        };
+
+        setRegisterValue(0x12345678, 32, bitRanges32, registerInfo);
     }
 
     // 执行测试
