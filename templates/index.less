@@ -213,6 +213,26 @@ body.dark-theme {
     -moz-user-select: none;
     -ms-user-select: none;
     white-space: nowrap;
+    transition: all 0.3s ease;
+    color: #666;
+
+    &.highlight {
+        color: #399bff;
+        font-weight: bold;
+        transform: scale(1.1);
+        text-shadow: 0 0 5px rgba(57, 155, 255, 0.3);
+    }
+}
+
+body.dark-theme {
+    .bit-name {
+        color: #ccc;
+
+        &.highlight {
+            color: #66b3ff;
+            text-shadow: 0 0 5px rgba(102, 179, 255, 0.3);
+        }
+    }
 }
 
 #svg-line {

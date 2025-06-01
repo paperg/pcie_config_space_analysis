@@ -252,6 +252,24 @@ $(document).ready(function () {
                 .attr('data-bit', i)
                 .text('0');
 
+            // 添加鼠标悬停事件
+            bitBox.on('mouseenter', function () {
+                // 找到包含当前bit的所有位域
+                fieldRanges.forEach(({
+                    start,
+                    end,
+                    field
+                }) => {
+                    if (i >= end && i <= start) {
+                        // 找到对应的位域名称元素并高亮
+                        $(`.bit-name[data-field-start="${start}"][data-field-end="${end}"]`).addClass('highlight');
+                    }
+                });
+            }).on('mouseleave', function () {
+                // 移除所有位域名称的高亮
+                $('.bit-name').removeClass('highlight');
+            });
+
             // 将bit编号和bit-box添加到容器中
             bitBoxContainer.append(bitNumber, bitBox);
 
