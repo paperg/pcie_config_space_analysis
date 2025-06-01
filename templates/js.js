@@ -505,10 +505,6 @@ $(document).ready(function () {
 
                     // Highlight current bit field name
                     $(`.bit-name[data-field-start="${currentStart}"][data-field-end="${currentEnd}"]`).addClass('highlight');
-                    // Highlight all corresponding bit-boxes
-                    for (let i = currentEnd; i <= currentStart; i++) {
-                        $(`.bit-box[data-bit="${i}"]`).addClass('highlight-box');
-                    }
                 }
             }).on('mousemove', function (e) {
                 // Update tooltip position on mouse move
