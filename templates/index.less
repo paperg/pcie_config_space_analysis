@@ -111,16 +111,15 @@
   -ms-user-select: none;
 }
 
+/* Up Box Component */
 .up-box {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 0.2rem;
-    padding: 0.2rem;
-    min-height: fit-content;
+    gap: 0.3rem;
     width: 100%;
-    box-sizing: border-box;
+    padding: 0.3rem;
     background: linear-gradient(to bottom, rgba(57, 155, 255, 0.02), rgba(57, 155, 255, 0.05));
+    border-radius: 0.2rem;
     position: relative;
     overflow: hidden;
 
@@ -131,11 +130,7 @@
         left: 0;
         right: 0;
         height: 1px;
-        background: linear-gradient(to right, 
-            transparent,
-            rgba(57, 155, 255, 0.2),
-            transparent
-        );
+        background: linear-gradient(to right, transparent, rgba(57, 155, 255, 0.2), transparent);
     }
 
     &::after {
@@ -145,11 +140,7 @@
         left: 0;
         right: 0;
         height: 1px;
-        background: linear-gradient(to right, 
-            transparent,
-            rgba(57, 155, 255, 0.2),
-            transparent
-        );
+        background: linear-gradient(to right, transparent, rgba(57, 155, 255, 0.2), transparent);
     }
 }
 
@@ -639,67 +630,145 @@ body.dark-theme {
     }
 }
 
-/* Register Info Component */
-.register-info {
+/* Register Controls Container */
+.register-controls {
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.15rem 0.3rem;
-    background: rgba(57, 155, 255, 0.05);
-    border-radius: 0.1rem;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.15rem;
+    width: 100%;
+    padding: 0.1rem;
+    margin-bottom: 0.15rem;
+    background: rgba(57, 155, 255, 0.02);
+    border-radius: 0.08rem;
     border: 1px solid rgba(57, 155, 255, 0.1);
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
-    width: fit-content;
-    min-width: max-content;
-    font-size: 0.2rem;
-    transform: scale(0.8);
-    transform-origin: top center;
-    margin-top: -0.2rem;  /* Reduce gap with register-selectors */
+}
 
-    .info-item {
+/* Register Selectors Component */
+.register-selectors {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.08rem;
+    padding: 0.1rem;
+    background: rgba(57, 155, 255, 0.05);
+    border-radius: 0.08rem;
+    border: 1px solid rgba(57, 155, 255, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    min-width: 5rem;
+    max-width: 8rem;
+
+    .selector-item {
         display: flex;
         align-items: center;
         gap: 0.15rem;
-        font-size: 0.2rem;
-        line-height: 1.1;
-        white-space: nowrap;
-        user-select: none;
+        width: 100%;
+        padding: 0.06rem;
+        background: rgba(57, 155, 255, 0.02);
+        border-radius: 0.04rem;
+        transition: all 0.3s ease;
+
+        &:hover {
+            background: rgba(57, 155, 255, 0.05);
+        }
+
+        label {
+            font-size: 0.14rem;
+            color: #666;
+            white-space: nowrap;
+            min-width: 1rem;
+            font-weight: bold;
+        }
+
+        select {
+            flex: 1;
+            font-size: 0.14rem;
+            padding: 0.06rem;
+            border: 1px solid rgba(57, 155, 255, 0.2);
+            border-radius: 0.04rem;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+
+            &:hover {
+                border-color: rgba(57, 155, 255, 0.4);
+                background: rgba(57, 155, 255, 0.02);
+            }
+
+            &:focus {
+                outline: none;
+                border-color: #399bff;
+                box-shadow: 0 0 0 1px rgba(57, 155, 255, 0.2);
+                background: rgba(57, 155, 255, 0.05);
+            }
+
+            option {
+                background: white;
+                color: #333;
+            }
+        }
+    }
+}
+
+/* Register Info Component */
+.register-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.08rem;
+    padding: 0.1rem;
+    background: rgba(57, 155, 255, 0.05);
+    border-radius: 0.08rem;
+    border: 1px solid rgba(57, 155, 255, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    min-width: 5rem;
+    max-width: 8rem;
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.06rem;
+        padding: 0.06rem;
+        background: rgba(57, 155, 255, 0.02);
+        border-radius: 0.04rem;
+        transition: all 0.3s ease;
+
+        &:hover {
+            background: rgba(57, 155, 255, 0.05);
+        }
 
         .info-label {
-            min-width: 1.5rem;
+            font-size: 0.14rem;
             color: #666;
             font-weight: bold;
             user-select: none;
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
-            font-size: 0.9em;
         }
 
         .info-value {
             font-family: monospace;
             color: #399bff;
-            padding: 0.02rem 0.15rem;
+            padding: 0.06rem;
             background: rgba(57, 155, 255, 0.1);
-            border-radius: 0.05rem;
+            border-radius: 0.04rem;
             transition: all 0.3s ease;
-            min-width: 3rem;
             text-align: center;
-            font-size: 0.2rem;
+            font-size: 0.16rem;
+            border: 1px solid transparent;
 
             &:hover {
                 background: rgba(57, 155, 255, 0.15);
                 transform: translateY(-0.01rem);
             }
 
-            // 可编辑的值显示
             &.register-value-display {
                 cursor: text;
                 border: 1px solid transparent;
                 outline: none;
-                transition: all 0.3s ease;
 
                 &:hover {
                     background: rgba(57, 155, 255, 0.15);
@@ -712,12 +781,10 @@ body.dark-theme {
                     box-shadow: 0 0 0 1px rgba(57, 155, 255, 0.2);
                 }
 
-                // 值更新时的动画效果
                 &.updating {
                     animation: valueUpdate 0.3s ease;
                 }
 
-                // 错误状态
                 &.error {
                     border-color: #ff4444;
                     background: rgba(255, 68, 68, 0.1);
@@ -725,75 +792,110 @@ body.dark-theme {
             }
         }
     }
-}
 
-// 值更新动画
-@keyframes valueUpdate {
-    0% {
-        background: rgba(57, 155, 255, 0.3);
-    }
-    100% {
+    .modify-btn {
+        margin-top: 0.06rem;
+        padding: 0.08rem;
         background: rgba(57, 155, 255, 0.1);
-    }
-}
-
-/* Register Selectors Component */
-.register-selectors {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    width: 100%;
-    max-width: 10rem;
-    padding: 0.15rem;
-    background: rgba(57, 155, 255, 0.05);
-    border-radius: 0.1rem;
-    border: 1px solid rgba(57, 155, 255, 0.1);
-    margin-bottom: 0.3rem;
-    transform: scale(0.8);
-    transform-origin: top center;
-
-    .selector-item {
+        border: 1px solid rgba(57, 155, 255, 0.2);
+        border-radius: 0.04rem;
+        color: #399bff;
+        font-size: 0.14rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
         display: flex;
         align-items: center;
-        gap: 0.3rem;
-        width: 100%;
+        justify-content: center;
+        gap: 0.06rem;
 
-        label {
-            font-size: 0.2rem;
-            color: #666;
-            white-space: nowrap;
-            min-width: 1.5rem;
-            font-weight: bold;
+        &:hover {
+            background: rgba(57, 155, 255, 0.15);
+            border-color: rgba(57, 155, 255, 0.3);
+            transform: translateY(-0.01rem);
         }
 
-        select {
-            flex: 1;
-            font-size: 0.2rem;
-            padding: 0.1rem;
-            border: 1px solid #ccc;
-            border-radius: 0.05rem;
-            background: white;
-            color: #333;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        &:active {
+            transform: translateY(0);
+        }
 
-            &:focus {
-                outline: none;
-                border-color: #399bff;
-                box-shadow: 0 0 0 1px rgba(57, 155, 255, 0.2);
-            }
+        &.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .modify-icon {
+            font-size: 0.16rem;
         }
     }
 }
 
 // Dark theme styles
 body.dark-theme {
-    .register-info {
+    .up-box {
+        background: linear-gradient(to bottom, rgba(102, 179, 255, 0.02), rgba(102, 179, 255, 0.05));
+
+        &::before,
+        &::after {
+            background: linear-gradient(to right, transparent, rgba(102, 179, 255, 0.2), transparent);
+        }
+    }
+
+    .register-controls {
+        background: rgba(102, 179, 255, 0.02);
+        border-color: rgba(102, 179, 255, 0.1);
+    }
+
+    .register-selectors, .register-info {
         background: rgba(102, 179, 255, 0.05);
         border-color: rgba(102, 179, 255, 0.1);
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
 
+    .register-selectors {
+        .selector-item {
+            background: rgba(102, 179, 255, 0.02);
+
+            &:hover {
+                background: rgba(102, 179, 255, 0.05);
+            }
+
+            label {
+                color: #ccc;
+            }
+
+            select {
+                background: #333;
+                border-color: rgba(102, 179, 255, 0.2);
+                color: #fff;
+
+                &:hover {
+                    border-color: rgba(102, 179, 255, 0.4);
+                    background: rgba(102, 179, 255, 0.05);
+                }
+
+                &:focus {
+                    border-color: #66b3ff;
+                    box-shadow: 0 0 0 1px rgba(102, 179, 255, 0.2);
+                    background: rgba(102, 179, 255, 0.1);
+                }
+
+                option {
+                    background: #333;
+                    color: #fff;
+                }
+            }
+        }
+    }
+
+    .register-info {
         .info-item {
+            background: rgba(102, 179, 255, 0.02);
+
+            &:hover {
+                background: rgba(102, 179, 255, 0.05);
+            }
+
             .info-label {
                 color: #ccc;
             }
@@ -828,28 +930,27 @@ body.dark-theme {
                 }
             }
         }
-    }
 
-    .register-selectors {
-        background: rgba(102, 179, 255, 0.05);
-        border-color: rgba(102, 179, 255, 0.1);
+        .modify-btn {
+            background: rgba(102, 179, 255, 0.1);
+            border-color: rgba(102, 179, 255, 0.2);
+            color: #66b3ff;
 
-        .selector-item {
-            label {
-                color: #ccc;
-            }
-
-            select {
-                background: #333;
-                border-color: #555;
-                color: #fff;
-
-                &:focus {
-                    border-color: #66b3ff;
-                    box-shadow: 0 0 0 2px rgba(102, 179, 255, 0.2);
-                }
+            &:hover {
+                background: rgba(102, 179, 255, 0.15);
+                border-color: rgba(102, 179, 255, 0.3);
             }
         }
+    }
+}
+
+// 值更新动画
+@keyframes valueUpdate {
+    0% {
+        background: rgba(57, 155, 255, 0.3);
+    }
+    100% {
+        background: rgba(57, 155, 255, 0.1);
     }
 }
 
