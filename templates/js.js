@@ -276,6 +276,15 @@ $(document).ready(function () {
             const fieldValue = (registerValue >> end) & ((1 << fieldWidth) - 1);
             const hexWidth = Math.ceil(fieldWidth / 4); // Calculate needed hexadecimal digits
 
+            // Check if any bits in this field are modified
+            let isFieldModified = false;
+            for (let i = end; i <= start; i++) {
+                if (modifiedBits.has(i)) {
+                    isFieldModified = true;
+                    break;
+                }
+            }
+
             const item = $('<div>')
                 .addClass('bit-description-item')
                 .attr('id', `bit-field-${start}-${end}`)
@@ -286,35 +295,41 @@ $(document).ready(function () {
                 })
                 .on('mouseleave', function () {
                     clearFieldHighlight(start, end);
-                })
-                .append(
-                    $('<span>')
-                    .addClass('bit-range')
-                    .text(isSingleBit ? `[${start}]` : `[${start}:${end}]`),
-                    $('<span>')
-                    .addClass('bit-field')
-                    .html(`${info.field || ''}`),
-                    $('<span>')
-                    .addClass('bit-value')
-                    .text(`0x${fieldValue.toString(16).toUpperCase().padStart(hexWidth, '0')}`)
-                    .css('cursor', 'pointer')
-                    .on('click', function (e) {
-                        // Get current field value
-                        const fieldWidth = start - end + 1;
-                        const fieldValue = (currentRegisterValue >> end) & ((1 << fieldWidth) - 1);
-                        // Show input dialog
-                        showFieldInputDialog(start, end, info.field || '', fieldValue);
-                    }),
-                    $('<span>')
-                    .addClass('bit-default')
-                    .text(`0x${info.default.toString(16).toUpperCase().padStart(hexWidth, '0')}`),
-                    $('<span>')
-                    .addClass('bit-description')
-                    .text(info.description),
-                    $('<span>')
-                    .addClass('bit-attributes')
-                    .text(info.attributes.join(', '))
-                );
+                });
+
+            // Add modified class if the field has modified bits
+            if (isFieldModified) {
+                item.addClass('modified-row');
+            }
+
+            item.append(
+                $('<span>')
+                .addClass('bit-range')
+                .text(isSingleBit ? `[${start}]` : `[${start}:${end}]`),
+                $('<span>')
+                .addClass('bit-field')
+                .html(`${info.field || ''}`),
+                $('<span>')
+                .addClass('bit-value')
+                .text(`0x${fieldValue.toString(16).toUpperCase().padStart(hexWidth, '0')}`)
+                .css('cursor', 'pointer')
+                .on('click', function (e) {
+                    // Get current field value
+                    const fieldWidth = start - end + 1;
+                    const fieldValue = (currentRegisterValue >> end) & ((1 << fieldWidth) - 1);
+                    // Show input dialog
+                    showFieldInputDialog(start, end, info.field || '', fieldValue);
+                }),
+                $('<span>')
+                .addClass('bit-default')
+                .text(`0x${info.default.toString(16).toUpperCase().padStart(hexWidth, '0')}`),
+                $('<span>')
+                .addClass('bit-description')
+                .text(info.description),
+                $('<span>')
+                .addClass('bit-attributes')
+                .text(info.attributes.join(', '))
+            );
             descriptionList.append(item);
         });
     }
@@ -701,7 +716,13 @@ $(document).ready(function () {
         display.text(formattedValue);
         display.attr('data-last-value', formattedValue);
 
-        // Update bit-boxes
+        // Clear all modified states first
+        $('.bit-box').removeClass('modified');
+        $('.bit-name').removeClass('modified-field-name');
+        $('.bit-description-item').removeClass('modified-row');
+        modifiedBits.clear();
+
+        // Update bit-boxes and track modified fields
         const boxes = $('.bit-box');
         for (let i = 0; i < currentBitCount; i++) {
             const bitValue = (value >> i) & 1;
@@ -715,18 +736,23 @@ $(document).ready(function () {
                     .removeClass('bit-0 bit-1')
                     .addClass(bitValue ? 'bit-1' : 'bit-0');
 
-                // Mark modified bits with orange color
                 if (isModified) {
+                    // Mark bit as modified
                     $box.addClass('modified');
                     modifiedBits.add(i);
-                } else {
-                    $box.removeClass('modified');
-                    modifiedBits.delete(i);
+
+                    // Find and mark the corresponding field name
+                    Object.entries(currentBitRanges).forEach(([range, info]) => {
+                        const [start, end] = range.split('-').map(Number);
+                        if (i >= end && i <= start) {
+                            $(`.bit-name[data-field-start="${start}"][data-field-end="${end}"]`).addClass('modified-field-name');
+                        }
+                    });
                 }
             }
         }
 
-        // Update bit descriptions
+        // Update bit descriptions (this will now handle the down-box row highlighting)
         updateBitDescriptions(currentBitRanges, value);
 
         // Update connection lines
@@ -861,6 +887,8 @@ $(document).ready(function () {
     function clearModifiedBits() {
         modifiedBits.clear();
         $('.bit-box').removeClass('modified');
+        $('.bit-name').removeClass('modified-field-name');
+        $('.bit-description-item').removeClass('modified-row');
     }
 
     async function applyRegisterChanges() {
@@ -1324,12 +1352,30 @@ $(document).ready(function () {
         modifyBtn.toggleClass('disabled', !isDifferent).prop('disabled', !isDifferent);
     }
 
-    // Add styles for modified and error bits
+    // Add styles for modified elements
     $('<style>')
         .text(`
             .modified {
                 border-color: #ffa500 !important;
                 background-color: rgba(255, 165, 0, 0.1) !important;
+            }
+            .modified-field-name {
+                color: #ffa500 !important;
+                font-weight: bold;
+            }
+            .modified-row {
+                background-color: rgba(255, 165, 0, 0.1) !important;
+                border-radius: 0.04rem;
+            }
+            body.dark-theme .modified {
+                border-color: #ffb84d !important;
+                background-color: rgba(255, 184, 77, 0.15) !important;
+            }
+            body.dark-theme .modified-field-name {
+                color: #ffb84d !important;
+            }
+            body.dark-theme .modified-row {
+                background-color: rgba(255, 184, 77, 0.15) !important;
             }
             .error-bit {
                 border-color: #ff4444 !important;
@@ -1340,10 +1386,6 @@ $(document).ready(function () {
                 0% { opacity: 1; }
                 50% { opacity: 0.7; }
                 100% { opacity: 1; }
-            }
-            body.dark-theme .modified {
-                border-color: #ffb84d !important;
-                background-color: rgba(255, 184, 77, 0.15) !important;
             }
             body.dark-theme .error-bit {
                 border-color: #ff6b6b !important;
