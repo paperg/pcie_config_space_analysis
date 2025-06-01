@@ -56,11 +56,6 @@
     text-decoration: none !important
   }
   
-  html,
-  body {
-    height: 100%;
-  }
-  
   .clearfix:after,
   .clearfix:before {
     display: table;
@@ -98,14 +93,18 @@
 
 /* nav */
 @line_width: .01rem;
-@box_width: .35rem;
+@box_width: .45rem;
 @box_font_size: .16rem;
+
+.body {
+    overflow-x: hidden;
+}
+
 
 .nav {
   width: 100%;
   height: 0.4rem;
   font-size: .3rem;
-  border: @line_width solid #000;
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -115,13 +114,18 @@
 .up-box {
     display: flex;
     height: 100vh - 0.6rem;
-    border: @line_width solid #000;
+    border-top: .02rem solid #000;
 }
 
 /* register */
 .register {
     position: relative;
     margin: auto;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    width: fit-content;
+    min-width: max-content;
     // background-color: #a3866f;
 }
 
@@ -130,6 +134,7 @@
     display: flex;
     flex-direction: row-reverse;
     justify-content: flex-end;
+    flex-shrink: 0;
     // background-color: #466ba4;
 }
 
@@ -166,24 +171,27 @@
   }
 }
 
+/* register-name */
 .register-name {
     position: relative;
-    left: @box_width;
-    top: @box_width;
+    top: @box_width * 2;
     display: flex;
     flex-direction: column;
+    flex-shrink: 0;
+    min-width: max-content;
     // background-color: #3cab62;
 }
 
 /* bit-name */
 .bit-name {
-  font-size: @box_font_size;
-  margin: .02rem;
-  padding-left: .05rem;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
+    font-size: @box_font_size;
+    margin: .02rem;
+    padding-left: .05rem;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    white-space: nowrap;
 }
 
 #svg-line {
@@ -328,7 +336,4 @@ body.dark-theme {
 
 .bit-box {
   border: @line_width solid @light-border;
-  // ... 保持其他样式不变 ...
 }
-
-// ... 保持其他样式不变 ...

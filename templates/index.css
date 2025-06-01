@@ -46,10 +46,6 @@ a:hover {
   color: #06c;
   text-decoration: none !important;
 }
-html,
-body {
-  height: 100%;
-}
 .clearfix:after,
 .clearfix:before {
   display: table;
@@ -78,11 +74,13 @@ body {
 }
 /* up-box */
 /* nav */
+.body {
+  overflow-x: hidden;
+}
 .nav {
   width: 100%;
   height: 0.4rem;
   font-size: 0.3rem;
-  border: 0.01rem solid #000;
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -91,26 +89,32 @@ body {
 .up-box {
   display: flex;
   height: 99.4vh;
-  border: 0.01rem solid #000;
+  border-top: 0.02rem solid #000;
 }
 /* register */
 .register {
   position: relative;
   margin: auto;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  width: fit-content;
+  min-width: max-content;
 }
 /* register-box */
 .register-box {
   display: flex;
   flex-direction: row-reverse;
   justify-content: flex-end;
+  flex-shrink: 0;
 }
 /* bit-box */
 .bit-box {
-  height: 0.35rem;
-  width: 0.35rem;
+  height: 0.45rem;
+  width: 0.45rem;
   font-size: 0.16rem;
   text-align: center;
-  line-height: 0.35rem;
+  line-height: 0.45rem;
   margin: 0.01rem 0.01rem 0.01rem 0.01rem;
   border: 0.01rem solid #000000;
   user-select: none;
@@ -133,12 +137,14 @@ body {
   background-color: #e1f0ff;
   border-color: #0066cc;
 }
+/* register-name */
 .register-name {
   position: relative;
-  left: 0.35rem;
-  top: 0.35rem;
+  top: 0.9rem;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
+  min-width: max-content;
 }
 /* bit-name */
 .bit-name {
@@ -149,6 +155,7 @@ body {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  white-space: nowrap;
 }
 #svg-line {
   position: absolute;

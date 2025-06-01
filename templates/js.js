@@ -27,25 +27,6 @@ $(document).ready(function () {
         }
     });
 
-    // 更新registerName位置的函数
-    function updateRegisterNamePosition() {
-        const registerName = $('.register-name');
-        const bitBoxContainers = $('.bit-box-container');
-        if (bitBoxContainers.length > 0) {
-            // 使用getBoundingClientRect替代getComputedStyle以获得更准确的位置
-            const boxRect = bitBoxContainers[0].getBoundingClientRect();
-            const boxWidth = boxRect.width;
-            console.log("boxWidth", boxWidth);
-            // 获取当前html的fontSize
-            const htmlFontSize = parseFloat($('html').css('fontSize'));
-            // 将px转换为rem
-            const boxWidthRem = boxWidth / htmlFontSize;
-            const leftPositionRem = boxWidthRem * (bitBoxContainers.length + 2);
-            registerName.css('left', `${leftPositionRem}rem`);
-            console.log("boxWidthRem", boxWidthRem, "leftPositionRem", leftPositionRem);
-        }
-    }
-
     // 添加防抖函数
     function debounce(func, wait) {
         let timeout;
@@ -151,7 +132,7 @@ $(document).ready(function () {
             const bitNumber = $('<div>')
                 .addClass('bit-number')
                 .css({
-                    'font-size': '0.12rem',
+                    'font-size': '0.16rem',
                     'margin-bottom': '0.02rem',
                     'user-select': 'none'
                 })
@@ -179,9 +160,6 @@ $(document).ready(function () {
             registerBox.append(bitBoxContainer);
             registerName.append(bitName);
         }
-
-        // 设置registerName位置
-        updateRegisterNamePosition();
     }
 
     // 更新寄存器显示
@@ -306,7 +284,7 @@ $(document).ready(function () {
 
         // 示例3：32位寄存器，带位描述
         const bitDescriptions32 = {
-            0: "Enablesdadsadasdasdsddasdsdasdasdasdasdd",
+            0: "Enablesdadd",
             1: "Interrupt",
             2: "Mode",
             3: "Status",
@@ -344,7 +322,7 @@ $(document).ready(function () {
         // 启动随机测试（取消注释以启用）
         // startRandomTest(8, bitDescriptions8);  // 8位随机测试
         // startRandomTest(16, bitDescriptions16);  // 16位随机测试
-        // startRandomTest(32, bitDescriptions32);  // 32位随机测试
+        // startRandomTest(32, bitDescriptions32); // 32位随机测试
     }
 
     // 执行测试
