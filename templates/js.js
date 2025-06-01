@@ -584,26 +584,32 @@ $(document).ready(function () {
         display.text(formattedValue);
         display.attr('data-last-value', formattedValue);
 
-        // Update bit-boxes while preserving modified state
+        // Update bit-boxes
         const boxes = $('.bit-box');
         for (let i = 0; i < currentBitCount; i++) {
             const bitValue = (value >> i) & 1;
             const originalBitValue = (initialRegisterValue >> i) & 1;
             if (boxes[i]) {
                 const $box = $(boxes[i]);
-                const isModified = bitValue !== originalBitValue;
+                const isMismatched = bitValue !== originalBitValue;
+
+                // Update bit value and style
+                $box.text(bitValue)
+                    .removeClass('bit-0 bit-1 error-bit')
+                    .addClass(bitValue ? 'bit-1' : 'bit-0');
+
+                // Mark mismatched bits in red
+                if (isMismatched) {
+                    $box.addClass('error-bit');
+                    console.log('Marking bit', i, 'as error - current:', bitValue, 'original:', originalBitValue);
+                }
 
                 // Update modified state
-                if (isModified) {
+                if (isMismatched) {
                     modifiedBits.add(i);
                 } else {
                     modifiedBits.delete(i);
                 }
-
-                $box.text(bitValue)
-                    .removeClass('bit-0 bit-1')
-                    .addClass(bitValue ? 'bit-1' : 'bit-0')
-                    .toggleClass('modified', isModified);
             }
         }
 
@@ -718,7 +724,8 @@ $(document).ready(function () {
                     .text('Confirm')
                     .on('click', function () {
                         dialog.remove();
-                        // Remove error styles
+                        // Clear all marks and update display
+                        clearModifiedBits();
                         removeErrorStyles();
                         // Update display to backend returned value
                         updateRegister(currentRegisterValue, currentBitCount, currentBitRanges, currentRegisterInfo);
@@ -791,9 +798,6 @@ $(document).ready(function () {
             console.log('Simulated backend response:', responseData);
 
             if (responseData.success) {
-                // Clear modified bits on successful apply
-                clearModifiedBits();
-
                 if (responseData.value === currentRegisterValue) {
                     // Value unchanged, update display directly
                     updateRegister(responseData.value, currentBitCount, currentBitRanges, currentRegisterInfo);
@@ -805,12 +809,9 @@ $(document).ready(function () {
                         const newBit = (responseData.value >> i) & 1;
                         if (originalBit !== newBit) {
                             mismatchedBits.push(i);
+                            console.log('Found mismatched bit:', i, 'original:', originalBit, 'new:', newBit);
                         }
                     }
-
-                    // Show error and mark mismatched bits
-                    addErrorStyles(mismatchedBits);
-                    showErrorDialog('Failed: Register value does not match expected value');
 
                     // Update current value to backend returned value
                     currentRegisterValue = responseData.value;
@@ -822,17 +823,24 @@ $(document).ready(function () {
                     // 2. Update register value display
                     updateRegisterValueDisplay(responseData.value);
 
-                    // 3. Update all bit-box values, maintain error styles
+                    // 3. Update all bit-box values and mark mismatched bits
                     const boxes = $('.bit-box');
                     for (let i = 0; i < currentBitCount; i++) {
                         const bitValue = (responseData.value >> i) & 1;
                         if (boxes[i]) {
                             const $box = $(boxes[i]);
-                            const isError = mismatchedBits.includes(i);
+                            const isMismatched = mismatchedBits.includes(i);
+
+                            // Update bit value
                             $box.text(bitValue)
                                 .removeClass('bit-0 bit-1')
-                                .addClass(bitValue ? 'bit-1' : 'bit-0')
-                                .toggleClass('error-bit', isError);
+                                .addClass(bitValue ? 'bit-1' : 'bit-0');
+
+                            // Mark mismatched bits in red
+                            if (isMismatched) {
+                                $box.addClass('error-bit');
+                                console.log('Marking bit', i, 'as error in apply changes');
+                            }
                         }
                     }
 
@@ -842,16 +850,20 @@ $(document).ready(function () {
                     // 5. Update connection line styles
                     $('.register-box').attr('data-value', responseData.value);
                     calculateCoordinates();
+
+                    // Force a reflow to ensure styles are applied
+                    $('.bit-box').hide().show(0);
+
+                    // Show error dialog
+                    showErrorDialog('Failed: Register value does not match expected value');
                 }
             } else {
                 // Handle other error cases
-                addErrorStyles([]);
                 showErrorDialog(responseData.message || 'Failed: Unknown error');
             }
         } catch (error) {
             // Handle network errors etc.
             console.error('Error updating register:', error);
-            addErrorStyles([]);
             showErrorDialog('Failed: Network error');
         } finally {
             // Reset modification state
@@ -873,64 +885,57 @@ $(document).ready(function () {
                 background: rgba(0, 0, 0, 0.5);
                 display: flex;
                 justify-content: center;
-                align-items: center;
+                align-items: flex-start;
                 z-index: 1000;
+                padding-top: 15vh;
             }
             .error-dialog-content {
                 background: white;
-                padding: 0.3rem;
-                border-radius: 0.1rem;
+                padding: 0.2rem;
+                border-radius: 0.08rem;
                 box-shadow: 0 0.05rem 0.2rem rgba(0, 0, 0, 0.2);
                 text-align: center;
-                min-width: 4rem;
-                max-width: 6rem;
+                min-width: 3.2rem;
+                max-width: 4.8rem;
+                border: 1px solid #e0e0e0;
+                transform: translateY(-0.5rem);
             }
             .error-dialog-message {
-                margin-bottom: 0.3rem;
+                margin-bottom: 0.2rem;
                 color: #ff4444;
-                font-size: 0.25rem;
+                font-size: 0.16rem;
                 line-height: 1.4;
-                padding: 0 0.2rem;
+                padding: 0 0.15rem;
+                font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
             }
             .error-dialog-button {
-                padding: 0.1rem 0.4rem;
+                padding: 0.08rem 0.3rem;
                 background: #399bff;
                 color: white;
                 border: none;
-                border-radius: 0.05rem;
+                border-radius: 0.04rem;
                 cursor: pointer;
-                font-size: 0.25rem;
-                transition: all 0.3s ease;
+                font-size: 0.14rem;
+                font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+                transition: all 0.2s ease;
+                min-width: 1.2rem;
             }
             .error-dialog-button:hover {
                 background: #2980ff;
-                transform: translateY(-0.02rem);
+                transform: translateY(-0.01rem);
             }
             .error-dialog-button:active {
                 transform: translateY(0);
-            }
-            .error-bit {
-                border-color: #ff4444 !important;
-                background-color: rgba(255, 68, 68, 0.1) !important;
-                animation: error-pulse 1s ease-in-out;
-            }
-            .error-name {
-                color: #ff4444 !important;
-                animation: error-pulse 1s ease-in-out;
-            }
-            .error-row {
-                background-color: rgba(255, 68, 68, 0.05) !important;
-                animation: error-pulse 1s ease-in-out;
-            }
-            @keyframes error-pulse {
-                0% { opacity: 1; }
-                50% { opacity: 0.7; }
-                100% { opacity: 1; }
+                background: #1a7ae0;
             }
             body.dark-theme .error-dialog-content {
                 background: #1a1a1a;
                 color: #fff;
                 box-shadow: 0 0.05rem 0.2rem rgba(0, 0, 0, 0.4);
+                border-color: #333333;
+            }
+            body.dark-theme .error-dialog-message {
+                color: #ff6b6b;
             }
             body.dark-theme .error-dialog-button {
                 background: #66b3ff;
@@ -938,8 +943,8 @@ $(document).ready(function () {
             body.dark-theme .error-dialog-button:hover {
                 background: #4d99ff;
             }
-            body.dark-theme .error-row {
-                background-color: rgba(255, 68, 68, 0.1) !important;
+            body.dark-theme .error-dialog-button:active {
+                background: #3380ff;
             }
         `)
         .appendTo('head');
@@ -1197,4 +1202,24 @@ $(document).ready(function () {
         const isDifferent = currentRegisterValue !== initialRegisterValue;
         modifyBtn.toggleClass('disabled', !isDifferent).prop('disabled', !isDifferent);
     }
+
+    // Add error styles
+    $('<style>')
+        .text(`
+            .error-bit {
+                border-color: #ff4444 !important;
+                background-color: rgba(255, 68, 68, 0.1) !important;
+                animation: error-pulse 1s ease-in-out;
+            }
+            @keyframes error-pulse {
+                0% { opacity: 1; }
+                50% { opacity: 0.7; }
+                100% { opacity: 1; }
+            }
+            body.dark-theme .error-bit {
+                border-color: #ff6b6b !important;
+                background-color: rgba(255, 107, 107, 0.15) !important;
+            }
+        `)
+        .appendTo('head');
 });
