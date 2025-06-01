@@ -89,7 +89,28 @@ a:hover {
 .up-box {
   display: flex;
   height: 99.4vh;
-  border-top: 0.02rem solid #000;
+  background: linear-gradient(to bottom, rgba(57, 155, 255, 0.02), rgba(57, 155, 255, 0.05));
+  padding: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+.up-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(57, 155, 255, 0.2), transparent);
+}
+.up-box::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(57, 155, 255, 0.2), transparent);
 }
 /* register */
 .register {
@@ -100,6 +121,12 @@ a:hover {
   align-items: flex-start;
   width: fit-content;
   min-width: max-content;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 0.5rem;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 .register-title {
   position: absolute;
@@ -114,9 +141,28 @@ a:hover {
   -ms-user-select: none;
   white-space: nowrap;
   z-index: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  padding: 0.2rem 0.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 0.3rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+body.dark-theme .up-box {
+  background: linear-gradient(to bottom, rgba(102, 179, 255, 0.02), rgba(102, 179, 255, 0.05));
+}
+body.dark-theme .up-box::before,
+body.dark-theme .up-box::after {
+  background: linear-gradient(to right, transparent, rgba(102, 179, 255, 0.2), transparent);
+}
+body.dark-theme .register {
+  background: rgba(26, 26, 26, 0.8);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
 }
 body.dark-theme .register-title {
   color: #66b3ff;
+  background: rgba(26, 26, 26, 0.9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 /* register-box */
 .register-box {
@@ -313,14 +359,6 @@ body.dark-theme .theme-toggle-btn .light-icon {
   display: none;
 }
 /* 修改现有样式以使用主题变量 */
-.up-box {
-  display: flex;
-  height: 99.4vh;
-  border: 0.01rem solid #000000;
-}
-.bit-box {
-  border: 0.01rem solid #000000;
-}
 .down-box {
   width: 100%;
   padding: 0.2rem;
