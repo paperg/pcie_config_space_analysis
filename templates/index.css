@@ -192,6 +192,7 @@ body.dark-theme .register-title {
   -ms-user-select: none;
   transition: all 0.3s ease;
   cursor: pointer;
+  position: relative;
 }
 .bit-box:hover {
   transform: scale(1.1);
@@ -217,6 +218,39 @@ body.dark-theme .register-title {
 }
 .bit-box.highlight-box.bit-1 {
   background-color: #cce5ff;
+}
+.bit-box.modified::after {
+  content: '';
+  position: absolute;
+  top: -0.02rem;
+  right: -0.02rem;
+  width: 0.08rem;
+  height: 0.08rem;
+  background-color: #ff9800;
+  border-radius: 50%;
+  border: 0.01rem solid #fff;
+  box-shadow: 0 0 0.02rem rgba(0, 0, 0, 0.2);
+}
+.bit-box.modified.bit-0 {
+  border-color: #ff9800;
+  background-color: rgba(255, 152, 0, 0.1);
+}
+.bit-box.modified.bit-1 {
+  border-color: #ff9800;
+  background-color: rgba(255, 152, 0, 0.15);
+}
+body.dark-theme .bit-box.modified::after {
+  background-color: #ffb74d;
+  border-color: #1a1a1a;
+  box-shadow: 0 0 0.02rem rgba(0, 0, 0, 0.4);
+}
+body.dark-theme .bit-box.modified.bit-0 {
+  border-color: #ffb74d;
+  background-color: rgba(255, 183, 77, 0.15);
+}
+body.dark-theme .bit-box.modified.bit-1 {
+  border-color: #ffb74d;
+  background-color: rgba(255, 183, 77, 0.2);
 }
 body.dark-theme .bit-box.highlight-box {
   box-shadow: 0 0 10px rgba(102, 179, 255, 0.5);

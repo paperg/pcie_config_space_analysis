@@ -299,6 +299,9 @@ $(document).ready(function () {
                     const currentBitValue = $(this).hasClass('bit-1');
                     const newBitValue = !currentBitValue;
 
+                    // Get the original bit value from initialRegisterValue
+                    const originalBitValue = (initialRegisterValue >> bitIndex) & 1;
+
                     // Update bit box appearance
                     $(this).removeClass('bit-0 bit-1')
                         .addClass(newBitValue ? 'bit-1' : 'bit-0')
@@ -311,6 +314,19 @@ $(document).ready(function () {
                         currentRegisterValue &= ~(1 << bitIndex);
                     }
 
+                    // Check if the new value matches the original value
+                    if (newBitValue === originalBitValue) {
+                        // If value is restored to original, remove modified mark
+                        modifiedBits.delete(bitIndex);
+                        $(`.bit-box[data-bit="${bitIndex}"]`).removeClass('modified');
+                        console.log('Removed modified mark for bit', bitIndex); // Debug log
+                    } else {
+                        // If value is different from original, add modified mark
+                        modifiedBits.add(bitIndex);
+                        $(`.bit-box[data-bit="${bitIndex}"]`).addClass('modified');
+                        console.log('Added modified mark for bit', bitIndex); // Debug log
+                    }
+
                     // Update display
                     updateRegisterValueDisplay(currentRegisterValue);
                     isValueModified = true;
@@ -320,6 +336,9 @@ $(document).ready(function () {
 
                     // Update bit values in descriptions
                     updateBitDescriptionValue(bitIndex, newBitValue);
+
+                    // Update apply button state
+                    updateApplyButtonState();
                 });
 
             // Add mouse hover event
@@ -404,6 +423,9 @@ $(document).ready(function () {
 
     // Update register display
     function updateRegister(registerValue, bitCount, bitRanges = {}, registerInfo = {}) {
+        // Clear modified bits when register is updated
+        clearModifiedBits();
+
         // Update global variables
         currentRegisterValue = registerValue;
         initialRegisterValue = registerValue;
@@ -945,13 +967,26 @@ $(document).ready(function () {
         display.text(formattedValue);
         display.attr('data-last-value', formattedValue);
 
-        // Update bit-boxes
+        // Update bit-boxes while preserving modified state
         const boxes = $('.bit-box');
         for (let i = 0; i < currentBitCount; i++) {
             const bitValue = (value >> i) & 1;
+            const originalBitValue = (initialRegisterValue >> i) & 1;
             if (boxes[i]) {
-                boxes[i].textContent = bitValue;
-                boxes[i].className = `bit-box ${bitValue ? 'bit-1' : 'bit-0'}`;
+                const $box = $(boxes[i]);
+                const isModified = bitValue !== originalBitValue;
+
+                // Update modified state
+                if (isModified) {
+                    modifiedBits.add(i);
+                } else {
+                    modifiedBits.delete(i);
+                }
+
+                $box.text(bitValue)
+                    .removeClass('bit-0 bit-1')
+                    .addClass(bitValue ? 'bit-1' : 'bit-0')
+                    .toggleClass('modified', isModified);
             }
         }
 
@@ -1078,6 +1113,20 @@ $(document).ready(function () {
         $('body').append(dialog);
     }
 
+    // Add a new function to track modified bits
+    let modifiedBits = new Set();
+
+    function markBitAsModified(bitIndex) {
+        modifiedBits.add(bitIndex);
+        $(`.bit-box[data-bit="${bitIndex}"]`).addClass('modified');
+    }
+
+    function clearModifiedBits() {
+        console.log('Clearing all modified bits'); // Debug log
+        modifiedBits.clear();
+        $('.bit-box').removeClass('modified');
+    }
+
     async function applyRegisterChanges() {
         if (!isValueModified) return;
 
@@ -1125,7 +1174,9 @@ $(document).ready(function () {
             console.log('Simulated backend response:', responseData);
 
             if (responseData.success) {
-                // If successful
+                // Clear modified bits on successful apply
+                clearModifiedBits();
+
                 if (responseData.value === currentRegisterValue) {
                     // Value unchanged, update display directly
                     updateRegister(responseData.value, currentBitCount, currentBitRanges, currentRegisterInfo);
