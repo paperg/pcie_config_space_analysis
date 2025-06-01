@@ -397,7 +397,6 @@ $(document).ready(function () {
         // Update register information
         if (registerInfo.name) {
             $('#register-name-value').text(registerInfo.name);
-            $('.register-title').text(registerInfo.name);
         }
         if (registerInfo.offset !== undefined) {
             $('#register-offset-value').text(`0x${registerInfo.offset.toString(16).toUpperCase().padStart(4, '0')}`);
@@ -811,60 +810,81 @@ $(document).ready(function () {
         }
     };
 
-    // Update register selector options based on space type
+    // Initialize space type selector with mock data
+    const spaceTypeSelect = $('#spaceType');
+    MOCK_DATA.spaceTypes.forEach(spaceType => {
+        spaceTypeSelect.append(
+            $('<option>')
+            .val(spaceType.value)
+            .text(spaceType.label)
+        );
+    });
+
+    // Initialize register selector when space type changes
     function updateRegisterOptions(spaceType) {
         const registerSelect = $('#registerSelect');
         registerSelect.empty();
 
-        if (testRegisters[spaceType]) {
-            Object.entries(testRegisters[spaceType]).forEach(([key, register]) => {
-                registerSelect.append(
-                    $('<option>')
-                    .val(key)
-                    .text(`${register.name} (0x${register.offset.toString(16).toUpperCase().padStart(4, '0')})`)
-                );
-            });
-        }
+        const registers = MOCK_DATA.registers[spaceType] || [];
+        registers.forEach(register => {
+            registerSelect.append(
+                $('<option>')
+                .val(register.value)
+                .text(register.label)
+            );
+        });
 
-        // Trigger change event to update display
-        registerSelect.trigger('change');
+        // Select first register by default
+        if (registers.length > 0) {
+            registerSelect.val(registers[0].value);
+            updateRegisterDisplay(registers[0]);
+        }
+    }
+
+    // Update register display when a register is selected
+    function updateRegisterDisplay(register) {
+        if (!register) return;
+
+        // Update register info
+        $('#register-name-value').text(register.label.split(' (')[0]);
+        $('#register-offset-value').text(register.offset);
+
+        // Get register value from mock data
+        const registerValue = MOCK_DATA.defaultValues[register.value] || 0;
+        currentRegisterValue = registerValue;
+        initialRegisterValue = registerValue;
+        isValueModified = false;
+
+        // Update display
+        updateRegisterValueDisplay(registerValue);
+        generateRegisterBits(currentBitCount, register.bitRanges);
+        updateBitDescriptions(register.bitRanges, registerValue);
+        updateApplyButtonState();
+
+        // Store current register info
+        currentRegisterInfo = register;
+        currentBitRanges = register.bitRanges;
+
+        // Force reflow and redraw lines
+        $('.register').hide().show(0);
+        calculateCoordinates();
     }
 
     // Handle space type change
-    $('#spaceType').on('change', function () {
-        const spaceType = $(this).val();
-        updateRegisterOptions(spaceType);
+    spaceTypeSelect.on('change', function () {
+        updateRegisterOptions($(this).val());
     });
 
     // Handle register selection change
     $('#registerSelect').on('change', function () {
-        const spaceType = $('#spaceType').val();
-        const registerKey = $(this).val();
-
-        if (testRegisters[spaceType] && testRegisters[spaceType][registerKey]) {
-            const register = testRegisters[spaceType][registerKey];
-            setRegisterValue(
-                register.initialValue,
-                32,
-                register.bitRanges, {
-                    name: register.name,
-                    offset: register.offset,
-                    description: register.description
-                }
-            );
-        }
+        const spaceType = spaceTypeSelect.val();
+        const registerValue = $(this).val();
+        const register = MOCK_DATA.registers[spaceType].find(r => r.value === registerValue);
+        updateRegisterDisplay(register);
     });
 
-    // Update test function
-    function runTest() {
-        // Set initial space type and update register options
-        const initialSpaceType = 'pci';
-        $('#spaceType').val(initialSpaceType);
-        updateRegisterOptions(initialSpaceType);
-    }
-
-    // Execute test
-    runTest();
+    // Initialize with first space type
+    updateRegisterOptions(spaceTypeSelect.val());
 
     function updateRegisterValueDisplay(value) {
         const display = document.getElementById('register-value-display');

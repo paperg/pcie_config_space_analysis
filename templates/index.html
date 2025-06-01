@@ -21,45 +21,16 @@
     <!-- up box -->
     <div class="up-box">
       <div class="register-selectors">
-        <div class="space-selector">
+        <div class="selector-item">
           <label>Space Type:</label>
           <select id="spaceType">
-            <option value="pci">PCI Configuration Space</option>
-            <option value="pcie">PCIe Configuration Space</option>
-            <option value="pcie_ext">PCIe Extended Space</option>
-            <option value="mem">Memory Space</option>
+            <!-- Options will be populated from backend -->
           </select>
         </div>
-        <div class="register-selector">
+        <div class="selector-item">
           <label>Register:</label>
           <select id="registerSelect">
-            <optgroup label="PCI Configuration Space">
-              <option value="DEVICE_ID">Device ID Register (0x0000)</option>
-              <option value="COMMAND">Command Register (0x0004)</option>
-              <option value="STATUS">Status Register (0x0006)</option>
-            </optgroup>
-            <optgroup label="PCIe Configuration Space">
-              <option value="PCIE_CAP">
-                PCIe Capability Register (0x0100)
-              </option>
-              <option value="DEVICE_CAP">
-                Device Capability Register (0x0104)
-              </option>
-            </optgroup>
-            <optgroup label="PCIe Extended Space">
-              <option value="EXT_CAP">
-                Extended Capability Register (0x1000)
-              </option>
-              <option value="EXT_CTRL">
-                Extended Control Register (0x1004)
-              </option>
-            </optgroup>
-            <optgroup label="Memory Space">
-              <option value="MEM_CTRL">Memory Control Register (0x2000)</option>
-              <option value="MEM_STATUS">
-                Memory Status Register (0x2004)
-              </option>
-            </optgroup>
+            <!-- Options will be populated from backend -->
           </select>
         </div>
       </div>
@@ -90,7 +61,6 @@
       </div>
       <!-- register all  -->
       <div class="register">
-        <div class="register-title">Device ID Register</div>
         <svg id="svg-line" preserveAspectRatio="xMinYMin meet"></svg>
         <!-- register box -->
         <div class="register-box">
@@ -116,6 +86,7 @@
       <div id="bit-description-list" class="bit-description-list"></div>
     </div>
 
+    <script type="text/javascript" src="mock_data.js"></script>
     <script type="text/javascript" src="js.js"></script>
   </body>
 </html>
