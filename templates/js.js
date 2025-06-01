@@ -276,7 +276,6 @@ $(document).ready(function () {
 
         sortedRanges.forEach(([range, info]) => {
             const [start, end] = range.split('-').map(Number);
-            console.log(start, end)
             const isSingleBit = start === end;
             // Calculate bit field value: Extract value from register value for corresponding bit field
             const fieldWidth = start - end + 1;
@@ -420,12 +419,11 @@ $(document).ready(function () {
                         // If value is restored to original, remove modified mark
                         modifiedBits.delete(bitIndex);
                         $(`.bit-box[data-bit="${bitIndex}"]`).removeClass('modified');
-                        console.log('Removed modified mark for bit', bitIndex); // Debug log
+
                     } else {
                         // If value is different from original, add modified mark
                         modifiedBits.add(bitIndex);
                         $(`.bit-box[data-bit="${bitIndex}"]`).addClass('modified');
-                        console.log('Added modified mark for bit', bitIndex); // Debug log
                     }
 
                     // Update display
@@ -449,6 +447,8 @@ $(document).ready(function () {
                 // Find all bit fields containing the current bit
                 let tooltipContent = '';
                 let foundField = false;
+                let currentStart = 0;
+                let currentEnd = 0;
 
                 fieldRanges.forEach(({
                     start,
@@ -461,6 +461,8 @@ $(document).ready(function () {
                         const fieldInfo = currentBitRanges[rangeKey];
                         if (fieldInfo) {
                             foundField = true;
+                            currentStart = start;
+                            currentEnd = end;
                             const isSingleBit = start === end;
                             const fieldWidth = start - end + 1;
                             const fieldValue = (currentRegisterValue >> end) & ((1 << fieldWidth) - 1);
@@ -494,9 +496,9 @@ $(document).ready(function () {
                         .addClass('show');
 
                     // Highlight current bit field name
-                    $(`.bit-name[data-field-start="${start}"][data-field-end="${end}"]`).addClass('highlight');
+                    $(`.bit-name[data-field-start="${currentStart}"][data-field-end="${currentEnd}"]`).addClass('highlight');
                     // Highlight all corresponding bit-boxes
-                    for (let i = end; i <= start; i++) {
+                    for (let i = currentEnd; i <= currentStart; i++) {
                         $(`.bit-box[data-bit="${i}"]`).addClass('highlight-box');
                     }
                 }
@@ -543,6 +545,10 @@ $(document).ready(function () {
 
             // Add mouse hover event
             fieldName.on('mouseenter', function () {
+                // Get field range from data attributes
+                const start = parseInt($(this).attr('data-field-start'));
+                const end = parseInt($(this).attr('data-field-end'));
+
                 // Highlight current bit field name
                 $(this).addClass('highlight');
                 // Highlight all corresponding bit-boxes
@@ -555,6 +561,10 @@ $(document).ready(function () {
                 // Remove all bit-box highlights
                 $('.bit-box').removeClass('highlight-box');
             }).on('click', function (e) {
+                // Get field range from data attributes
+                const start = parseInt($(this).attr('data-field-start'));
+                const end = parseInt($(this).attr('data-field-end'));
+
                 // Check if Ctrl key is pressed
                 if (e.ctrlKey) {
                     // Build anchor ID
@@ -851,7 +861,6 @@ $(document).ready(function () {
     }
 
     function clearModifiedBits() {
-        console.log('Clearing all modified bits'); // Debug log
         modifiedBits.clear();
         $('.bit-box').removeClass('modified');
     }
