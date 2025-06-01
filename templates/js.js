@@ -343,20 +343,81 @@ $(document).ready(function () {
 
             // Add mouse hover event
             bitBox.on('mouseenter', function () {
+                const bitIndex = $(this).data('bit');
+
                 // Find all bit fields containing the current bit
+                let tooltipContent = '';
+                let foundField = false;
+
                 fieldRanges.forEach(({
                     start,
                     end,
                     field
                 }) => {
-                    if (i >= end && i <= start) {
-                        // Find corresponding bit field name element and highlight
-                        $(`.bit-name[data-field-start="${start}"][data-field-end="${end}"]`).addClass('highlight');
+                    if (bitIndex >= end && bitIndex <= start) {
+                        // Find corresponding bit field info
+                        const rangeKey = `${start}-${end}`;
+                        const fieldInfo = currentBitRanges[rangeKey];
+                        if (fieldInfo) {
+                            foundField = true;
+                            const isSingleBit = start === end;
+                            const fieldWidth = start - end + 1;
+                            const fieldValue = (currentRegisterValue >> end) & ((1 << fieldWidth) - 1);
+                            const hexWidth = Math.ceil(fieldWidth / 4);
+
+                            tooltipContent += `
+                                <div class="tooltip-title">${fieldInfo.field || 'Unnamed Field'}</div>
+                                <div class="tooltip-content">
+                                    <div>Range: [${start}:${end}]</div>
+                                    <div>Value: 0x${fieldValue.toString(16).toUpperCase().padStart(hexWidth, '0')}</div>
+                                    <div>Default: 0x${fieldInfo.default.toString(16).toUpperCase().padStart(hexWidth, '0')}</div>
+                                    <div>Description: ${fieldInfo.description || 'No description'}</div>
+                                    <div>Attributes: ${fieldInfo.attributes.join(', ')}</div>
+                                </div>
+                            `;
+                        }
                     }
                 });
+
+                if (foundField) {
+                    // Position tooltip
+                    const boxRect = this.getBoundingClientRect();
+                    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+
+                    tooltip.html(tooltipContent)
+                        .css({
+                            top: boxRect.bottom + scrollTop + 10,
+                            left: boxRect.left + scrollLeft - (tooltip.width() / 2) + (boxRect.width / 2)
+                        })
+                        .addClass('show');
+
+                    // Highlight current bit field name
+                    $(`.bit-name[data-field-start="${start}"][data-field-end="${end}"]`).addClass('highlight');
+                    // Highlight all corresponding bit-boxes
+                    for (let i = end; i <= start; i++) {
+                        $(`.bit-box[data-bit="${i}"]`).addClass('highlight-box');
+                    }
+                }
+            }).on('mousemove', function (e) {
+                // Update tooltip position on mouse move
+                if (tooltip.hasClass('show')) {
+                    const boxRect = this.getBoundingClientRect();
+                    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+
+                    tooltip.css({
+                        top: boxRect.bottom + scrollTop + 10,
+                        left: boxRect.left + scrollLeft - (tooltip.width() / 2) + (boxRect.width / 2)
+                    });
+                }
             }).on('mouseleave', function () {
+                // Hide tooltip
+                tooltip.removeClass('show');
                 // Remove all bit field name highlights
                 $('.bit-name').removeClass('highlight');
+                // Remove all bit-box highlights
+                $('.bit-box').removeClass('highlight-box');
             });
 
             // Add bit number and bit-box to container
@@ -1417,4 +1478,57 @@ $(document).ready(function () {
             }
         });
     });
+
+    // Add tooltip styles
+    $('<style>')
+        .text(`
+            .register-tooltip {
+                position: fixed;
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 0.15rem 0.2rem;
+                border-radius: 0.08rem;
+                font-size: 0.14rem;
+                max-width: 3rem;
+                z-index: 1000;
+                pointer-events: none;
+                box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.2);
+                backdrop-filter: blur(5px);
+                -webkit-backdrop-filter: blur(5px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                opacity: 0;
+                transition: opacity 0.2s ease;
+            }
+
+            .register-tooltip.show {
+                opacity: 1;
+            }
+
+            .register-tooltip .tooltip-title {
+                color: #399bff;
+                font-weight: bold;
+                margin-bottom: 0.05rem;
+                font-size: 0.16rem;
+            }
+
+            .register-tooltip .tooltip-content {
+                color: #fff;
+                line-height: 1.4;
+            }
+
+            body.dark-theme .register-tooltip {
+                background: rgba(26, 26, 26, 0.95);
+                border-color: rgba(102, 179, 255, 0.2);
+            }
+
+            body.dark-theme .register-tooltip .tooltip-title {
+                color: #66b3ff;
+            }
+        `)
+        .appendTo('head');
+
+    // Add tooltip element
+    const tooltip = $('<div>')
+        .addClass('register-tooltip')
+        .appendTo('body');
 });
