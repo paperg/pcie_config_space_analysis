@@ -575,7 +575,9 @@ $(document).ready(function () {
 
     // Update register value display
     function updateRegisterValueDisplay(value) {
-        const hexValue = value.toString(16).toUpperCase().padStart(currentBitCount / 4, '0');
+        // Ensure value is treated as unsigned
+        const unsignedValue = value >>> 0;
+        const hexValue = unsignedValue.toString(16).toUpperCase().padStart(currentBitCount / 4, '0');
         const formattedValue = `0x${hexValue}`;
 
         // Update both displays and store the last value
@@ -587,8 +589,8 @@ $(document).ready(function () {
         // Update bit-boxes
         const boxes = $('.bit-box');
         for (let i = 0; i < currentBitCount; i++) {
-            const bitValue = (value >> i) & 1;
-            const originalBitValue = (initialRegisterValue >> i) & 1;
+            const bitValue = (unsignedValue >> i) & 1;
+            const originalBitValue = (initialRegisterValue >>> 0 >> i) & 1;
             if (boxes[i]) {
                 const $box = $(boxes[i]);
                 const isMismatched = bitValue !== originalBitValue;
@@ -614,10 +616,10 @@ $(document).ready(function () {
         }
 
         // Update bit descriptions
-        updateBitDescriptions(currentBitRanges, value);
+        updateBitDescriptions(currentBitRanges, unsignedValue);
 
         // Update connection lines
-        $('.register-box').attr('data-value', value);
+        $('.register-box').attr('data-value', unsignedValue);
         calculateCoordinates();
 
         // Update apply button state
@@ -756,7 +758,7 @@ $(document).ready(function () {
 
         // Disable apply button
         const modifyBtn = $('#modify-register-btn');
-        modifyBtn.addClass('disabled').prop('disabled', true);
+        modifyBtn.addClass('disabled').prop('disabled', false);
 
         try {
             // Simulate backend response
@@ -815,15 +817,15 @@ $(document).ready(function () {
 
                     // Update current value to backend returned value
                     currentRegisterValue = responseData.value;
+                    initialRegisterValue = responseData.value; // Update initial value to match new value
 
                     // Update all display locations
-                    // 1. Update register info display
-                    $('#register-value').text(`0x${responseData.value.toString(16).toUpperCase().padStart(currentBitCount/4, '0')}`);
+                    // 1. Update register info display with proper hex formatting
+                    const hexValue = (responseData.value >>> 0).toString(16).toUpperCase().padStart(currentBitCount / 4, '0');
+                    $('#register-value').text(`0x${hexValue}`);
+                    $('#register-value-display').text(`0x${hexValue}`);
 
-                    // 2. Update register value display
-                    updateRegisterValueDisplay(responseData.value);
-
-                    // 3. Update all bit-box values and mark mismatched bits
+                    // 2. Update all bit-box values and mark mismatched bits
                     const boxes = $('.bit-box');
                     for (let i = 0; i < currentBitCount; i++) {
                         const bitValue = (responseData.value >> i) & 1;
@@ -844,10 +846,10 @@ $(document).ready(function () {
                         }
                     }
 
-                    // 4. Update bit field descriptions
+                    // 3. Update bit field descriptions
                     updateBitDescriptions(currentBitRanges, responseData.value);
 
-                    // 5. Update connection line styles
+                    // 4. Update connection line styles
                     $('.register-box').attr('data-value', responseData.value);
                     calculateCoordinates();
 
