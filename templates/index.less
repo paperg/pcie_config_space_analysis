@@ -684,9 +684,10 @@ body.dark-theme {
     width: 100%;
     padding: 0.1rem;
     margin-bottom: 0.15rem;
-    background: rgba(57, 155, 255, 0.02);
+    background: #ffffff;
     border-radius: 0.08rem;
-    border: 1px solid rgba(57, 155, 255, 0.1);
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.05);
 }
 
 /* Register Selectors Component */
@@ -696,10 +697,9 @@ body.dark-theme {
     flex-direction: column;
     gap: 0.08rem;
     padding: 0.1rem;
-    background: rgba(57, 155, 255, 0.05);
+    background: #ffffff;
     border-radius: 0.08rem;
-    border: 1px solid rgba(57, 155, 255, 0.1);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e0e0e0;
     min-width: 5rem;
     max-width: 8rem;
 
@@ -709,18 +709,17 @@ body.dark-theme {
         gap: 0.15rem;
         width: 100%;
         padding: 0.06rem;
-        background: rgba(57, 155, 255, 0.02);
+        background: #f5f5f5;
         border-radius: 0.04rem;
         transition: all 0.3s ease;
-        user-select: none;
 
         &:hover {
-            background: rgba(57, 155, 255, 0.05);
+            background: #eeeeee;
         }
 
         label {
             font-size: 0.14rem;
-            color: #666;
+            color: #666666;
             white-space: nowrap;
             min-width: 1rem;
             font-weight: bold;
@@ -730,28 +729,27 @@ body.dark-theme {
             flex: 1;
             font-size: 0.14rem;
             padding: 0.06rem;
-            border: 1px solid rgba(57, 155, 255, 0.2);
+            border: 1px solid #e0e0e0;
             border-radius: 0.04rem;
-            background: white;
-            color: #333;
+            background: #ffffff;
+            color: #333333;
             cursor: pointer;
             transition: all 0.3s ease;
 
             &:hover {
-                border-color: rgba(57, 155, 255, 0.4);
-                background: rgba(57, 155, 255, 0.02);
+                border-color: #399bff;
+                background: #f5f5f5;
             }
 
             &:focus {
                 outline: none;
                 border-color: #399bff;
                 box-shadow: 0 0 0 1px rgba(57, 155, 255, 0.2);
-                background: rgba(57, 155, 255, 0.05);
             }
 
             option {
-                background: white;
-                color: #333;
+                background: #ffffff;
+                color: #333333;
             }
         }
     }
@@ -764,30 +762,28 @@ body.dark-theme {
     flex-direction: column;
     gap: 0.08rem;
     padding: 0.1rem;
-    background: rgba(57, 155, 255, 0.05);
+    background: #ffffff;
     border-radius: 0.08rem;
-    border: 1px solid rgba(57, 155, 255, 0.1);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e0e0e0;
     min-width: 5rem;
     max-width: 8rem;
-    user-select: none;
 
     .info-item {
         display: flex;
         flex-direction: column;
         gap: 0.06rem;
         padding: 0.06rem;
-        background: rgba(57, 155, 255, 0.02);
+        background: #f5f5f5;
         border-radius: 0.04rem;
         transition: all 0.3s ease;
 
         &:hover {
-            background: rgba(57, 155, 255, 0.05);
+            background: #eeeeee;
         }
 
         .info-label {
             font-size: 0.14rem;
-            color: #666;
+            color: #666666;
             font-weight: bold;
             user-select: none;
             -webkit-user-select: none;
@@ -799,31 +795,31 @@ body.dark-theme {
             font-family: monospace;
             color: #399bff;
             padding: 0.06rem;
-            background: rgba(57, 155, 255, 0.1);
+            background: #ffffff;
             border-radius: 0.04rem;
             transition: all 0.3s ease;
             text-align: center;
             font-size: 0.16rem;
-            border: 1px solid transparent;
+            border: 1px solid #e0e0e0;
 
             &:hover {
-                background: rgba(57, 155, 255, 0.15);
-                transform: translateY(-0.01rem);
+                border-color: #399bff;
+                background: #f5f5f5;
             }
 
             &.register-value-display {
                 cursor: text;
-                border: 1px solid transparent;
+                border: 1px solid #e0e0e0;
                 outline: none;
 
                 &:hover {
-                    background: rgba(57, 155, 255, 0.15);
-                    transform: translateY(-0.01rem);
+                    border-color: #399bff;
+                    background: #f5f5f5;
                 }
 
                 &:focus {
                     border-color: #399bff;
-                    background: rgba(57, 155, 255, 0.2);
+                    background: #ffffff;
                     box-shadow: 0 0 0 1px rgba(57, 155, 255, 0.2);
                 }
 
@@ -833,7 +829,7 @@ body.dark-theme {
 
                 &.error {
                     border-color: #ff4444;
-                    background: rgba(255, 68, 68, 0.1);
+                    background: #fff5f5;
                 }
             }
         }
@@ -842,8 +838,8 @@ body.dark-theme {
     .modify-btn {
         margin-top: 0.06rem;
         padding: 0.08rem;
-        background: rgba(57, 155, 255, 0.1);
-        border: 1px solid rgba(57, 155, 255, 0.2);
+        background: #f5f5f5;
+        border: 1px solid #e0e0e0;
         border-radius: 0.04rem;
         color: #399bff;
         font-size: 0.14rem;
@@ -855,19 +851,22 @@ body.dark-theme {
         gap: 0.06rem;
 
         &:hover {
-            background: rgba(57, 155, 255, 0.15);
-            border-color: rgba(57, 155, 255, 0.3);
-            transform: translateY(-0.01rem);
+            background: #eeeeee;
+            border-color: #399bff;
+            color: #2980ff;
         }
 
         &:active {
-            transform: translateY(0);
+            background: #e0e0e0;
         }
 
         &.disabled {
             opacity: 0.5;
             cursor: not-allowed;
             pointer-events: none;
+            background: #f5f5f5;
+            border-color: #e0e0e0;
+            color: #999999;
         }
 
         .modify-icon {
@@ -876,59 +875,178 @@ body.dark-theme {
     }
 }
 
-// Dark theme styles
-body.dark-theme {
-    .up-box {
-        background: linear-gradient(to bottom, rgba(102, 179, 255, 0.02), rgba(102, 179, 255, 0.05));
+/* Down Box Component */
+.down-box {
+    width: 100%;
+    padding: 0.2rem;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 0.08rem;
+    box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.05);
+}
 
-        &::before,
-        &::after {
-            background: linear-gradient(to right, transparent, rgba(102, 179, 255, 0.2), transparent);
-        }
+.down-box-title {
+    font-size: @box_font_size;
+    font-weight: bold;
+    color: #399bff;
+    margin-bottom: 0.2rem;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.bit-description-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 0.1rem;
+}
+
+.bit-description-header {
+    display: grid;
+    grid-template-columns: 1.5rem 2rem 1rem 1rem 1fr 1.5rem;
+    align-items: center;
+    padding: 0.1rem 0.2rem;
+    margin-bottom: 0.1rem;
+    font-size: @box_font_size;
+    font-weight: bold;
+    color: #399bff;
+    gap: 0.2rem;
+    border-bottom: 1px solid #e0e0e0;
+    background: #f5f5f5;
+    border-radius: 0.04rem;
+
+    .bit-range {
+        text-align: right;
     }
 
+    .bit-field {
+        text-align: left;
+        font-family: monospace;
+    }
+
+    .bit-value, .bit-default {
+        text-align: center;
+    }
+
+    .bit-description {
+        padding: 0 0.1rem;
+    }
+
+    .bit-attributes {
+        text-align: left;
+    }
+}
+
+.bit-description-item {
+    display: grid;
+    grid-template-columns: 1.5rem 2rem 1rem 1rem 1fr 1.5rem;
+    align-items: center;
+    padding: 0.1rem 0.2rem;
+    background: #f5f5f5;
+    border-radius: 0.04rem;
+    font-size: @box_font_size;
+    transition: all 0.3s ease;
+    line-height: 1.5;
+    gap: 0.2rem;
+    border: 1px solid #e0e0e0;
+
+    &:hover {
+        background: #eeeeee;
+    }
+
+    &.highlight-description {
+        background: #e3f2fd;
+        border-color: #399bff;
+    }
+
+    .bit-range {
+        font-weight: bold;
+        color: #399bff;
+        text-align: right;
+    }
+
+    .bit-field {
+        font-family: monospace;
+        color: #666666;
+    }
+
+    .bit-value {
+        text-align: center;
+        font-family: monospace;
+        color: #399bff;
+        background: #ffffff;
+        padding: 0.05rem;
+        border-radius: 0.04rem;
+        border: 1px solid #e0e0e0;
+    }
+
+    .bit-default {
+        text-align: center;
+        font-family: monospace;
+        color: #666666;
+        background: #ffffff;
+        padding: 0.05rem;
+        border-radius: 0.04rem;
+        border: 1px solid #e0e0e0;
+    }
+
+    .bit-description {
+        color: #666666;
+        padding: 0 0.1rem;
+    }
+
+    .bit-attributes {
+        color: #ff6b6b;
+        font-size: 0.9em;
+        white-space: nowrap;
+    }
+}
+
+// Dark theme styles
+body.dark-theme {
     .register-controls {
-        background: rgba(102, 179, 255, 0.02);
-        border-color: rgba(102, 179, 255, 0.1);
+        background: #1a1a1a;
+        border-color: #333333;
+        box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.2);
     }
 
     .register-selectors, .register-info {
-        background: rgba(102, 179, 255, 0.05);
-        border-color: rgba(102, 179, 255, 0.1);
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        background: #1a1a1a;
+        border-color: #333333;
     }
 
     .register-selectors {
         .selector-item {
-            background: rgba(102, 179, 255, 0.02);
+            background: #262626;
 
             &:hover {
-                background: rgba(102, 179, 255, 0.05);
+                background: #333333;
             }
 
             label {
-                color: #ccc;
+                color: #999999;
             }
 
             select {
-                background: #333;
-                border-color: rgba(102, 179, 255, 0.2);
-                color: #fff;
+                background: #1a1a1a;
+                border-color: #333333;
+                color: #e0e0e0;
 
                 &:hover {
-                    border-color: rgba(102, 179, 255, 0.4);
-                    background: rgba(102, 179, 255, 0.05);
+                    border-color: #66b3ff;
+                    background: #262626;
                 }
 
                 &:focus {
                     border-color: #66b3ff;
                     box-shadow: 0 0 0 1px rgba(102, 179, 255, 0.2);
-                    background: rgba(102, 179, 255, 0.1);
                 }
 
                 option {
-                    background: #333;
-                    color: #fff;
+                    background: #1a1a1a;
+                    color: #e0e0e0;
                 }
             }
         }
@@ -936,56 +1054,118 @@ body.dark-theme {
 
     .register-info {
         .info-item {
-            background: rgba(102, 179, 255, 0.02);
+            background: #262626;
 
             &:hover {
-                background: rgba(102, 179, 255, 0.05);
+                background: #333333;
             }
 
             .info-label {
-                color: #ccc;
+                color: #999999;
             }
 
             .info-value {
                 color: #66b3ff;
-                background: rgba(102, 179, 255, 0.1);
+                background: #1a1a1a;
+                border-color: #333333;
 
                 &:hover {
-                    background: rgba(102, 179, 255, 0.15);
+                    border-color: #66b3ff;
+                    background: #262626;
                 }
 
                 &.register-value-display {
                     &:hover {
-                        background: rgba(102, 179, 255, 0.15);
+                        border-color: #66b3ff;
+                        background: #262626;
                     }
 
                     &:focus {
                         border-color: #66b3ff;
-                        background: rgba(102, 179, 255, 0.2);
+                        background: #1a1a1a;
                         box-shadow: 0 0 0 1px rgba(102, 179, 255, 0.2);
-                    }
-
-                    &.updating {
-                        animation: valueUpdateDark 0.3s ease;
                     }
 
                     &.error {
                         border-color: #ff8080;
-                        background: rgba(255, 128, 128, 0.1);
+                        background: #331a1a;
                     }
                 }
             }
         }
 
         .modify-btn {
-            background: rgba(102, 179, 255, 0.1);
-            border-color: rgba(102, 179, 255, 0.2);
+            background: #262626;
+            border-color: #333333;
             color: #66b3ff;
 
             &:hover {
-                background: rgba(102, 179, 255, 0.15);
-                border-color: rgba(102, 179, 255, 0.3);
+                background: #333333;
+                border-color: #66b3ff;
+                color: #99ccff;
             }
+
+            &:active {
+                background: #404040;
+            }
+
+            &.disabled {
+                background: #262626;
+                border-color: #333333;
+                color: #666666;
+            }
+        }
+    }
+
+    .down-box {
+        background: #1a1a1a;
+        border-color: #333333;
+        box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.2);
+    }
+
+    .down-box-title {
+        color: #66b3ff;
+    }
+
+    .bit-description-header {
+        background: #262626;
+        border-bottom-color: #333333;
+        color: #66b3ff;
+    }
+
+    .bit-description-item {
+        background: #262626;
+        border-color: #333333;
+
+        &:hover {
+            background: #333333;
+        }
+
+        &.highlight-description {
+            background: #1a3a5f;
+            border-color: #66b3ff;
+        }
+
+        .bit-range {
+            color: #66b3ff;
+        }
+
+        .bit-field {
+            color: #999999;
+        }
+
+        .bit-value, .bit-default {
+            background: #1a1a1a;
+            border-color: #333333;
+            color: #66b3ff;
+        }
+
+        .bit-description {
+            color: #999999;
+        }
+
+        .bit-attributes {
+            color: #ff8080;
         }
     }
 }

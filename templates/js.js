@@ -368,11 +368,11 @@ $(document).ready(function () {
                             tooltipContent += `
                                 <div class="tooltip-title">${fieldInfo.field || 'Unnamed Field'}</div>
                                 <div class="tooltip-content">
-                                    <div>Range: [${start}:${end}]</div>
-                                    <div>Value: 0x${fieldValue.toString(16).toUpperCase().padStart(hexWidth, '0')}</div>
-                                    <div>Default: 0x${fieldInfo.default.toString(16).toUpperCase().padStart(hexWidth, '0')}</div>
-                                    <div>Description: ${fieldInfo.description || 'No description'}</div>
-                                    <div>Attributes: ${fieldInfo.attributes.join(', ')}</div>
+                                    <div><span class="tooltip-label">Range:</span> <span class="tooltip-value">[${start}:${end}]</span></div>
+                                    <div><span class="tooltip-label">Value:</span> <span class="tooltip-value">0x${fieldValue.toString(16).toUpperCase().padStart(hexWidth, '0')}</span></div>
+                                    <div><span class="tooltip-label">Default:</span> <span class="tooltip-value">0x${fieldInfo.default.toString(16).toUpperCase().padStart(hexWidth, '0')}</span></div>
+                                    <div><span class="tooltip-label">Description:</span> <span class="tooltip-value">${fieldInfo.description || 'No description'}</span></div>
+                                    <div><span class="tooltip-label">Attributes:</span> <span class="tooltip-value">${fieldInfo.attributes.join(', ')}</span></div>
                                 </div>
                             `;
                         }
@@ -1479,23 +1479,21 @@ $(document).ready(function () {
         });
     });
 
-    // Add tooltip styles
+    // Modify tooltip styles
     $('<style>')
         .text(`
             .register-tooltip {
                 position: fixed;
-                background: rgba(0, 0, 0, 0.8);
-                color: white;
+                background: #ffffff;
+                color: #333333;
                 padding: 0.15rem 0.2rem;
                 border-radius: 0.08rem;
                 font-size: 0.14rem;
                 max-width: 3rem;
                 z-index: 1000;
                 pointer-events: none;
-                box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.2);
-                backdrop-filter: blur(5px);
-                -webkit-backdrop-filter: blur(5px);
-                border: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.1);
+                border: 1px solid #e0e0e0;
                 opacity: 0;
                 transition: opacity 0.2s ease;
             }
@@ -1509,19 +1507,51 @@ $(document).ready(function () {
                 font-weight: bold;
                 margin-bottom: 0.05rem;
                 font-size: 0.16rem;
+                padding-bottom: 0.05rem;
+                border-bottom: 1px solid #e0e0e0;
             }
 
             .register-tooltip .tooltip-content {
-                color: #fff;
+                color: #333333;
                 line-height: 1.4;
             }
 
+            .register-tooltip .tooltip-content div {
+                padding: 0.03rem 0;
+            }
+
+            .register-tooltip .tooltip-content .tooltip-label {
+                color: #666666;
+                display: inline-block;
+                width: 1.2rem;
+            }
+
+            .register-tooltip .tooltip-content .tooltip-value {
+                color: #399bff;
+                font-family: monospace;
+            }
+
             body.dark-theme .register-tooltip {
-                background: rgba(26, 26, 26, 0.95);
-                border-color: rgba(102, 179, 255, 0.2);
+                background: #1a1a1a;
+                color: #e0e0e0;
+                border-color: #333333;
+                box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.3);
             }
 
             body.dark-theme .register-tooltip .tooltip-title {
+                color: #66b3ff;
+                border-bottom-color: #333333;
+            }
+
+            body.dark-theme .register-tooltip .tooltip-content {
+                color: #e0e0e0;
+            }
+
+            body.dark-theme .register-tooltip .tooltip-content .tooltip-label {
+                color: #999999;
+            }
+
+            body.dark-theme .register-tooltip .tooltip-content .tooltip-value {
                 color: #66b3ff;
             }
         `)
