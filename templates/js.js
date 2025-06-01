@@ -294,7 +294,15 @@ $(document).ready(function () {
                     .html(`${info.field || ''}`),
                     $('<span>')
                     .addClass('bit-value')
-                    .text(`0x${fieldValue.toString(16).toUpperCase().padStart(hexWidth, '0')}`),
+                    .text(`0x${fieldValue.toString(16).toUpperCase().padStart(hexWidth, '0')}`)
+                    .css('cursor', 'pointer')
+                    .on('click', function (e) {
+                        // Get current field value
+                        const fieldWidth = start - end + 1;
+                        const fieldValue = (currentRegisterValue >> end) & ((1 << fieldWidth) - 1);
+                        // Show input dialog
+                        showFieldInputDialog(start, end, info.field || '', fieldValue);
+                    }),
                     $('<span>')
                     .addClass('bit-default')
                     .text(`0x${info.default.toString(16).toUpperCase().padStart(hexWidth, '0')}`),
@@ -1590,6 +1598,27 @@ $(document).ready(function () {
             }
             body.dark-theme .highlight-line {
                 stroke: #66b3ff !important;
+            }
+        `)
+        .appendTo('head');
+
+    // Add styles for bit-value clickable
+    $('<style>')
+        .text(`
+            .bit-value {
+                cursor: pointer;
+                color: #399bff;
+                transition: color 0.2s ease;
+            }
+            .bit-value:hover {
+                color: #2980ff;
+                text-decoration: underline;
+            }
+            body.dark-theme .bit-value {
+                color: #66b3ff;
+            }
+            body.dark-theme .bit-value:hover {
+                color: #4d99ff;
             }
         `)
         .appendTo('head');
