@@ -306,7 +306,7 @@ $(document).ready(function () {
 
         // 示例3：32位寄存器，带位描述
         const bitDescriptions32 = {
-            0: "Enablesdadsadasdasdsddasdsdasdasdasdasdsadsd",
+            0: "Enablesdadsadasdasdsddasdsdasdasdasdasdd",
             1: "Interrupt",
             2: "Mode",
             3: "Status",

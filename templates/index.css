@@ -83,6 +83,10 @@ body {
   height: 0.4rem;
   font-size: 0.3rem;
   border: 0.01rem solid #000;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 .up-box {
   display: flex;
@@ -235,6 +239,7 @@ body.dark-theme .theme-toggle-btn:hover {
 }
 .theme-toggle-btn .dark-icon {
   display: none;
+  user-select: none;
 }
 .theme-toggle-btn .light-icon {
   display: inline;
