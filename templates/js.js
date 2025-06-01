@@ -906,8 +906,13 @@ $(document).ready(function () {
     // Update register value display
     function updateRegisterValueDisplay(value) {
         const hexValue = value.toString(16).toUpperCase().padStart(currentBitCount / 4, '0');
-        $('#register-value').text(`0x${hexValue}`);
-        $('#register-value-display').text(`0x${hexValue}`);
+        const formattedValue = `0x${hexValue}`;
+
+        // Update both displays and store the last value
+        $('#register-value').text(formattedValue);
+        const display = $('#register-value-display');
+        display.text(formattedValue);
+        display.attr('data-last-value', formattedValue);
 
         // Update bit-boxes
         const boxes = $('.bit-box');
@@ -1248,5 +1253,86 @@ $(document).ready(function () {
             // Set initial state to disabled
             modifyBtn.addClass('disabled').prop('disabled', true);
         }
+    });
+
+    // Add event listeners for register value display editing
+    $(document).ready(function () {
+        const registerValueDisplay = $('#register-value-display');
+
+        // Make the display editable on double click
+        registerValueDisplay.on('dblclick', function () {
+            const currentValue = $(this).text();
+            // Remove '0x' prefix for editing
+            const valueWithoutPrefix = currentValue.substring(2);
+            const input = $('<input>')
+                .attr('type', 'text')
+                .val(valueWithoutPrefix)
+                .css({
+                    'width': '100%',
+                    'height': '100%',
+                    'border': 'none',
+                    'background': 'transparent',
+                    'font-family': 'monospace',
+                    'font-size': 'inherit',
+                    'color': 'inherit',
+                    'text-align': 'center',
+                    'padding': '0',
+                    'margin': '0'
+                });
+
+            $(this).html(input);
+            input.focus();
+
+            // Select all text
+            input[0].select();
+        });
+
+        // Handle value changes
+        $(document).on('blur', '#register-value-display input', function () {
+            const input = $(this);
+            const display = input.parent();
+            const newValue = input.val().trim();
+
+            // Validate hex format (without 0x prefix)
+            if (!/^[0-9A-Fa-f]+$/.test(newValue)) {
+                // Invalid format, revert to previous value
+                display.text(display.attr('data-last-value') || '0x00000000');
+                return;
+            }
+
+            // Convert hex to number
+            const numericValue = parseInt(newValue, 16);
+            const maxValue = Math.pow(2, currentBitCount) - 1;
+
+            if (numericValue > maxValue) {
+                // Value too large, revert to previous value
+                display.text(display.attr('data-last-value') || '0x00000000');
+                return;
+            }
+
+            // Format the value with 0x prefix
+            const formattedValue = `0x${newValue.toUpperCase().padStart(currentBitCount / 4, '0')}`;
+
+            // Store the new value
+            display.attr('data-last-value', formattedValue);
+            display.text(formattedValue);
+
+            // Update all displays
+            currentRegisterValue = numericValue;
+            isValueModified = true;
+            updateRegisterValueDisplay(numericValue);
+            updateApplyButtonState();
+        });
+
+        // Handle Enter key
+        $(document).on('keydown', '#register-value-display input', function (e) {
+            if (e.key === 'Enter') {
+                $(this).blur();
+            } else if (e.key === 'Escape') {
+                const display = $(this).parent();
+                display.text(display.attr('data-last-value') || '0x00000000');
+                $(this).blur();
+            }
+        });
     });
 });
