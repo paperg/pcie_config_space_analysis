@@ -406,6 +406,7 @@ body.dark-theme .theme-toggle-btn .light-icon {
   border: 1px solid #e0e0e0;
   border-radius: 0.08rem;
   box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.05);
+  user-select: none;
 }
 .down-box-title {
   font-size: 0.16rem;
@@ -622,6 +623,7 @@ body.dark-theme .bit-description-item .bit-attributes {
   border: 1px solid #e0e0e0;
   min-width: 5rem;
   max-width: 8rem;
+  user-select: none;
 }
 .register-selectors .selector-item {
   display: flex;
