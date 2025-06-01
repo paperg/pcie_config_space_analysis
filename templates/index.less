@@ -129,6 +129,27 @@
     // background-color: #a3866f;
 }
 
+.register-title {
+    position: absolute;
+    top: -0.4rem;
+    left: 0;
+    font-size: @box_font_size;
+    font-weight: bold;
+    color: #399bff;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    white-space: nowrap;
+    z-index: 1;
+}
+
+body.dark-theme {
+    .register-title {
+        color: #66b3ff;
+    }
+}
+
 /* register-box */
 .register-box {
     display: flex;
@@ -336,4 +357,163 @@ body.dark-theme {
 
 .bit-box {
   border: @line_width solid @light-border;
+}
+
+.down-box {
+    width: 100%;
+    padding: 0.2rem;
+    border-top: @line_width solid @light-border;
+    background-color: rgba(57, 155, 255, 0.02);
+}
+
+.down-box-title {
+    font-size: @box_font_size;
+    font-weight: bold;
+    color: #399bff;
+    margin-bottom: 0.2rem;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.bit-description-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 0.1rem;
+}
+
+.bit-description-header {
+    display: grid;
+    grid-template-columns: 1.5rem 2rem 1rem 1rem 1fr 1.5rem;
+    align-items: center;
+    padding: 0.1rem 0.2rem;
+    margin-bottom: 0.1rem;
+    font-size: @box_font_size;
+    font-weight: bold;
+    color: #399bff;
+    gap: 0.2rem;
+    border-bottom: @line_width solid @light-border;
+
+    .bit-range {
+        text-align: right;
+    }
+
+    .bit-field {
+        text-align: left;
+        font-family: monospace;
+    }
+
+    .bit-value, .bit-default {
+        text-align: center;
+    }
+
+    .bit-description {
+        padding: 0 0.1rem;
+    }
+
+    .bit-attributes {
+        text-align: left;
+    }
+}
+
+body.dark-theme {
+    .bit-description-header {
+        color: #66b3ff;
+        border-bottom-color: @dark-border;
+    }
+}
+
+.bit-description-item {
+    display: grid;
+    grid-template-columns: 1.5rem 2rem 1rem 1rem 1fr 1.5rem;
+    align-items: center;
+    padding: 0.1rem 0.2rem;
+    background-color: rgba(57, 155, 255, 0.05);
+    border-radius: 0.1rem;
+    font-size: @box_font_size;
+    transition: all 0.3s ease;
+    line-height: 1.5;
+    gap: 0.2rem;
+
+    &:hover {
+        background-color: rgba(57, 155, 255, 0.1);
+    }
+
+    .bit-range {
+        font-weight: bold;
+        color: #399bff;
+        text-align: right;
+    }
+
+    .bit-field {
+        font-family: monospace;
+        color: #666;
+    }
+
+    .bit-value {
+        text-align: center;
+        font-family: monospace;
+        color: #666;
+        background-color: rgba(0, 0, 0, 0.05);
+        padding: 0.05rem;
+        border-radius: 0.05rem;
+    }
+
+    .bit-default {
+        text-align: center;
+        font-family: monospace;
+        color: #666;
+        background-color: rgba(0, 0, 0, 0.05);
+        padding: 0.05rem;
+        border-radius: 0.05rem;
+    }
+
+    .bit-description {
+        color: #666;
+        padding: 0 0.1rem;
+    }
+
+    .bit-attributes {
+        color: #ff6b6b;
+        font-size: 0.9em;
+        white-space: nowrap;
+    }
+}
+
+body.dark-theme {
+    .down-box {
+        border-top-color: @dark-border;
+        background-color: rgba(57, 155, 255, 0.05);
+    }
+
+    .down-box-title {
+        color: #66b3ff;
+    }
+
+    .bit-description-item {
+        background-color: rgba(57, 155, 255, 0.1);
+
+        &:hover {
+            background-color: rgba(57, 155, 255, 0.15);
+        }
+
+        .bit-range {
+            color: #66b3ff;
+        }
+
+        .bit-value, .bit-default {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ccc;
+        }
+
+        .bit-description {
+            color: #ccc;
+        }
+
+        .bit-attributes {
+            color: #ff8080;
+        }
+    }
 }

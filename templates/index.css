@@ -101,6 +101,23 @@ a:hover {
   width: fit-content;
   min-width: max-content;
 }
+.register-title {
+  position: absolute;
+  top: -0.4rem;
+  left: 0;
+  font-size: 0.16rem;
+  font-weight: bold;
+  color: #399bff;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  white-space: nowrap;
+  z-index: 1;
+}
+body.dark-theme .register-title {
+  color: #66b3ff;
+}
 /* register-box */
 .register-box {
   display: flex;
@@ -266,4 +283,135 @@ body.dark-theme .theme-toggle-btn .light-icon {
 }
 .bit-box {
   border: 0.01rem solid #000000;
+}
+.down-box {
+  width: 100%;
+  padding: 0.2rem;
+  border-top: 0.01rem solid #000000;
+  background-color: rgba(57, 155, 255, 0.02);
+}
+.down-box-title {
+  font-size: 0.16rem;
+  font-weight: bold;
+  color: #399bff;
+  margin-bottom: 0.2rem;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+.bit-description-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.1rem;
+}
+.bit-description-header {
+  display: grid;
+  grid-template-columns: 1.5rem 2rem 1rem 1rem 1fr 1.5rem;
+  align-items: center;
+  padding: 0.1rem 0.2rem;
+  margin-bottom: 0.1rem;
+  font-size: 0.16rem;
+  font-weight: bold;
+  color: #399bff;
+  gap: 0.2rem;
+  border-bottom: 0.01rem solid #000000;
+}
+.bit-description-header .bit-range {
+  text-align: right;
+}
+.bit-description-header .bit-field {
+  text-align: left;
+  font-family: monospace;
+}
+.bit-description-header .bit-value,
+.bit-description-header .bit-default {
+  text-align: center;
+}
+.bit-description-header .bit-description {
+  padding: 0 0.1rem;
+}
+.bit-description-header .bit-attributes {
+  text-align: left;
+}
+body.dark-theme .bit-description-header {
+  color: #66b3ff;
+  border-bottom-color: #ffffff;
+}
+.bit-description-item {
+  display: grid;
+  grid-template-columns: 1.5rem 2rem 1rem 1rem 1fr 1.5rem;
+  align-items: center;
+  padding: 0.1rem 0.2rem;
+  background-color: rgba(57, 155, 255, 0.05);
+  border-radius: 0.1rem;
+  font-size: 0.16rem;
+  transition: all 0.3s ease;
+  line-height: 1.5;
+  gap: 0.2rem;
+}
+.bit-description-item:hover {
+  background-color: rgba(57, 155, 255, 0.1);
+}
+.bit-description-item .bit-range {
+  font-weight: bold;
+  color: #399bff;
+  text-align: right;
+}
+.bit-description-item .bit-field {
+  font-family: monospace;
+  color: #666;
+}
+.bit-description-item .bit-value {
+  text-align: center;
+  font-family: monospace;
+  color: #666;
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 0.05rem;
+  border-radius: 0.05rem;
+}
+.bit-description-item .bit-default {
+  text-align: center;
+  font-family: monospace;
+  color: #666;
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 0.05rem;
+  border-radius: 0.05rem;
+}
+.bit-description-item .bit-description {
+  color: #666;
+  padding: 0 0.1rem;
+}
+.bit-description-item .bit-attributes {
+  color: #ff6b6b;
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+body.dark-theme .down-box {
+  border-top-color: #ffffff;
+  background-color: rgba(57, 155, 255, 0.05);
+}
+body.dark-theme .down-box-title {
+  color: #66b3ff;
+}
+body.dark-theme .bit-description-item {
+  background-color: rgba(57, 155, 255, 0.1);
+}
+body.dark-theme .bit-description-item:hover {
+  background-color: rgba(57, 155, 255, 0.15);
+}
+body.dark-theme .bit-description-item .bit-range {
+  color: #66b3ff;
+}
+body.dark-theme .bit-description-item .bit-value,
+body.dark-theme .bit-description-item .bit-default {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ccc;
+}
+body.dark-theme .bit-description-item .bit-description {
+  color: #ccc;
+}
+body.dark-theme .bit-description-item .bit-attributes {
+  color: #ff8080;
 }

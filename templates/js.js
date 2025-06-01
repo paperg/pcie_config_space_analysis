@@ -42,7 +42,6 @@ $(document).ready(function () {
 
     // 处理resize的函数
     function handleResize() {
-        console.log("resize handling");
         var whei = $(window).width();
         $("html").css({
             fontSize: whei / 20
@@ -59,56 +58,146 @@ $(document).ready(function () {
     const debouncedResize = debounce(handleResize, 100);
 
     $(window).resize(function () {
-        console.log("resize event triggered");
         debouncedResize();
     });
 
     // 计算坐标并画线
     function calculateCoordinates() {
         const boxes = $('.bit-box');
-        const names = $('.bit-name');
+        const fieldNames = $('.bit-name');
         const svg = $('#svg-line');
-        const svgRect = svg[0].getBoundingClientRect(); // 获取SVG的位置
+        const svgRect = svg[0].getBoundingClientRect();
+        const registerRect = $('.register')[0].getBoundingClientRect();
 
         // 清空之前的线
         svg.empty();
 
-        boxes.each(function (index) {
-            const box = $(this);
-            const name = names.eq(index);
+        // 获取所有位域的范围
+        const fieldRanges = [];
+        fieldNames.each(function () {
+            const start = parseInt($(this).attr('data-field-start'));
+            const end = parseInt($(this).attr('data-field-end'));
+            fieldRanges.push({
+                start,
+                end,
+                element: this
+            });
+        });
 
-            // 获取box的位置和尺寸
-            const boxRect = box[0].getBoundingClientRect();
-            const nameRect = name[0].getBoundingClientRect();
-            const registerRect = $('.register')[0].getBoundingClientRect();
+        // 为每个位域创建连接线
+        fieldRanges.forEach(({
+            start,
+            end,
+            element
+        }) => {
+            // 获取位域的第一个和最后一个box（注意：end是较小的数字，start是较大的数字）
+            const firstBox = boxes.eq(end); // bit-box 0
+            const lastBox = boxes.eq(start); // bit-box 7
+            const fieldName = $(element);
 
-            // 计算相对于SVG的坐标
-            const startX = boxRect.left - registerRect.left + boxRect.width / 2;
-            const startY = boxRect.top - registerRect.top + boxRect.height;
-            const endX = nameRect.left - registerRect.left;
-            const endY = nameRect.top - registerRect.top + nameRect.height / 2;
+            if (firstBox.length && lastBox.length && fieldName.length) {
+                // 获取box的位置和尺寸
+                const firstBoxRect = firstBox[0].getBoundingClientRect();
+                const lastBoxRect = lastBox[0].getBoundingClientRect();
+                const nameRect = fieldName[0].getBoundingClientRect();
 
-            // console.log("index", index, "startX", startX, "startY", startY, "endX", endX, "endY", endY);
-            const lineClass = box.text() == "1" ? "line-dashed" : "line";
+                // 计算左右两边垂直线的起点（box下边沿的中点）
+                const leftX = lastBoxRect.left - registerRect.left + lastBoxRect.width / 2;
+                const rightX = firstBoxRect.left - registerRect.left + firstBoxRect.width / 2;
+                const startY = firstBoxRect.top - registerRect.top + firstBoxRect.height;
 
-            // 创建垂直线
-            const vPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            const vd = `M ${startX} ${startY} V ${endY}`;
-            vPath.setAttribute("d", vd);
-            vPath.setAttribute("class", lineClass);
-            svg.append(vPath);
+                // 计算连接线的终点坐标
+                const nameX = nameRect.left - registerRect.left;
+                const nameY = nameRect.top - registerRect.top + nameRect.height / 2;
+                const vLineEndY = startY + 20;
 
-            // 创建水平线
-            const hPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            const hd = `M ${startX} ${endY} H ${endX}`;
-            hPath.setAttribute("d", hd);
-            hPath.setAttribute("class", lineClass);
-            svg.append(hPath);
+                // 获取位域的值（使用最高位的值来决定线的样式）
+                const highBitValue = (parseInt($('.register-box').attr('data-value') || '0') >> start) & 1;
+                const lineClass = highBitValue ? "line-dashed" : "line";
+
+                // 创建左垂直线
+                const leftVLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                const leftVLineD = `M ${leftX} ${startY} V ${vLineEndY}`;
+                leftVLine.setAttribute("d", leftVLineD);
+                leftVLine.setAttribute("class", lineClass);
+                svg.append(leftVLine);
+
+                // 创建右垂直线
+                const rightVLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                const rightVLineD = `M ${rightX} ${startY} V ${vLineEndY}`;
+                rightVLine.setAttribute("d", rightVLineD);
+                rightVLine.setAttribute("class", lineClass);
+                svg.append(rightVLine);
+
+                // 连接左右垂直线
+                const hLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                const hLineD = `M ${leftX} ${vLineEndY} H ${rightX}`;
+                hLine.setAttribute("d", hLineD);
+                hLine.setAttribute("class", lineClass);
+                svg.append(hLine);
+
+                // 中点起始 svg 画垂直线
+                const midStartX = (leftX + rightX) / 2;
+                const midLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                const midLineD = `M ${midStartX} ${vLineEndY} V ${nameY}`;
+                midLine.setAttribute("d", midLineD);
+                midLine.setAttribute("class", lineClass);
+                svg.append(midLine);
+
+                // 创建水平连接线（从两条垂直线的中点开始）
+                const hPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                const hd = `M ${midStartX} ${nameY} H ${nameX}`;
+                hPath.setAttribute("d", hd);
+                hPath.setAttribute("class", lineClass);
+                svg.append(hPath);
+            }
+        });
+    }
+
+    // 更新位描述列表
+    function updateBitDescriptions(bitRanges, registerValue) {
+        const descriptionList = $('.bit-description-list');
+        descriptionList.empty();
+
+        // 按位范围升序排序（低位在前）
+        const sortedRanges = Object.entries(bitRanges).sort((a, b) => {
+            const [startA] = a[0].split('-').map(Number);
+            const [startB] = b[0].split('-').map(Number);
+            return startA - startB; // 升序排列
+        });
+
+        sortedRanges.forEach(([range, info]) => {
+            const [start, end] = range.split('-').map(Number);
+            const bitValue = (registerValue >> start) & ((1 << (end - start + 1)) - 1);
+
+            const item = $('<div>')
+                .addClass('bit-description-item')
+                .append(
+                    $('<span>')
+                    .addClass('bit-range')
+                    .text(`[${start}:${end}]`),
+                    $('<span>')
+                    .addClass('bit-field')
+                    .html(`${info.field || ''}`),
+                    $('<span>')
+                    .addClass('bit-value')
+                    .text(`0x${bitValue.toString(16).toUpperCase()}`),
+                    $('<span>')
+                    .addClass('bit-default')
+                    .text(`0x${info.default.toString(16).toUpperCase()}`),
+                    $('<span>')
+                    .addClass('bit-description')
+                    .text(info.description),
+                    $('<span>')
+                    .addClass('bit-attributes')
+                    .text(info.attributes.join(', '))
+                );
+            descriptionList.append(item);
         });
     }
 
     // 生成bit-box和bit-name
-    function generateRegisterBits(bitCount, bitDescriptions = {}) {
+    function generateRegisterBits(bitCount, bitRanges = {}) {
         const registerBox = $('.register-box');
         const registerName = $('.register-name');
 
@@ -116,7 +205,25 @@ $(document).ready(function () {
         registerBox.empty();
         registerName.empty();
 
-        // 生成bit-box和bit-name
+        // 创建位域映射和位域范围数组
+        const bitFieldMap = new Map();
+        const fieldRanges = [];
+        Object.entries(bitRanges).forEach(([range, info]) => {
+            const [start, end] = range.split('-').map(Number);
+            fieldRanges.push({
+                start,
+                end,
+                field: info.field || ''
+            });
+            for (let i = start; i <= end; i++) {
+                bitFieldMap.set(i, info.field || '');
+            }
+        });
+
+        // 按起始位升序排序位域（低位在前）
+        fieldRanges.sort((a, b) => a.start - b.start);
+
+        // 生成bit-box
         for (let i = 0; i < bitCount; i++) {
             // 创建bit-box容器
             const bitBoxContainer = $('<div>')
@@ -136,7 +243,7 @@ $(document).ready(function () {
                     'margin-bottom': '0.02rem',
                     'user-select': 'none'
                 })
-                .text(i); // 从31到0显示
+                .text(i);
 
             // 创建bit-box
             const bitBox = $('<div>')
@@ -145,25 +252,31 @@ $(document).ready(function () {
                 .attr('data-bit', i)
                 .text('0');
 
-            // 创建bit-name，使用传入的描述或默认值
-            const bitDescription = bitDescriptions[i] || `bit${i}`;
-            const bitName = $('<span>')
-                .addClass('bit-name')
-                .attr('contenteditable', 'false')
-                .attr('data-bit', i)
-                .text(bitDescription);
-
             // 将bit编号和bit-box添加到容器中
             bitBoxContainer.append(bitNumber, bitBox);
 
             // 添加到DOM
             registerBox.append(bitBoxContainer);
-            registerName.append(bitName);
         }
+
+        // 生成位域名称（低位在上）
+        fieldRanges.forEach(({
+            start,
+            end,
+            field
+        }) => {
+            const fieldName = $('<span>')
+                .addClass('bit-name')
+                .attr('contenteditable', 'false')
+                .attr('data-field-start', start)
+                .attr('data-field-end', end)
+                .html(`${field}`);
+            registerName.append(fieldName);
+        });
     }
 
     // 更新寄存器显示
-    function updateRegister(registerValue, bitCount, bitDescriptions = {}) {
+    function updateRegister(registerValue, bitCount, bitRanges = {}) {
         // 确保输入是有效的整数
         if (typeof registerValue !== 'number' || registerValue < 0) {
             console.error('Invalid register value: must be a non-negative integer');
@@ -177,12 +290,17 @@ $(document).ready(function () {
             return;
         }
 
-        // 重新生成bit-box和bit-name
-        generateRegisterBits(bitCount, bitDescriptions);
+        // 存储当前值用于线段样式
+        $('.register-box').attr('data-value', registerValue);
 
-        // 获取所有bit-box和bit-name元素
+        // 重新生成bit-box和bit-name
+        generateRegisterBits(bitCount, bitRanges);
+
+        // 更新位描述列表
+        updateBitDescriptions(bitRanges, registerValue);
+
+        // 获取所有bit-box元素
         const boxes = $('.bit-box');
-        const names = $('.bit-name');
 
         // 遍历每一位
         for (let i = 0; i < bitCount; i++) {
@@ -195,12 +313,6 @@ $(document).ready(function () {
                 // 根据值设置不同的样式
                 boxes[i].className = `bit-box ${bitValue ? 'bit-1' : 'bit-0'}`;
             }
-
-            // 更新bit-name
-            if (names[i]) {
-                const description = bitDescriptions[i] || `bit${i}`;
-                names[i].textContent = description;
-            }
         }
 
         // 重新计算连接线
@@ -208,12 +320,12 @@ $(document).ready(function () {
     }
 
     // 示例：更新寄存器的函数
-    function setRegisterValue(value, bitCount = 32, bitDescriptions = {}) {
-        updateRegister(value, bitCount, bitDescriptions);
+    function setRegisterValue(value, bitCount = 32, bitRanges = {}) {
+        updateRegister(value, bitCount, bitRanges);
     }
 
     // 测试函数：随机更新寄存器值
-    function startRandomTest(bitCount = 32, bitDescriptions = {}) {
+    function startRandomTest(bitCount = 32, bitRanges = {}) {
         // 清除可能存在的旧定时器
         if (window.randomTestInterval) {
             clearInterval(window.randomTestInterval);
@@ -224,7 +336,7 @@ $(document).ready(function () {
             const maxValue = Math.pow(2, bitCount) - 1;
             const randomValue = Math.floor(Math.random() * maxValue);
             console.log('New random value:', randomValue.toString(16)); // 以16进制显示
-            setRegisterValue(randomValue, bitCount, bitDescriptions);
+            setRegisterValue(randomValue, bitCount, bitRanges);
         }, 2000);
     }
 
@@ -248,81 +360,35 @@ $(document).ready(function () {
 
     // 测试用例
     function runTest() {
-        // 示例1：8位寄存器，带位描述
-        const bitDescriptions8 = {
-            0: "Enable",
-            1: "Interrupt",
-            2: "Mode",
-            3: "Status",
-            4: "Error",
-            5: "Busy",
-            6: "Ready",
-            7: "Valid"
+        // 示例：32位寄存器，带位域描述
+        const bitRanges32 = {
+            "31-24": {
+                field: "DEVICE_ID_H",
+                description: "Device ID High Byte",
+                default: 0x12,
+                attributes: ["RO", "Reset"]
+            },
+            "23-16": {
+                field: "DEVICE_ID_L",
+                description: "Device ID Low Byte",
+                default: 0x34,
+                attributes: ["RO", "Reset"]
+            },
+            "15-8": {
+                field: "REVISION_ID",
+                description: "Revision ID",
+                default: 0x56,
+                attributes: ["RO", "Reset"]
+            },
+            "7-0": {
+                field: "CLASS_CODE",
+                description: "Class Code",
+                default: 0x78,
+                attributes: ["RO", "Reset"]
+            }
         };
-        // setRegisterValue(0xA5, 8, bitDescriptions8); // 设置8位值 10100101
 
-        // 示例2：16位寄存器，带位描述
-        const bitDescriptions16 = {
-            0: "Enable",
-            1: "Interrupt",
-            2: "Mode",
-            3: "Status",
-            4: "Error",
-            5: "Busy",
-            6: "Ready",
-            7: "Valid",
-            8: "Power",
-            9: "Clock",
-            10: "Reset",
-            11: "Test",
-            12: "Debug",
-            13: "Trace",
-            14: "Monitor",
-            15: "Control"
-        };
-        // setRegisterValue(0x1234, 16, bitDescriptions16); // 设置16位值
-
-        // 示例3：32位寄存器，带位描述
-        const bitDescriptions32 = {
-            0: "Enablesdadd",
-            1: "Interrupt",
-            2: "Mode",
-            3: "Status",
-            4: "Error",
-            5: "Busy",
-            6: "Ready",
-            7: "Valid",
-            8: "Power",
-            9: "Clock",
-            10: "Reset",
-            11: "Test",
-            12: "Debug",
-            13: "Trace",
-            14: "Monitor",
-            15: "Control",
-            16: "Data[0]",
-            17: "Data[1]",
-            18: "Data[2]",
-            19: "Data[3]",
-            20: "Data[4]",
-            21: "Data[5]",
-            22: "Data[6]",
-            23: "Data[7]",
-            24: "Addr[0]",
-            25: "Addr[1]",
-            26: "Addr[2]",
-            27: "Addr[3]",
-            28: "Addr[4]",
-            29: "Addr[5]",
-            30: "Addr[6]",
-            31: "Addr[7]"
-        };
-        setRegisterValue(0x12345678, 32, bitDescriptions32); // 设置32位值
-
-        // 启动随机测试（取消注释以启用）
-        // startRandomTest(8, bitDescriptions8);  // 8位随机测试
-        // startRandomTest(16, bitDescriptions16);  // 16位随机测试
-        // startRandomTest(32, bitDescriptions32); // 32位随机测试
+        setRegisterValue(0x12345678, 32, bitRanges32);
     }
 
     // 执行测试
