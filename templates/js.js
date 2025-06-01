@@ -708,6 +708,8 @@ $(document).ready(function () {
 
     // Update register value display
     function updateRegisterValueDisplay(value) {
+        // 确保值是32位无符号整数
+        value = value >>> 0;
         const hexValue = value.toString(16).toUpperCase().padStart(currentBitCount / 4, '0');
         const formattedValue = `0x${hexValue}`;
 
@@ -723,6 +725,7 @@ $(document).ready(function () {
         const display = $('#register-value-display');
         display.text(formattedValue);
         display.attr('data-last-value', formattedValue);
+        display.removeClass('error');
 
         // Update bit-boxes and track modified fields
         const boxes = $('.bit-box');
@@ -735,7 +738,7 @@ $(document).ready(function () {
 
                 // Update bit value and style
                 $box.text(bitValue)
-                    .removeClass('bit-0 bit-1')
+                    .removeClass('bit-0 bit-1 error-bit')
                     .addClass(bitValue ? 'bit-1' : 'bit-0');
 
                 if (isModified) {
@@ -925,10 +928,6 @@ $(document).ready(function () {
     async function applyRegisterChanges() {
         if (!isValueModified) return;
 
-        // Disable apply button
-        const modifyBtn = $('#modify-register-btn');
-        modifyBtn.addClass('disabled').prop('disabled', false);
-
         try {
             // Simulate backend response
             // Randomly generate a test scenario
@@ -980,50 +979,49 @@ $(document).ready(function () {
                         const newBit = (responseData.value >> i) & 1;
                         if (originalBit !== newBit) {
                             mismatchedBits.push(i);
-                            console.log('Found mismatched bit:', i, 'original:', originalBit, 'new:', newBit);
                         }
                     }
 
                     // Update current value to backend returned value
-                    currentRegisterValue = responseData.value;
-                    initialRegisterValue = responseData.value; // Update initial value to match new value
+                    currentRegisterValue = responseData.value >>> 0; // 确保是32位无符号整数
+                    initialRegisterValue = responseData.value >>> 0; // 更新初始值
 
                     // Update all display locations
                     // 1. Update register info display with proper hex formatting
-                    const hexValue = (responseData.value >>> 0).toString(16).toUpperCase().padStart(currentBitCount / 4, '0');
+                    const hexValue = currentRegisterValue.toString(16).toUpperCase().padStart(currentBitCount / 4, '0');
+                    const display = $('#register-value-display');
+                    display.text(`0x${hexValue}`).addClass('error');
                     $('#register-value').text(`0x${hexValue}`);
-                    $('#register-value-display').text(`0x${hexValue}`);
 
                     // 2. Update all bit-box values and mark mismatched bits
                     const boxes = $('.bit-box');
                     for (let i = 0; i < currentBitCount; i++) {
-                        const bitValue = (responseData.value >> i) & 1;
+                        const bitValue = (currentRegisterValue >> i) & 1;
                         if (boxes[i]) {
                             const $box = $(boxes[i]);
                             const isMismatched = mismatchedBits.includes(i);
 
                             // Update bit value
                             $box.text(bitValue)
-                                .removeClass('bit-0 bit-1')
+                                .removeClass('bit-0 bit-1 modified')
                                 .addClass(bitValue ? 'bit-1' : 'bit-0');
 
                             // Mark mismatched bits in red
                             if (isMismatched) {
                                 $box.addClass('error-bit');
-                                console.log('Marking bit', i, 'as error in apply changes');
                             }
                         }
                     }
 
                     // 3. Update bit field descriptions
-                    updateBitDescriptions(currentBitRanges, responseData.value);
+                    updateBitDescriptions(currentBitRanges, currentRegisterValue);
 
                     // 4. Update connection line styles
-                    $('.register-box').attr('data-value', responseData.value);
+                    $('.register-box').attr('data-value', currentRegisterValue);
                     calculateCoordinates();
 
-                    // Force a reflow to ensure styles are applied
-                    $('.bit-box').hide().show(0);
+                    // Clear modified bits since we're showing the new value
+                    modifiedBits.clear();
 
                     // Show error dialog
                     showErrorDialog('Failed: Register value does not match expected value');
@@ -1036,11 +1034,6 @@ $(document).ready(function () {
             // Handle network errors etc.
             console.error('Error updating register:', error);
             showErrorDialog('Failed: Network error');
-        } finally {
-            // Reset modification state
-            isValueModified = false;
-            // Re-enable apply button
-            modifyBtn.removeClass('disabled').prop('disabled', false);
         }
     }
 
