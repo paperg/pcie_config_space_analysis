@@ -576,6 +576,7 @@ body.dark-theme .bit-description-item .bit-attributes {
   background: rgba(57, 155, 255, 0.02);
   border-radius: 0.04rem;
   transition: all 0.3s ease;
+  user-select: none;
 }
 .register-selectors .selector-item:hover {
   background: rgba(57, 155, 255, 0.05);
@@ -625,6 +626,7 @@ body.dark-theme .bit-description-item .bit-attributes {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   min-width: 5rem;
   max-width: 8rem;
+  user-select: none;
 }
 .register-info .info-item {
   display: flex;
