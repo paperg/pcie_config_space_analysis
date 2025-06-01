@@ -432,6 +432,7 @@ body.dark-theme .theme-toggle-btn .light-icon {
   color: #399bff;
   gap: 0.2rem;
   border-bottom: 0.01rem solid #000000;
+  user-select: none;
 }
 .bit-description-header .bit-range {
   text-align: right;
@@ -465,6 +466,7 @@ body.dark-theme .bit-description-header {
   transition: all 0.3s ease;
   line-height: 1.5;
   gap: 0.2rem;
+  user-select: none;
 }
 .bit-description-item:hover {
   background-color: rgba(57, 155, 255, 0.1);
