@@ -507,8 +507,10 @@ body.dark-theme {
 .down-box {
     width: 100%;
     padding: 0.2rem;
-    border-top: @line_width solid @light-border;
-    background-color: rgba(57, 155, 255, 0.02);
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 0.08rem;
+    box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.05);
 }
 
 .down-box-title {
@@ -525,8 +527,18 @@ body.dark-theme {
 .bit-description-list {
     display: flex;
     flex-direction: column;
-    gap: 0.1rem;
+    gap: 0.08rem;
     padding: 0.1rem;
+}
+
+.bit-description-header,
+.bit-description-item {
+    .bit-range,
+    .bit-field,
+    .bit-value {
+        color: #399bff;
+        font-weight: bold;
+    }
 }
 
 .bit-description-header {
@@ -539,9 +551,21 @@ body.dark-theme {
     font-weight: bold;
     color: #399bff;
     gap: 0.2rem;
-    border-bottom: @line_width solid @light-border;
-    user-select: none;
-  
+    background: #f5f5f5;
+    border-radius: 0.04rem;
+    border: 1px solid #e0e0e0;
+
+    .bit-range,
+    .bit-field,
+    .bit-value {
+        color: #399bff;
+    }
+
+    .bit-default,
+    .bit-description {
+        color: #666666;
+    }
+
     .bit-range {
         text-align: right;
     }
@@ -567,7 +591,7 @@ body.dark-theme {
 body.dark-theme {
     .bit-description-header {
         color: #66b3ff;
-        border-bottom-color: @dark-border;
+        border-color: @dark-border;
     }
 }
 
@@ -576,56 +600,74 @@ body.dark-theme {
     grid-template-columns: 1.5rem 2rem 1rem 1rem 1fr 1.5rem;
     align-items: center;
     padding: 0.1rem 0.2rem;
-    background-color: rgba(57, 155, 255, 0.05);
-    border-radius: 0.1rem;
+    background: #f5f5f5;
+    border-radius: 0.04rem;
     font-size: @box_font_size;
     transition: all 0.3s ease;
     line-height: 1.5;
     gap: 0.2rem;
-    user-select: none;
+    border: 1px solid #e0e0e0;
 
     &:hover {
-        background-color: rgba(57, 155, 255, 0.1);
+        background: #eeeeee;
     }
 
     &.highlight-description {
-        background-color: rgba(57, 155, 255, 0.2);
-        transform: scale(1.02);
-        box-shadow: 0 0 10px rgba(57, 155, 255, 0.3);
+        background: #e3f2fd;
+        border-color: #399bff;
+    }
+
+    .bit-range,
+    .bit-field,
+    .bit-value {
+        color: #399bff;
+        font-weight: bold;
+        background: none;
+        padding: 0;
+        border: none;
+        border-radius: 0;
+        transition: none;
+
+        &:hover {
+            border: none;
+            background: none;
+        }
     }
 
     .bit-range {
-        font-weight: bold;
-        color: #399bff;
         text-align: right;
     }
 
     .bit-field {
         font-family: monospace;
-        color: #666;
     }
 
     .bit-value {
         text-align: center;
         font-family: monospace;
-        color: #666;
-        background-color: rgba(0, 0, 0, 0.05);
-        padding: 0.05rem;
-        border-radius: 0.05rem;
     }
 
     .bit-default {
         text-align: center;
         font-family: monospace;
-        color: #666;
-        background-color: rgba(0, 0, 0, 0.05);
-        padding: 0.05rem;
-        border-radius: 0.05rem;
+        color: #666666;
+        font-weight: normal;
+        background: none;
+        padding: 0;
+        border: none;
+        border-radius: 0;
+        transition: none;
+
+        &:hover {
+            border: none;
+            background: none;
+        }
     }
 
     .bit-description {
-        color: #666;
+        color: #666666;
         padding: 0 0.1rem;
+        font-weight: normal;
     }
 
     .bit-attributes {
@@ -637,8 +679,9 @@ body.dark-theme {
 
 body.dark-theme {
     .down-box {
-        border-top-color: @dark-border;
-        background-color: rgba(57, 155, 255, 0.05);
+        background: #1a1a1a;
+        border-color: #333333;
+        box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.2);
     }
 
     .down-box-title {
@@ -646,28 +689,44 @@ body.dark-theme {
     }
 
     .bit-description-item {
-        background-color: rgba(57, 155, 255, 0.1);
+        background: #262626;
+        border-color: #333333;
 
         &:hover {
-            background-color: rgba(57, 155, 255, 0.15);
+            background: #333333;
         }
 
         &.highlight-description {
-            background-color: rgba(102, 179, 255, 0.2);
-            box-shadow: 0 0 10px rgba(102, 179, 255, 0.3);
+            background: #1a3a5f;
+            border-color: #66b3ff;
         }
 
-        .bit-range {
+        .bit-range,
+        .bit-field,
+        .bit-value {
             color: #66b3ff;
+            background: none;
+            border: none;
+
+            &:hover {
+                border: none;
+                background: none;
+            }
         }
 
-        .bit-value, .bit-default {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: #ccc;
+        .bit-default {
+            color: #999999;
+            background: none;
+            border: none;
+
+            &:hover {
+                border: none;
+                background: none;
+            }
         }
 
         .bit-description {
-            color: #ccc;
+            color: #999999;
         }
 
         .bit-attributes {
@@ -902,7 +961,7 @@ body.dark-theme {
 .bit-description-list {
     display: flex;
     flex-direction: column;
-    gap: 0.1rem;
+    gap: 0.08rem;
     padding: 0.1rem;
 }
 
@@ -916,9 +975,17 @@ body.dark-theme {
     font-weight: bold;
     color: #399bff;
     gap: 0.2rem;
-    border-bottom: 1px solid #e0e0e0;
     background: #f5f5f5;
     border-radius: 0.04rem;
+    border: 1px solid #e0e0e0;
+
+    .bit-range,
+    .bit-field,
+    .bit-value,
+    .bit-default,
+    .bit-attributes {
+        color: #399bff;
+    }
 
     .bit-range {
         text-align: right;
@@ -964,40 +1031,57 @@ body.dark-theme {
         border-color: #399bff;
     }
 
-    .bit-range {
-        font-weight: bold;
+    .bit-range,
+    .bit-field,
+    .bit-value {
         color: #399bff;
+        font-weight: bold;
+        background: none;
+        padding: 0;
+        border: none;
+        border-radius: 0;
+        transition: none;
+
+        &:hover {
+            border: none;
+            background: none;
+        }
+    }
+
+    .bit-range {
         text-align: right;
     }
 
     .bit-field {
         font-family: monospace;
-        color: #666666;
     }
 
     .bit-value {
         text-align: center;
         font-family: monospace;
-        color: #399bff;
-        background: #ffffff;
-        padding: 0.05rem;
-        border-radius: 0.04rem;
-        border: 1px solid #e0e0e0;
     }
 
     .bit-default {
         text-align: center;
         font-family: monospace;
         color: #666666;
-        background: #ffffff;
-        padding: 0.05rem;
-        border-radius: 0.04rem;
-        border: 1px solid #e0e0e0;
+        font-weight: normal;
+        background: none;
+        padding: 0;
+        border: none;
+        border-radius: 0;
+        transition: none;
+
+        &:hover {
+            border: none;
+            background: none;
+        }
     }
 
     .bit-description {
         color: #666666;
         padding: 0 0.1rem;
+        font-weight: normal;
     }
 
     .bit-attributes {
@@ -1132,7 +1216,7 @@ body.dark-theme {
 
     .bit-description-header {
         background: #262626;
-        border-bottom-color: #333333;
+        border-color: #333333;
         color: #66b3ff;
     }
 
@@ -1149,18 +1233,28 @@ body.dark-theme {
             border-color: #66b3ff;
         }
 
-        .bit-range {
+        .bit-range,
+        .bit-field,
+        .bit-value {
             color: #66b3ff;
+            background: none;
+            border: none;
+
+            &:hover {
+                border: none;
+                background: none;
+            }
         }
 
-        .bit-field {
+        .bit-default {
             color: #999999;
-        }
+            background: none;
+            border: none;
 
-        .bit-value, .bit-default {
-            background: #1a1a1a;
-            border-color: #333333;
-            color: #66b3ff;
+            &:hover {
+                border: none;
+                background: none;
+            }
         }
 
         .bit-description {
