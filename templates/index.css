@@ -555,6 +555,7 @@ body.dark-theme .register-info .modify-btn.disabled {
   border-radius: 0.08rem;
   box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.05);
   user-select: none;
+  margin-top: 0.15rem;
 }
 body.dark-theme .down-box {
   background: #1a1a1a;
