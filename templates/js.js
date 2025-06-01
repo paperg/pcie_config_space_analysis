@@ -1158,7 +1158,7 @@ $(document).ready(function () {
         });
     });
 
-    // Modify tooltip styles
+    // Update tooltip styles
     $('<style>')
         .text(`
             .register-tooltip {
@@ -1168,7 +1168,8 @@ $(document).ready(function () {
                 padding: 0.15rem 0.2rem;
                 border-radius: 0.08rem;
                 font-size: 0.14rem;
-                max-width: 3rem;
+                min-width: 4rem;
+                max-width: 6rem;
                 z-index: 1000;
                 pointer-events: none;
                 box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.1);
@@ -1192,22 +1193,30 @@ $(document).ready(function () {
 
             .register-tooltip .tooltip-content {
                 color: #333333;
-                line-height: 1.4;
             }
 
             .register-tooltip .tooltip-content div {
                 padding: 0.03rem 0;
+                display: table;
+                width: 100%;
             }
 
             .register-tooltip .tooltip-content .tooltip-label {
                 color: #666666;
-                display: inline-block;
+                display: table-cell;
                 width: 1.2rem;
+                vertical-align: top;
+                padding-right: 0.1rem;
+                white-space: nowrap;
             }
 
             .register-tooltip .tooltip-content .tooltip-value {
                 color: #399bff;
                 font-family: monospace;
+                display: table-cell;
+                vertical-align: top;
+                white-space: pre;
+                overflow-x: visible;
             }
 
             body.dark-theme .register-tooltip {
