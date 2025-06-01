@@ -1,5 +1,12 @@
 /****/
 $(document).ready(function () {
+    // 全局变量声明
+    let currentRegisterValue = 0;
+    let isValueModified = false;
+    let currentBitRanges = {};
+    let currentBitCount = 32;
+    let currentRegisterInfo = {};
+
     console.log("ready")
     var whei = $(window).width()
     $("html").css({
@@ -168,11 +175,14 @@ $(document).ready(function () {
 
         sortedRanges.forEach(([range, info]) => {
             const [start, end] = range.split('-').map(Number);
-            const bitValue = (registerValue >> start) & ((1 << (end - start + 1)) - 1);
+            // 计算位域的值：从寄存器值中提取对应位域的值
+            const fieldWidth = start - end + 1;
+            const fieldValue = (registerValue >> end) & ((1 << fieldWidth) - 1);
+            const hexWidth = Math.ceil(fieldWidth / 4); // 计算需要的十六进制位数
 
             const item = $('<div>')
                 .addClass('bit-description-item')
-                .attr('id', `bit-field-${start}-${end}`) // 添加锚点ID
+                .attr('id', `bit-field-${start}-${end}`)
                 .append(
                     $('<span>')
                     .addClass('bit-range')
@@ -182,10 +192,10 @@ $(document).ready(function () {
                     .html(`${info.field || ''}`),
                     $('<span>')
                     .addClass('bit-value')
-                    .text(`0x${bitValue.toString(16).toUpperCase()}`),
+                    .text(`0x${fieldValue.toString(16).toUpperCase().padStart(hexWidth, '0')}`),
                     $('<span>')
                     .addClass('bit-default')
-                    .text(`0x${info.default.toString(16).toUpperCase()}`),
+                    .text(`0x${info.default.toString(16).toUpperCase().padStart(hexWidth, '0')}`),
                     $('<span>')
                     .addClass('bit-description')
                     .text(info.description),
@@ -249,9 +259,35 @@ $(document).ready(function () {
             // 创建bit-box
             const bitBox = $('<div>')
                 .addClass('bit-box')
-                .attr('contenteditable', 'false')
                 .attr('data-bit', i)
-                .text('0');
+                .text('0')
+                .on('click', function () {
+                    const bitIndex = $(this).data('bit');
+                    const currentBitValue = $(this).hasClass('bit-1');
+                    const newBitValue = !currentBitValue;
+
+                    // Update bit box appearance
+                    $(this).removeClass('bit-0 bit-1')
+                        .addClass(newBitValue ? 'bit-1' : 'bit-0')
+                        .text(newBitValue ? '1' : '0');
+
+                    // Update register value
+                    if (newBitValue) {
+                        currentRegisterValue |= (1 << bitIndex);
+                    } else {
+                        currentRegisterValue &= ~(1 << bitIndex);
+                    }
+
+                    // Update display
+                    updateRegisterValueDisplay(currentRegisterValue);
+                    isValueModified = true;
+
+                    // Update bit descriptions
+                    updateBitDescriptions(currentBitRanges, currentRegisterValue);
+
+                    // Update bit values in descriptions
+                    updateBitDescriptionValue(bitIndex, newBitValue);
+                });
 
             // 添加鼠标悬停事件
             bitBox.on('mouseenter', function () {
@@ -269,38 +305,6 @@ $(document).ready(function () {
             }).on('mouseleave', function () {
                 // 移除所有位域名称的高亮
                 $('.bit-name').removeClass('highlight');
-            }).on('click', function (e) {
-                // 检查是否按下了Ctrl键
-                if (e.ctrlKey) {
-                    // 找到包含当前bit的所有位域
-                    fieldRanges.forEach(({
-                        start,
-                        end,
-                        field
-                    }) => {
-                        if (i >= end && i <= start) {
-                            // 构建锚点ID
-                            const anchorId = `bit-field-${start}-${end}`;
-                            // 获取目标元素
-                            const targetElement = document.getElementById(anchorId);
-                            if (targetElement) {
-                                // 平滑滚动到目标位置
-                                targetElement.scrollIntoView({
-                                    behavior: 'smooth',
-                                    block: 'center'
-                                });
-                                // 添加临时高亮效果
-                                $(targetElement).addClass('highlight-description')
-                                    .delay(1000)
-                                    .queue(function () {
-                                        $(this).removeClass('highlight-description').dequeue();
-                                    });
-                            }
-                        }
-                    });
-                    // 阻止默认的点击行为
-                    e.preventDefault();
-                }
             });
 
             // 将bit编号和bit-box添加到容器中
@@ -367,6 +371,13 @@ $(document).ready(function () {
 
     // 更新寄存器显示
     function updateRegister(registerValue, bitCount, bitRanges = {}, registerInfo = {}) {
+        // 更新全局变量
+        currentRegisterValue = registerValue;
+        currentBitRanges = bitRanges;
+        currentBitCount = bitCount;
+        currentRegisterInfo = registerInfo;
+        isValueModified = false;
+
         // 确保输入是有效的整数
         if (typeof registerValue !== 'number' || registerValue < 0) {
             console.error('Invalid register value: must be a non-negative integer');
@@ -499,4 +510,99 @@ $(document).ready(function () {
 
     // 执行测试
     runTest();
+
+    function updateRegisterValueDisplay(value) {
+        const display = document.getElementById('register-value-display');
+        const modifyBtn = document.getElementById('modify-register-btn');
+
+        // Format value as hex with leading zeros
+        const hexValue = '0x' + value.toString(16).padStart(8, '0').toUpperCase();
+        display.textContent = hexValue;
+
+        // Update modify button state
+        if (isValueModified) {
+            modifyBtn.classList.remove('disabled');
+        } else {
+            modifyBtn.classList.add('disabled');
+        }
+    }
+
+    function updateBitDescriptionValue(bitIndex, value) {
+        // 遍历所有位域
+        Object.entries(currentBitRanges).forEach(([range, info]) => {
+            const [start, end] = range.split('-').map(Number);
+            // 检查当前位是否在这个位域范围内
+            if (bitIndex >= end && bitIndex <= start) {
+                const descriptionItem = document.getElementById(`bit-field-${start}-${end}`);
+                if (descriptionItem) {
+                    const valueElement = descriptionItem.querySelector('.bit-value');
+                    if (valueElement) {
+                        // 计算位域的值
+                        const fieldValue = (currentRegisterValue >> end) & ((1 << (start - end + 1)) - 1);
+                        // 更新显示
+                        valueElement.textContent = `0x${fieldValue.toString(16).toUpperCase().padStart(Math.ceil((start - end + 1) / 4), '0')}`;
+                    }
+                }
+            }
+        });
+    }
+
+    function toggleBit(bitIndex) {
+        const bitBox = $(`.bit-box[data-bit="${bitIndex}"]`);
+        if (!bitBox.length) return;
+
+        // Toggle bit value
+        const currentBitValue = bitBox.hasClass('bit-1');
+        const newBitValue = !currentBitValue;
+
+        // Update bit box appearance
+        bitBox.removeClass('bit-0 bit-1')
+            .addClass(newBitValue ? 'bit-1' : 'bit-0')
+            .text(newBitValue ? '1' : '0');
+
+        // Update register value
+        if (newBitValue) {
+            currentRegisterValue |= (1 << bitIndex);
+        } else {
+            currentRegisterValue &= ~(1 << bitIndex);
+        }
+
+        // Update display
+        updateRegisterValueDisplay(currentRegisterValue);
+        isValueModified = true;
+
+        // Update bit descriptions with new value
+        updateBitDescriptions(currentBitRanges, currentRegisterValue);
+
+        // Update bit values in descriptions
+        updateBitDescriptionValue(bitIndex, newBitValue);
+    }
+
+    function applyRegisterChanges() {
+        if (!isValueModified) return;
+
+        // Here you would typically make an API call to update the register value
+        // For now, we'll just log it
+        console.log('Applying register changes:', {
+            value: currentRegisterValue,
+            hexValue: '0x' + currentRegisterValue.toString(16).padStart(8, '0').toUpperCase(),
+            bitCount: currentBitCount,
+            registerInfo: currentRegisterInfo
+        });
+
+        // Reset modification state
+        isValueModified = false;
+        updateRegisterValueDisplay(currentRegisterValue);
+
+        // Update the register display with the new value
+        updateRegister(currentRegisterValue, currentBitCount, currentBitRanges, currentRegisterInfo);
+    }
+
+    // Add event listener for modify button
+    document.addEventListener('DOMContentLoaded', function () {
+        const modifyBtn = document.getElementById('modify-register-btn');
+        if (modifyBtn) {
+            modifyBtn.addEventListener('click', applyRegisterChanges);
+        }
+    });
 });

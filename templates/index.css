@@ -507,6 +507,7 @@ body.dark-theme .bit-description-item .bit-attributes {
   display: flex;
   flex-direction: row;
   justify-content: center;
+  align-items: center;
   gap: 0.5rem;
   padding: 0.2rem 0.5rem;
   background: rgba(57, 155, 255, 0.05);
@@ -566,4 +567,49 @@ body.dark-theme .info-value {
 }
 body.dark-theme .info-value:hover {
   background: rgba(102, 179, 255, 0.15);
+}
+.modify-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.1rem 0.3rem;
+  background: rgba(57, 155, 255, 0.1);
+  border: 1px solid rgba(57, 155, 255, 0.2);
+  border-radius: 0.15rem;
+  color: #399bff;
+  font-size: 0.6em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-left: 0.5rem;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+.modify-btn:hover {
+  background: rgba(57, 155, 255, 0.2);
+  transform: translateY(-1px);
+}
+.modify-btn:active {
+  transform: translateY(0);
+}
+.modify-btn .modify-icon {
+  font-size: 1.1em;
+  font-weight: bold;
+}
+.modify-btn .modify-text {
+  font-weight: bold;
+}
+.modify-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+body.dark-theme .modify-btn {
+  background: rgba(102, 179, 255, 0.1);
+  border-color: rgba(102, 179, 255, 0.2);
+  color: #66b3ff;
+}
+body.dark-theme .modify-btn:hover {
+  background: rgba(102, 179, 255, 0.2);
 }
