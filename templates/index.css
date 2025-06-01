@@ -454,14 +454,13 @@ body.dark-theme .theme-toggle-btn .light-icon {
 }
 .bit-description-header .bit-default,
 .bit-description-header .bit-description {
-  color: #666666;
+  color: #399bff;
 }
 .bit-description-header .bit-range {
   text-align: right;
 }
 .bit-description-header .bit-field {
   text-align: left;
-  font-family: monospace;
 }
 .bit-description-header .bit-value,
 .bit-description-header .bit-default {
@@ -516,9 +515,6 @@ body.dark-theme .bit-description-header {
 }
 .bit-description-item .bit-range {
   text-align: right;
-}
-.bit-description-item .bit-field {
-  font-family: monospace;
 }
 .bit-description-item .bit-value {
   text-align: center;
@@ -825,7 +821,6 @@ body.dark-theme .bit-description-item .bit-attributes {
 }
 .bit-description-header .bit-field {
   text-align: left;
-  font-family: monospace;
 }
 .bit-description-header .bit-value,
 .bit-description-header .bit-default {
@@ -876,9 +871,6 @@ body.dark-theme .bit-description-item .bit-attributes {
 }
 .bit-description-item .bit-range {
   text-align: right;
-}
-.bit-description-item .bit-field {
-  font-family: monospace;
 }
 .bit-description-item .bit-value {
   text-align: center;
