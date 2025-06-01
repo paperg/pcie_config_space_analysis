@@ -97,9 +97,9 @@ $(document).ready(function () {
             end,
             element
         }) => {
-            // Get the first and last box of the bit field (note: end is the smaller number, start is the larger number)
-            const firstBox = boxes.eq(end); // bit-box 0
-            const lastBox = boxes.eq(start); // bit-box 7
+            // Get the first and last box of the bit field
+            const firstBox = boxes.eq(end);
+            const lastBox = boxes.eq(start);
             const fieldName = $(element);
 
             if (firstBox.length && lastBox.length && fieldName.length) {
@@ -108,55 +108,156 @@ $(document).ready(function () {
                 const lastBoxRect = lastBox[0].getBoundingClientRect();
                 const nameRect = fieldName[0].getBoundingClientRect();
 
-                // Calculate the starting points of the vertical lines on both sides (midpoints of the box bottom edge)
+                // Calculate the starting points of the vertical lines
                 const leftX = lastBoxRect.left - registerRect.left + lastBoxRect.width / 2;
                 const rightX = firstBoxRect.left - registerRect.left + firstBoxRect.width / 2;
-                const startY = firstBoxRect.top - registerRect.top + firstBoxRect.height;
-
-                // Calculate the ending coordinates of the connection line
+                const startY = firstBoxRect.top - registerRect.top + lastBoxRect.height;
                 const nameX = nameRect.left - registerRect.left;
                 const nameY = nameRect.top - registerRect.top + nameRect.height / 2;
                 const vLineEndY = startY + 20;
 
-                // Get bit field value (use the value of the highest bit to determine line style)
+                // Get bit field value for line style
                 const highBitValue = (parseInt($('.register-box').attr('data-value') || '0') >> start) & 1;
                 const lineClass = highBitValue ? "line-dashed" : "line";
 
-                // Create left vertical line
-                const leftVLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                const leftVLineD = `M ${leftX} ${startY} V ${vLineEndY}`;
-                leftVLine.setAttribute("d", leftVLineD);
-                leftVLine.setAttribute("class", lineClass);
-                svg.append(leftVLine);
+                // Create SVG group for this field's lines
+                const fieldGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                fieldGroup.setAttribute("class", `field-lines field-${start}-${end}`);
+                fieldGroup.setAttribute("data-field-start", start);
+                fieldGroup.setAttribute("data-field-end", end);
 
-                // Create right vertical line
-                const rightVLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                const rightVLineD = `M ${rightX} ${startY} V ${vLineEndY}`;
-                rightVLine.setAttribute("d", rightVLineD);
-                rightVLine.setAttribute("class", lineClass);
-                svg.append(rightVLine);
+                // Define line segments with their hit areas
+                const lineSegments = [
+                    // Left vertical line
+                    {
+                        path: {
+                            d: `M ${leftX} ${startY} V ${vLineEndY}`,
+                            class: lineClass
+                        },
+                        hitArea: {
+                            x: leftX - 3,
+                            y: startY,
+                            width: 6,
+                            height: vLineEndY - startY
+                        }
+                    },
+                    // Right vertical line
+                    {
+                        path: {
+                            d: `M ${rightX} ${startY} V ${vLineEndY}`,
+                            class: lineClass
+                        },
+                        hitArea: {
+                            x: rightX - 3,
+                            y: startY,
+                            width: 6,
+                            height: vLineEndY - startY
+                        }
+                    },
+                    // Horizontal connecting line
+                    {
+                        path: {
+                            d: `M ${leftX} ${vLineEndY} H ${rightX}`,
+                            class: lineClass
+                        },
+                        hitArea: {
+                            x: leftX,
+                            y: vLineEndY - 3,
+                            width: rightX - leftX,
+                            height: 6
+                        }
+                    },
+                    // Midpoint vertical line
+                    {
+                        path: {
+                            d: `M ${(leftX + rightX) / 2} ${vLineEndY} V ${nameY}`,
+                            class: lineClass
+                        },
+                        hitArea: {
+                            x: (leftX + rightX) / 2 - 3,
+                            y: vLineEndY,
+                            width: 6,
+                            height: nameY - vLineEndY
+                        }
+                    },
+                    // Horizontal connection to name
+                    {
+                        path: {
+                            d: `M ${(leftX + rightX) / 2} ${nameY} H ${nameX}`,
+                            class: lineClass
+                        },
+                        hitArea: {
+                            x: (leftX + rightX) / 2,
+                            y: nameY - 3,
+                            width: nameX - (leftX + rightX) / 2,
+                            height: 6
+                        }
+                    }
+                ];
 
-                // Connect left and right vertical lines
-                const hLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                const hLineD = `M ${leftX} ${vLineEndY} H ${rightX}`;
-                hLine.setAttribute("d", hLineD);
-                hLine.setAttribute("class", lineClass);
-                svg.append(hLine);
+                // Add all lines and their hit areas to group
+                lineSegments.forEach(segment => {
+                    // Create path
+                    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    path.setAttribute("d", segment.path.d);
+                    path.setAttribute("class", segment.path.class);
+                    fieldGroup.appendChild(path);
 
-                // Midpoint starting svg draw vertical line
-                const midStartX = (leftX + rightX) / 2;
-                const midLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                const midLineD = `M ${midStartX} ${vLineEndY} V ${nameY}`;
-                midLine.setAttribute("d", midLineD);
-                midLine.setAttribute("class", lineClass);
-                svg.append(midLine);
+                    // Create hit area
+                    const hitArea = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                    hitArea.setAttribute("x", segment.hitArea.x);
+                    hitArea.setAttribute("y", segment.hitArea.y);
+                    hitArea.setAttribute("width", segment.hitArea.width);
+                    hitArea.setAttribute("height", segment.hitArea.height);
+                    hitArea.setAttribute("fill", "transparent");
+                    hitArea.setAttribute("class", "line-hit-area");
+                    hitArea.style.cursor = "pointer";
 
-                // Create horizontal connection line (start from the midpoint of the two vertical lines)
-                const hPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                const hd = `M ${midStartX} ${nameY} H ${nameX}`;
-                hPath.setAttribute("d", hd);
-                hPath.setAttribute("class", lineClass);
-                svg.append(hPath);
+                    // Add event listeners to hit area
+                    $(hitArea).on('mouseenter', function () {
+                        // Highlight field name
+                        $(`.bit-name[data-field-start="${start}"][data-field-end="${end}"]`).addClass('highlight');
+                        // Highlight all corresponding bit-boxes
+                        for (let i = end; i <= start; i++) {
+                            $(`.bit-box[data-bit="${i}"]`).addClass('highlight-box');
+                        }
+                        // Highlight the line
+                        $(this).siblings('path').addClass('highlight-line');
+                    }).on('mouseleave', function () {
+                        // Remove highlights
+                        $(`.bit-name[data-field-start="${start}"][data-field-end="${end}"]`).removeClass('highlight');
+                        $('.bit-box').removeClass('highlight-box');
+                        $(this).siblings('path').removeClass('highlight-line');
+                    }).on('click', function (e) {
+                        if (e.ctrlKey) {
+                            // Ctrl+click: scroll to description
+                            const anchorId = `bit-field-${start}-${end}`;
+                            const targetElement = document.getElementById(anchorId);
+                            if (targetElement) {
+                                targetElement.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'center'
+                                });
+                                $(targetElement).addClass('highlight-description')
+                                    .delay(1000)
+                                    .queue(function () {
+                                        $(this).removeClass('highlight-description').dequeue();
+                                    });
+                            }
+                            e.preventDefault();
+                        } else {
+                            // Normal click: show input dialog
+                            const fieldWidth = start - end + 1;
+                            const fieldValue = (currentRegisterValue >> end) & ((1 << fieldWidth) - 1);
+                            showFieldInputDialog(start, end, fieldName.text(), fieldValue);
+                        }
+                    });
+
+                    fieldGroup.appendChild(hitArea);
+                });
+
+                // Add the group to SVG
+                svg.append(fieldGroup);
             }
         });
     }
@@ -1457,4 +1558,30 @@ $(document).ready(function () {
             }
         });
     }
+
+    // Add styles for SVG lines
+    $('<style>')
+        .text(`
+            .field-lines {
+                pointer-events: none;
+            }
+            .field-lines .line-hit-area {
+                pointer-events: all;
+            }
+            .field-lines path {
+                transition: all 0.2s ease;
+                pointer-events: none;
+            }
+            .highlight-line {
+                stroke: #399bff !important;
+                stroke-width: 2px !important;
+            }
+            .highlight-line.line-dashed {
+                stroke-dasharray: 4,4 !important;
+            }
+            body.dark-theme .highlight-line {
+                stroke: #66b3ff !important;
+            }
+        `)
+        .appendTo('head');
 });
