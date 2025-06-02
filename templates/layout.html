@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PCIe Memory Layout Viewer</title>
+    <!-- Custom CSS -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/layout.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <!-- 左侧内存布局 -->
+      <div class="memory-layout">
+        <div class="region pcie-config" data-region="pcie">
+          <div class="region-label">PCIe Config Space</div>
+          <div class="region-size">4KB</div>
+        </div>
+        <div class="region membar0" data-region="membar0">
+          <div class="region-label">MEMBAR0 Space</div>
+          <div class="region-size">Variable Size</div>
+        </div>
+      </div>
+
+      <!-- 右侧数据展示 -->
+      <div class="memory-data">
+        <div class="data-header">
+          <span class="address-col">Address</span>
+          <span class="data-col">Data (16 bytes per row)</span>
+        </div>
+        <div id="data-container" class="data-container">
+          <!-- 数据将通过 JavaScript 动态填充 -->
+        </div>
+        <div id="loading" class="loading" style="display: none">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
+  </body>
+</html>

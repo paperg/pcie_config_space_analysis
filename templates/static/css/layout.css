@@ -1,0 +1,148 @@
+/* Variables */
+:root {
+  --primary-color: #4a90e2;
+  --secondary-color: #50c878;
+  --background-color: #f5f5f5;
+  --text-color: #333;
+  --border-color: #ddd;
+  --hover-brightness: 1.1;
+}
+
+/* Base styles */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  gap: 20px;
+}
+
+/* Memory Layout (Left Column) */
+.memory-layout {
+  width: 20%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.memory-layout .region {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 20px;
+  text-align: center;
+  color: white;
+  position: relative;
+}
+
+.memory-layout .region:hover {
+  filter: brightness(var(--hover-brightness));
+}
+
+.memory-layout .region.pcie-config {
+  background-color: var(--primary-color);
+}
+
+.memory-layout .region.membar0 {
+  background-color: var(--secondary-color);
+}
+
+.memory-layout .region .region-label {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.memory-layout .region .region-size {
+  font-size: 0.9em;
+  opacity: 0.9;
+}
+
+/* Memory Data (Right Column) */
+.memory-data {
+  flex: 1;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.memory-data .data-header {
+  display: flex;
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid var(--border-color);
+  font-weight: bold;
+}
+
+.memory-data .data-header .address-col {
+  width: 120px;
+}
+
+.memory-data .data-header .data-col {
+  flex: 1;
+}
+
+.memory-data .data-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 20px;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.memory-data .data-container .data-row {
+  display: flex;
+  padding: 4px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.memory-data .data-container .data-row:hover {
+  background-color: #f8f9fa;
+}
+
+.memory-data .data-container .data-row .address {
+  width: 120px;
+  color: #666;
+  padding-right: 15px;
+}
+
+.memory-data .data-container .data-row .bytes {
+  display: flex;
+  gap: 4px;
+}
+
+.memory-data .data-container .data-row .bytes .byte {
+  width: 24px;
+  text-align: center;
+}
+
+.memory-data .loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 1.2em;
+  color: #666;
+}
