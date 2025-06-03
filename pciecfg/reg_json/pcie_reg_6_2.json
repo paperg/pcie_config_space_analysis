@@ -1,0 +1,80 @@
+{
+    "structure": {
+        "pcie_capability_structure": {
+            "info": {
+                "cap_id": 16,
+                "offset": 0,
+                "size": 64
+            },
+            "registers": [
+                "pcie_capabilities"
+            ]
+        }
+    },
+    "register": {
+        "pcie_capabilities": {
+            "offset": 2,
+            "size": 2,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 4,
+                    "name": "capability_version",
+                    "default": 2,
+                    "description": "Capability Version - Indicates PCI-SIG defined PCI Express Capability structure version number.\nA version of the specification that changes the PCI Express Capability structure in a way that is not\notherwise identifiable (e.g., through a new Capability field) is permitted to increment this field. All such\nchanges to the PCI Express Capability structure must be software-compatible. Software must check for\nCapability Version numbers that are greater than or equal to the highest number defined when the\nsoftware is written, as Functions reporting any such Capability Version numbers will contain a PCI\nExpress Capability structure that is compatible with that piece of software.\nMust be hardwired to 2h for Functions compliant to this specification.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 4,
+                    "bit_width": 4,
+                    "name": "device_port_type",
+                    "default": 0,
+                    "value_parse": {
+                        "0": "PCI Express Endpoint",
+                        "1": "Legacy PCI Express Endpoint",
+                        "4": "Root Port of PCI Express Root Complex",
+                        "5": "Upstream Port of PCI Express Switch",
+                        "6": "Downstream Port of PCI Express Switch",
+                        "7": "PCI Express to PCI/PCI-X Bridge",
+                        "8": "PCI/PCI-X to PCI Express Bridge",
+                        "9": "Root Complex Integrated Endpoint",
+                        "10": "Root Complex Event Collector"
+                    },
+                    "description": "Device/Port Type - Indicates the specific type of this PCI Express Function. Note that different\nFunctions in a Multi-Function Device can generally be of different types.\nDefined encodings for Functions that implement a Type 00h PCI Configuration Space header are:\nPCI Express Endpoint\nLegacy PCI Express Endpoint\nRCiEP\nRoot Complex Event Collector\nDefined encodings for Functions that implement a Type 01h PCI Configuration Space header are:\nRoot Port of PCI Express Root Complex\nUpstream Port of PCI Express Switch\nDownstream Port of PCI Express Switch\nPCI Express to PCI/PCI-X Bridge\nPCI/PCI-X to PCI Express Bridge\nAll other encodings are Reserved.\nNote that the different Endpoint types have notably different requirements in § Section 1.3.2 regarding I/\nO resources, Extended Configuration Space, and other capabilities.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 8,
+                    "bit_width": 1,
+                    "name": "slot_implemented",
+                    "default": 0,
+                    "description": "Slot Implemented - When Set, this bit indicates that the Link associated with this Port is connected to a\nslot (as compared to being connected to a system-integrated device or being disabled).\nThis bit is valid for Downstream Ports. This bit is undefined for Upstream Ports.",
+                    "attributes": "HwInit"
+                },
+                {
+                    "bit": 9,
+                    "bit_width": 5,
+                    "name": "interrupt_message_number",
+                    "default": 0,
+                    "description": "Interrupt Message Number - This field indicates which MSI/MSI-X vector is used for the interrupt\nmessage generated in association with any of the status bits of this Capability structure.\nFor MSI, the value in this field indicates the offset between the base Message Data and the interrupt\nmessage that is generated. Hardware is required to update this field so that it is correct if the number of\nMSI Messages assigned to the Function changes when software writes to the Multiple Message Enable\nfield in the Message Control Register for MSI.\nFor MSI-X, the value in this field indicates which MSI-X Table entry is used to generate the interrupt\nmessage. The entry must be one of the first 32 entries even if the Function implements more than 32\nentries. For a given MSI-X implementation, the entry must remain constant.\nIf both MSI and MSI-X are implemented, they are permitted to use different vectors, though software is\npermitted to enable only one mechanism at a time. If MSI-X is enabled, the value in this field must\nindicate the vector for MSI-X. If MSI is enabled or neither is enabled, the value in this field must indicate\nthe vector for MSI. If software enables both MSI and MSI-X at the same time, the value in this field is\nundefined.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 14,
+                    "bit_width": 1,
+                    "name": "undefined",
+                    "default": 0,
+                    "description": "Undefined - The value read from this bit is undefined. In previous versions of this specification, this bit\nwas used to indicate support for TCS Routing. System software should ignore the value read from this\nbit. System software is permitted to write any value to this bit.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 15,
+                    "bit_width": 1,
+                    "name": "flit_mode_supported",
+                    "default": 0,
+                    "description": "Flit Mode Supported – When Set, indicates support for Flit Mode. Must be Set by all implementations\nthat support Flit Mode. Must be Clear by implementations that do not support Flit Mode.",
+                    "attributes": "HwInit"
+                }
+            ]
+        }
+    }
+}
