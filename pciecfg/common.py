@@ -1,7 +1,7 @@
 
-from dataclasses import dataclass
-from typing import List, Dict
-
+from dataclasses import dataclass, field
+from typing import Optional, List, Union
+from typing import Dict
 @dataclass
 class Field:
     name: str
@@ -93,7 +93,7 @@ class Register:
         lines.append(f"{self.name.capitalize()} Register:")
 
         # 将寄存器值分为 16 字节一组，按行显示
-        for i in range(0, self.size, 16):  # 每次处理 16 字节
+        for i in range(0, self.size, 16):  # 每次处理 16 字节 
             # 提取 16 字节
             byte_chunk = self.raw[i:i + 16]
 
@@ -118,3 +118,59 @@ class Register:
 
     def __repr__(self):
         return self.debug()
+    
+    
+@dataclass
+class CapabilityStructure:
+    name: str
+    cap_id: Optional[int]  # None 表示共用 pci-compatible
+    offset: int
+    size: Optional[int] = None    # size 可以不传
+    raw: Optional[bytes] = None   # raw 可以不传
+    registers: List[Register] = field(default_factory=list)
+
+    def add_register(self, register: Register):
+        self.registers.append(register)
+
+    def get_register_by_name(self, name: str) -> Optional[Register]:
+        return next((r for r in self.registers if r.name == name), None)
+
+    def get_register_by_offset(self, offset: int) -> Optional[Register]:
+        return next((r for r in self.registers if r.offset == offset), None)
+
+    def get_field_value(self, register_name: str, field_name: str):
+        reg = self.get_register_by_name(register_name)
+        return reg.get_field_value(field_name) if reg else None
+
+    def finalize_raw_data(self):
+        if not self.registers:
+            return
+        last = max(r.offset + r.size for r in self.registers)
+        self.raw = self.raw[:last]
+        self.size = len(self.raw)
+
+    def __getitem__(self, key: Union[str, int, tuple]):
+        if isinstance(key, str):
+            return self.get_register_by_name(key)
+        elif isinstance(key, tuple) and len(key) == 2:
+            return self.get_field_value(*key)
+        elif isinstance(key, int):
+            return self.get_register_by_offset(key)
+        raise KeyError(f"Invalid key: {key}")
+
+    def __repr__(self):
+        indent = "  "
+        lines = [
+            f"<CapabilityStructure: name='{self.name}', cap_id={self.cap_id}, offset=0x{self.offset:02X}>",
+            f"{indent}Raw Data (16 bytes per line):"
+        ]
+        for i in range(0, len(self.raw), 16):
+            chunk = self.raw[i:i + 16]
+            hex_str = ' '.join(f"{b:02X}" for b in chunk)
+            lines.append(f"{indent}{i:03X}: {hex_str}")
+
+        if self.registers:
+            for reg in self.registers:
+                lines.append(reg.debug())
+
+        return "\n".join(lines)

@@ -1,45 +1,58 @@
 
-
-
-
 import json
+from typing import List
 from common import Register
-from typing import List, Dict
+from common import CapabilityStructure
 
+def build_pci_structures_from_json(config_space: bytes, filename: str = 'pciecfg/reg_json/pci_reg_6_2.json') -> List[CapabilityStructure]:
+    with open(filename, 'r', encoding='utf-8') as f:
+        json_data = json.load(f)
 
-def load_pci_registers_from_json(config_space: bytes) -> List[Register]:
-    """
-    读取指定 JSON 文件，解析其中 pci 类型的寄存器，并用配置空间 bytes 初始化 Register 对象列表。
+    structures = []
+    structure_data = json_data["structure"]
+    reg_type = 'pci'
     
-    假设 JSON 结构为：
-    {
-        "register": {
-            "command": {
-                "offset": 0,
-                "size": 8,
-                "type": "pci",
-                "fields": [ ... ]
-            },
-            "status": {
-                ...
-            }
-        }
-    }
-    """
-    with open('pciecfg/reg_json/pci_reg_6_2.json', 'r', encoding='utf-8') as f:
-        data = json.load(f)
+    for struct_name, struct_info in structure_data.items():
+        if struct_name == "register":
+            continue  # 跳过寄存器定义部分
 
-    regs = []
-    register_dict = data.get("register", {})
-    for reg_name, reg_json in register_dict.items():
-        reg = Register('pci', reg_name, reg_json, config_space)
-        regs.append(reg)
-            
-    return regs
+        info = struct_info.get("info", {})
+        offset = info.get("offset", 0)
+        size = info.get("size", 1024)
+
+        cap_struct = CapabilityStructure(
+            name=struct_name,
+            cap_id=None,
+            offset=offset,
+            size=size,
+            raw=config_space[offset:offset+size],
+        )
+
+        # 构建所有寄存器
+        register_defs = json_data["register"]
+        for reg_name in struct_info.get("registers", []):
+            if reg_name not in register_defs:
+                raise ValueError(f"Register definition not found: {reg_name}")
+
+            reg_json = register_defs[reg_name]
+
+            reg = Register(
+                reg_type=reg_type,
+                reg_name=reg_name,
+                reg_json=reg_json,
+                config_space=config_space,
+            )
+            cap_struct.add_register(reg)
+
+        cap_struct.finalize_raw_data()
+        structures.append(cap_struct)
+
+    return structures
+
 
 
 with open("pciecfg/config_space.bin", "rb") as f:
     config_space = bytearray(f.read())
-    regs = load_pci_registers_from_json(config_space)
-    print(regs)
+    structures = build_pci_structures_from_json(config_space)
+    print(structures)
     

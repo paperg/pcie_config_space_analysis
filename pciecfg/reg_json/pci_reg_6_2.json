@@ -1,17 +1,48 @@
 {
     "structure": {
-        "type0_comman_configuration_space": [
-            "vendor_id",
-            "device_id",
-            "command"
-        ]
+        "type0_comman_configuration_space": {
+            "info": {
+                "offset": 0,
+                "size": 64
+            },
+            "registers": [
+                "vendor_id",
+                "device_id",
+                "command"
+            ]
+        }
     },
 
     "register": {
-        "command": {
-            "cap_id": 0,
+        "vendor_id": {
             "offset": 0,
-            "size": 64,
+            "size": 2,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 16,
+                "name": "vendor_id",
+                "default": 65535,
+                "description": "For non-VFs, the Vendor ID register is HwInit and the value in this register identifies the manufacturer of the Function. In\nkeeping with PCI-SIG procedures, valid vendor identifiers must be allocated by the PCI-SIG to ensure uniqueness. Each\nvendor must have at least one Vendor ID. It is recommended that software read the Vendor ID register to determine if a\nFunction is present, where a value of FFFFh indicates that no Function is present.\nFor VFs, this field must return FFFFh when read. VI software should return the Vendor ID value from the associated PF as\nthe Vendor ID value for the VF.",
+                "attributes": "RO"
+            }]
+        },
+
+        "device_id": {
+            "offset": 2,
+            "size": 2,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 16,
+                "name": "device_id",
+                "default": 65535,
+                "description": "For non-VFs, the Device ID register is HwInit and the value in this register identifies the particular Function. The Device ID\nmust be allocated by the vendor. The Device ID, in conjunction with the Vendor ID and Revision ID, are used as one\nmechanism for software to determine which driver should be loaded. The vendor must ensure that the chosen values do\nnot result in the use of an incompatible device driver.\nFor VFs, this field must return FFFFh when read. VI software should return the VF Device ID (see § Section 9.3.3.11 ) value\nfrom the associated PF as the Device ID for the VF.",
+                "attributes": "RO"
+            }]
+        },
+
+        "command": {
+            "offset": 4,
+            "size": 2,
             "fields": [{
                     "bit": 0,
                     "bit_width": 1,
