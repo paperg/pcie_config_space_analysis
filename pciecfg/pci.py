@@ -54,5 +54,6 @@ if __name__ == "__main__":
     with open("pciecfg/config_space.bin", "rb") as f:
         config_space = bytearray(f.read())
         structures = build_pci_structures_from_json(config_space)
-        print(structures)
+        for s in structures:
+            print(s)
     

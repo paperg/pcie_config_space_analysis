@@ -25,10 +25,6 @@ def build_pcie_extended_structures_from_json(
             break
         visited_offsets.add(offset)
 
-        # 读4字节头部，结构是：  
-        # Word0低16位 = cap_id  
-        # Word0高8位 = version (低4位) + 下一个偏移 (高4位的一部分)  
-        # Word1低8位 = 下一个偏移剩余部分，组成12位偏移指针
         if offset + 4 > 0x1000:
             break
 
@@ -37,10 +33,9 @@ def build_pcie_extended_structures_from_json(
             break
 
         cap_id = int.from_bytes(header[:2], 'little')
-        # next_ptr：header[2]高4位 + header[3]，组成12位指针
+        # next_ptr：header[2]高4位 + header[3]，组成12位偏移指针
         next_ptr = ((header[2] >> 4) | (header[3] << 4))
 
-        # 查找JSON中是否支持该cap_id
         matched_struct = None
         for struct_name, struct_info in structure_data.items():
             info = struct_info.get("info", {})
@@ -48,23 +43,21 @@ def build_pcie_extended_structures_from_json(
                 matched_struct = (struct_name, struct_info)
                 break
 
-        if not matched_struct:
-            # 不支持的cap_id，跳过或用通用处理（这里跳过）
-            if next_ptr == 0 or next_ptr <= offset:
-                break
-            offset = next_ptr
-            continue
+        if matched_struct:
+            struct_name, struct_info = matched_struct
+            info = struct_info.get("info", {})
+            registers = struct_info.get("registers", [])
+        else:
+            # 不支持的cap_id，构造一个UnknownStructure，寄存器为空
+            struct_name = f"UnknownStructure_{cap_id:#x}"
+            info = {}
+            registers = []
 
-        struct_name, struct_info = matched_struct
-        info = struct_info.get("info", {})
-
-        # 计算当前结构大小（如果有下一个偏移，就用下一个偏移减当前偏移，否则用默认大小）
         if next_ptr > offset:
             size = next_ptr - offset
         else:
             size = info.get("size", 0x100)
 
-        # 防止越界
         if offset + size > len(config_space):
             size = len(config_space) - offset
 
@@ -78,8 +71,8 @@ def build_pcie_extended_structures_from_json(
             raw=raw,
         )
 
-        # 添加寄存器
-        for reg_name in struct_info.get("registers", []):
+        # 添加寄存器，仅已知结构体有寄存器
+        for reg_name in registers:
             if reg_name not in register_defs:
                 raise ValueError(f"Register definition not found: {reg_name}")
 
@@ -102,8 +95,12 @@ def build_pcie_extended_structures_from_json(
 
     return structures
 
+
 if __name__ == "__main__":
     with open("pciecfg/config_space.bin", "rb") as f:
         config_space = bytearray(f.read())
         structures = build_pcie_extended_structures_from_json(config_space)
-        print(structures)
+        for s in structures:
+            print(f"{s.name} (cap_id=0x{s.cap_id:x}) @ offset 0x{s.offset:x}, size={s.size}")
+            for r in s.registers:
+                print(r)

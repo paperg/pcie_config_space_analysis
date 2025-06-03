@@ -7,6 +7,8 @@ class Field:
     name: str
     bit_offset: int
     bit_width: int
+    default: int
+    value_parse: str
     description: str
     attributes: str
 
@@ -54,11 +56,13 @@ class Register:
         self.fields = []
         for f in reg_json.get("fields", []):
             field = Field(
-                name=f["name"],
-                bit_offset=f["bit"],
-                bit_width=f["bit_width"],
-                description=f["description"],
-                attributes=f["attributes"]
+                name=f.get("name"),
+                bit_offset=f.get("bit"),
+                bit_width=f.get("bit_width"),
+                default=f.get("default"),
+                value_parse=f.get("value_parse"),
+                description=f.get("description"),
+                attributes=f.get("attributes")
             )
             self.fields.append(field)
 
