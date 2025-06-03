@@ -1,0 +1,42 @@
+{
+    "structure": {
+        "type0_comman_configuration_space": [
+            "vendor_id",
+            "device_id",
+            "command"
+        ]
+    },
+
+    "register": {
+        "command": {
+            "cap_id": 0,
+            "offset": 0,
+            "size": 64,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 1,
+                    "name": "io_space_enable",
+                    "default": 0,
+                    "value_parse": {
+                        "0": "I/O decoding disabled",
+                        "1": "I/O decoding enabled"
+                    },
+                    "description": "Controls a Function's response to I/O Space accesses. When this bit is Clear, all\nreceived I/O accesses are caused to be handled as Unsupported Requests. When this bit is Set, the\nFunction is enabled to decode the address and further process I/O Space accesses. For a Function with a\nType 1 Configuration Space Header, this bit controls the response to I/O Space accesses received on its\nPrimary Side.\nDefault value of this bit is 0b.\nThis bit is permitted to be hardwired to Zero if a Function does not support I/O Space accesses.\nThis bit does not apply to VFs and must be hardwired to Zero.",
+                    "attributes": "RW\nVF ROZ"
+                },
+                {
+                    "bit": 1,
+                    "bit_width": 1,
+                    "name": "memory_space_enable",
+                    "default": 0,
+                    "value_parse": {
+                        "0": "Memory decoding disabled",
+                        "1": "Memory decoding enabled"
+                    },
+                    "description": "Controls a Function's response to Memory Space accesses. When this bit is\nClear, all received Memory Space accesses are caused to be handled as Unsupported Requests. When\nthis bit is Set, the Function is enabled to decode the address and further process Memory Space\naccesses. For a Function with a Type 1 Configuration Space Header, this bit controls the response to\nMemory Space accesses received on its Primary Side.\nDefault value of this bit is 0b.\nThis bit is permitted to be hardwired to 0b if a Function does not support Memory Space accesses.\nThis bit does not apply to VFs and must be hardwired to Zero. VF Memory Space is controlled by the VF\nMSE bit in the SR-IOV Control Register.",
+                    "attributes": "RW\nVF ROZ"
+                }
+            ]
+        }
+    }
+}
