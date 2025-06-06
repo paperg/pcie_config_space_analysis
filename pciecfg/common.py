@@ -30,7 +30,7 @@ class Register:
     name: str = ""
     offset: int = None
     size: int = None
-    type: str = "pci"  # 'pci' | 'pcie' | 'extended' | 'CXL'
+    type: str = "pci"  # 'pci' | 'pcie' | 'pcie_extended' | 'CXL'
     fields: List[Field] = None
     raw: bytes = None
     _value: int = 0
@@ -81,7 +81,6 @@ class Register:
                     value = field.extract(self._value)
                     return f"0x{value:X}"  # 返回十六进制表示
 
-            raise KeyError(f"Field '{key}' not found")
         elif isinstance(key, int):
             for field in self.fields:
                 if field.bit_offset <= key < field.bit_offset + field.bit_width:
@@ -142,9 +141,19 @@ class CapabilityStructure:
     def get_register_by_offset(self, offset: int) -> Optional[Register]:
         return next((r for r in self.registers if r.offset == offset), None)
 
-    def get_field_value(self, register_name: str, field_name: str):
-        reg = self.get_register_by_name(register_name)
-        return reg.get_field_value(field_name) if reg else None
+
+    def get_field_value(self, field_name: str):
+        """在所有寄存器中查找字段名，并返回其值（如果唯一匹配）"""
+        matches = []
+        for reg in self.registers:
+            if reg[field_name] is not None:
+                matches.append(reg[field_name])
+
+        if not matches:
+            raise KeyError(f"Field '{field_name}' not found in any register.")
+        elif len(matches) > 1:
+            raise KeyError(f"Field '{field_name}' found in multiple registers.")
+        return int(matches[0], 16)
 
     def finalize_raw_data(self):
         if not self.registers:

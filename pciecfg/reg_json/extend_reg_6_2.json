@@ -9,6 +9,16 @@
             "registers": [
                 "uncorrectable_error_status_register"
             ]
+        },
+        "designated_vendor_specific_extended_capability": {
+            "info": {
+                "cap_id": 35
+            },
+            "registers": [
+                "designated_vendor_specific_extended_capability_header",
+                "designated_vendor_specific_header_1",
+                "designated_vendor_specific_header_2"
+            ]
         }
     },
 
@@ -201,6 +211,79 @@
                     "attributes": "RW1CS"
                 }
             ]
+        },
+
+        "designated_vendor_specific_extended_capability_header": {
+            "offset": 0,
+            "size": 4,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 16,
+                    "name": "pci_express_extended_capability_id",
+                    "default": 35,
+                    "description": "PCI Express Extended Capability ID - This field is a PCI-SIG defined ID number that indicates the nature\nand format of the Extended Capability.\nExtended Capability ID for the Designated Vendor-Specific Extended Capability is 0023h.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 16,
+                    "bit_width": 4,
+                    "name": "capability_version",
+                    "default": 1,
+                    "description": "Capability Version - This field is a PCI-SIG defined version number that indicates the version of the\nCapability structure present.\nMust be 1h for this version of the specification.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 20,
+                    "bit_width": 12,
+                    "name": "next_capability_offset",
+                    "default": 0,
+                    "description": "Next Capability Offset - This field contains the offset to the next PCI Express Capability structure or 000h\nif no other items exist in the linked list of Capabilities.\nFor Extended Capabilities implemented in Configuration Space, this offset is relative to the beginning of\nPCI-compatible Configuration Space and thus must always be either 000h (for terminating list of\nCapabilities) or greater than 0FFh.",
+                    "attributes": "RO"
+                }
+            ]
+        },
+
+        "designated_vendor_specific_header_1": {
+            "offset": 4,
+            "size": 4,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 16,
+                    "name": "dvsec_vendor_id",
+                    "default": 0,
+                    "description": "DVSEC Vendor ID - This field is the Vendor ID associated with the vendor that defined the contents of this\ncapability.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 16,
+                    "bit_width": 4,
+                    "name": "dvsec_revision",
+                    "default": 0,
+                    "description": "DVSEC Revision - This field is a vendor-defined version number that indicates the version of the DVSEC\nstructure.\nSoftware must qualify the DVSEC Vendor ID and DVSEC ID before interpreting this field.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 20,
+                    "bit_width": 12,
+                    "name": "dvsec_length",
+                    "default": 12,
+                    "description": "DVSEC Length - This field indicates the number of bytes in the entire DVSEC structure, including the PCI\nExpress Extended Capability Header, the DVSEC Header 1, DVSEC Header 2, and DVSEC vendor-specific\nregisters.",
+                    "attributes": "RO"
+                }
+            ]
+        },
+
+        "designated_vendor_specific_header_2": {
+            "offset": 8,
+            "size": 2,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 16,
+                "name": "dvsec_id",
+                "default": 0,
+                "description": "DVSEC ID - This field is a vendor-defined ID that indicates the nature and format of the DVSEC structure.\nSoftware must qualify the DVSEC Vendor ID before interpreting this field.",
+                "attributes": "RO"
+            }]
         }
     }
 }

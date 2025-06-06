@@ -145,8 +145,9 @@ ff - fff:
 		dv header vendor id = 0x1e98
 	
 	
-BAR: 
-	CXL Component Register
+3. DVSEC 0x23 , dvsec id = 0x8 Register Locator DVSEC
+Register Locator DVSEC locate CXL register
+
 ```	
 
 寄存器信息， json 文件：

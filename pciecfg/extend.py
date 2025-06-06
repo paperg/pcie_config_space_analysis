@@ -2,18 +2,24 @@ import json
 from typing import List
 from common import CapabilityStructure
 from common import Register
+from dvsec import parse_dvsec_structure
 
 
 def build_pcie_extended_structures_from_json(
     config_space: bytes,
-    filename: str = 'pciecfg/reg_json/extend_reg_6_2.json'
+    filename: str = 'pciecfg/reg_json/extend_reg_6_2.json',
+    dvsec_filename: str = 'pciecfg/reg_json/dvsec_reg_6_2.json'
 ) -> List[CapabilityStructure]:
     with open(filename, 'r', encoding='utf-8') as f:
         json_data = json.load(f)
 
+    with open(dvsec_filename, 'r', encoding='utf-8') as f:
+        dvsec_json_data = json.load(f)
+        
     structures = []
     structure_data = json_data.get("structure", {})
     register_defs = json_data.get("register", {})
+    dvsec_structure_data = dvsec_json_data.get("structure", {})
     reg_type = 'pcie_extended'
 
     offset = 0x100
@@ -53,10 +59,7 @@ def build_pcie_extended_structures_from_json(
             info = {}
             registers = []
 
-        if next_ptr > offset:
-            size = next_ptr - offset
-        else:
-            size = info.get("size", 0x100)
+        size = info.get("size", 0x100)
 
         if offset + size > len(config_space):
             size = len(config_space) - offset
@@ -82,10 +85,23 @@ def build_pcie_extended_structures_from_json(
                 reg_type=reg_type,
                 reg_name=reg_name,
                 reg_json=reg_json,
-                config_space=config_space,
+                config_space=raw,
             )
             cap_struct.add_register(reg)
-
+            
+        if cap_id == 0x23:
+            reg_list = None
+            dvsec_id = cap_struct.get_field_value("dvsec_id")
+            for dvsec_name, dvsec_info in dvsec_structure_data.items():
+                info = dvsec_info.get("info", {})
+                if info.get("cap_id") == dvsec_id:
+                    reg_list = dvsec_info.get("registers", [])
+                    break
+                
+            if reg_list is not None:
+                cap_struct.name = dvsec_name
+                parse_dvsec_structure(cap_struct, reg_list, dvsec_json_data, raw)
+            
         cap_struct.finalize_raw_data()
         structures.append(cap_struct)
 
