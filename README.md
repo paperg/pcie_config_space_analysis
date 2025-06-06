@@ -21,6 +21,18 @@ Python
 
 ## Software design manuscript
 
+1. Get PCIE config space data command
+
+```bash
+sudo lspci -xxxx -s b:d.f | xxd -r -p > config_space.bin
+```
+
+2. get CXL rgister data
+
+```bash
+sudo busybox devmem addr 4
+```
+
 ```python
 class Field:
     # Bit offset of the field in the register
