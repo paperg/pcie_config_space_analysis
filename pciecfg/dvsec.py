@@ -26,12 +26,13 @@ def parse_dvsec_structure(cap_struct, reg_list, dvsec_json_data, raw) -> Capabil
             config_space=raw,
         )
         cap_struct.add_register(reg)
+        cur_length += reg_json.get("size")
 
     block_num = 2
     vairs_reg_list_pos = 0
     vairs_reg_list = None
     json_key_name = None
-    cur_length = max(r.offset + r.size for r in cap_struct.registers)
+
     while cur_length < length:
         if vairs_reg_list is None:
             # "dvsec_register_locator_varies": {

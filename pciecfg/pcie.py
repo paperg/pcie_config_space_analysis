@@ -1,3 +1,13 @@
+'''
+Author: Peng Guo & <peng.guo@montage-tech.com>
+Date: 2025-06-03 13:05:42
+LastEditors: pguo peng.guo@montage-tech.com
+LastEditTime: 2025-06-06 17:04:51
+FilePath: \pcie_config_space_analysis\pciecfg\pcie.py
+Description: 
+
+Copyright (c) 2025 by Montage Technology Corporation/pguo, All Rights Reserved. 
+'''
 
 from typing import List
 import json
@@ -87,7 +97,7 @@ def build_pcie_structures_from_json(config_space: bytes, filename: str = 'pciecf
 
 
 if __name__ == "__main__":
-    with open("pciecfg/config_space.bin", "rb") as f:
+    with open("pciecfg/mock_data/config_space.bin", "rb") as f:
         config_space = bytearray(f.read())
         structures = build_pcie_structures_from_json(config_space)
         print(structures)

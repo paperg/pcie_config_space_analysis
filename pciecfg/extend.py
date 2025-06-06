@@ -113,7 +113,7 @@ def build_pcie_extended_structures_from_json(
 
 
 if __name__ == "__main__":
-    with open("pciecfg/config_space.bin", "rb") as f:
+    with open("pciecfg/mock_data/config_space.bin", "rb") as f:
         config_space = bytearray(f.read())
         structures = build_pcie_extended_structures_from_json(config_space)
         for s in structures:
