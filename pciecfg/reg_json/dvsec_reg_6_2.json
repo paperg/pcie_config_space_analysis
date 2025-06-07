@@ -1,0 +1,1000 @@
+{
+    "structure": {
+        "dvsec_for_cxl_devices": {
+            "info": {
+                "_comment": "This is a comment: use cap_id instead of dvsec_id",
+                "cap_id": 0,
+                "size": 60,
+                "description": "PCIe DVSEC for CXL Devices"
+            },
+            "registers": [
+                "cxl_capability",
+                "cxl_control",
+                "cxl_status",
+                "cxl_control2",
+                "cxl_status2",
+                "cxl_lock",
+                "cxl_capability2",
+                "range_1_size_high",
+                "range_1_size_low",
+                "range_1_base_high",
+                "range_1_base_low",
+                "range_2_size_high",
+                "range_2_size_low",
+                "range_2_base_high",
+                "range_2_base_low",
+                "cxl_capability3",
+                "Reserved"
+            ]
+        },
+
+        "dvsec_register_locator": {
+            "info": {
+                "cap_id": 8,
+                "description": "Register Locator DVSEC for CXL Devices"
+            },
+            "registers": [
+                "register_locator_reserved",
+                "register_offset_low",
+                "register_offset_high"
+            ]
+        }
+
+    },
+
+    "register": {
+        "dvsec_register_locator_varies": {
+            "prefix": "register_block_",
+            "registers": ["register_offset_low", "register_offset_high"]
+        },
+        "register_locator_reserved": {
+            "offset": 10,
+            "size": 2,
+            "fields": [{
+                "bit": 15,
+                "bit_width": 16,
+                "name": "reserved",
+                "description": "Reserved",
+                "attributes": "RO"
+            }]
+        },
+
+        "register_offset_low": {
+            "offset": "varies",
+            "size": 4,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 3,
+                    "name": "Register_BIR",
+                    "description": "Register BIR: Indicates which one of a Function’s BARs, located beginning at Offset 10h in Configuration Space, or entry in the Enhanced Allocation capability with a matching BAR Equivalent Indicator (BEI), is used to map the CXL registers into Memory Space.\nDefined encodings are:\n• 000b = Base Address Register 10h\n• 001b = Base Address Register 14h\n• 010b = Base Address Register 18h\n• 011b = Base Address Register 1Ch\n• 100b = Base Address Register 20h\n• 101b = Base Address Register 24h\n• All other encodings are reserved\nThe Register block must be contained within the specified BAR. The specified BAR must be associated with the Function that implements the Register Locator DVSEC. For a 64-bit BAR, the Register BIR indicates the lower DWORD.",
+                    "attributes": "HwInit",
+                    "value_parse": {
+                        "0": "Base Address Register 10h",
+                        "1": "Base Address Register 14h",
+                        "2": "Base Address Register 18h",
+                        "3": "Base Address Register 1Ch",
+                        "4": "Base Address Register 20h",
+                        "5": "Base Address Register 24h"
+                    }
+                },
+                {
+                    "bit": 3,
+                    "bit_width": 5,
+                    "name": "Reserved",
+                    "description": "Reserved",
+                    "attributes": "RsvdP"
+                },
+                {
+                    "bit": 8,
+                    "bit_width": 8,
+                    "name": "Register_Block_Identifier",
+                    "description": "Register Block Identifier: Identifies the type of CXL registers.\nDefined encodings are:\n• 00h = Indicates the register block entry is empty and the Register BIR, Register Block Offset Low, and Register Block Offset High fields are invalid.\n• 01h = Component Registers. The format of the Component Register block is defined in Section 8.2.3.\n• 02h = BAR Virtualization ACL Registers. The format of the BAR Virtualization ACL Register Block is defined in Section 8.2.6.\n• 03h = CXL Device Registers. The format of the CXL Device Register block is defined in Section 8.2.9.\n• 04h = CPMU Registers. More than one instance per Register Locator DVSEC instance is permitted. The CPMU Register format is defined in Section 8.2.7.\n• 05h = CHMU Registers. More than one instance per Register Locator DVSEC instance is permitted. The CHMU Register format is defined in Section 8.2.8.\n• FFh = Designated Vendor Specific Registers. The format of the designated vendor specific register block starts with the header defined in Table 8-10.\n• All other encodings are reserved.",
+                    "attributes": "HwInit",
+                    "value_parse": {
+                        "0": "Empty",
+                        "1": "Component Registers",
+                        "2": "BAR Virtualization ACL Registers",
+                        "3": "CXL Device Registers",
+                        "4": "CPMU Registers",
+                        "5": "CHMU Registers",
+                        "255": "Vendor Specific Registers"
+                    }
+                },
+                {
+                    "bit": 16,
+                    "bit_width": 16,
+                    "name": "Register_Block_Offset_Low",
+                    "description": "Register Block Offset Low: A[31:16] byte offset from the starting address of the Function’s BAR associated with the Register BIR field to point to the base of the Register Block. Register Block Offset is 64-KB aligned. Hence A[15:0] is 0000h.",
+                    "attributes": "HwInit"
+                }
+            ]
+        },
+
+        "register_offset_high": {
+            "offset": "varies",
+            "size": 4,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 32,
+                "name": "register_block_offset_high",
+                "description": "Register Block Offset High: A[63:32] byte offset from the starting address of the Function’s BAR associated with the Register BIR field to point to the base of the Register Block.",
+                "attributes": "HwInit"
+            }]
+        },
+
+        "cxl_capability": {
+            "offset": 10,
+            "size": 2,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 1,
+                    "name": "cache_capable",
+                    "description": "Cache_Capable: If set, indicates that the CXL.cache protocol is supported when operating in Flex Bus.CXL mode. This must be 0 for all LDs of an MLD.",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "CXL.cache not supported",
+                        "1": "CXL.cache supported"
+                    }
+                },
+                {
+                    "bit": 1,
+                    "bit_width": 1,
+                    "name": "io_capable",
+                    "description": "IO_Capable: If set, indicates that the CXL.io protocol is supported when operating in Flex Bus.CXL mode. Must be 1.",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "CXL.io not supported",
+                        "1": "CXL.io supported"
+                    }
+                },
+                {
+                    "bit": 2,
+                    "bit_width": 1,
+                    "name": "mem_capable",
+                    "description": "Mem_Capable: If set, indicates that the CXL.mem protocol is supported when operating in Flex Bus.CXL mode. This must be 1 for all LDs of an MLD.",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "CXL.mem not supported",
+                        "1": "CXL.mem supported"
+                    }
+                },
+                {
+                    "bit": 3,
+                    "bit_width": 1,
+                    "name": "mem_hwinit_mode",
+                    "description": "Mem_HwInit_Mode: If set, indicates that this CXL.mem-capable device initializes memory with assistance from hardware and firmware located on the device. If cleared, indicates that memory is initialized by host software such as a device driver. This bit must be ignored when Mem_Capable=0. Functions that implements the Class Code specified in Section 8.1.12.1 shall set this bit to 1.",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "Memory initialized by host software",
+                        "1": "Memory initialized by device hardware/firmware"
+                    }
+                },
+                {
+                    "bit": 4,
+                    "bit_width": 2,
+                    "name": "hdm_count",
+                    "description": "HDM_Count: Number of HDM ranges implemented by the CXL device and reported through this function. This field must return 00b if Mem_Capable=0. • 00b = Zero ranges. This setting is illegal when Mem_Capable=1. • 01b = One HDM range. • 10b = Two HDM ranges. • 11b = Reserved.",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "Zero HDM ranges (illegal if Mem_Capable=1)",
+                        "1": "One HDM range",
+                        "2": "Two HDM ranges",
+                        "3": "Reserved"
+                    }
+                },
+                {
+                    "bit": 6,
+                    "bit_width": 1,
+                    "name": "cache_wbinv_capable",
+                    "description": "Cache Writeback and Invalidate Capable: If set, indicates that the device implements the Disable Caching and Initiate Cache Write Back and Invalidation control bits in the DVSEC CXL Control2 register, and the Cache Invalid status bit in the DVSEC CXL Status2 register. All devices that are not RCDs shall set this capability bit when Cache_Capable=1.1",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 7,
+                    "bit_width": 1,
+                    "name": "cxl_reset_capable",
+                    "description": "CXL Reset Capable: If set, indicates that the device supports CXL Reset and implements the CXL Reset Timeout field in this register, the Initiate CXL Reset bit in the DVSEC CXL Control2 register, and the DVSEC CXL Reset Complete status bit in the DVSEC CXL Status2 register.1 This bit must report the same value for all LDs of an MLD.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 8,
+                    "bit_width": 3,
+                    "name": "cxl_reset_timeout",
+                    "description": "CXL Reset Timeout: If the CXL Reset Capable bit in this register is set, this field indicates the maximum time that the device may take to complete the CXL Reset. If the CXL Reset Mem Clr Capable bit in this register is 1, this time also accounts for the time that is needed for clearing or randomizing of volatile HDM Ranges. If the CXL Reset Complete status bit in the DVSEC CXL Status2 register is not set after the passage of this time duration, software may assume that CXL Reset has failed. This value must be the same for all LDs of an MLD.1 • 000b = 10 ms • 001b = 100 ms • 010b = 1 second • 011b = 10 second • 100b = 100 second • All other encodings are reserved",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "10 ms",
+                        "1": "100 ms",
+                        "2": "1 second",
+                        "3": "10 seconds",
+                        "4": "100 seconds"
+                    }
+                },
+                {
+                    "bit": 11,
+                    "bit_width": 1,
+                    "name": "cxl_reset_mem_clr_capable",
+                    "description": "CXL Reset Mem Clr Capable: When set, the Device is capable of clearing or randomizing volatile HDM Ranges during CXL Reset.1",
+                    "attributes": "HwInit"
+                },
+                {
+                    "bit": 12,
+                    "bit_width": 1,
+                    "name": "tsp_capable",
+                    "description": "TSP Capable: When set, the Device is capable of supporting TSP and shall support TSP requests (see Section 11.5.5) and MemRdFill (see Table 3-41).2",
+                    "attributes": "HwInit"
+                },
+                {
+                    "bit": 13,
+                    "bit_width": 1,
+                    "name": "multiple_logical_device",
+                    "description": "Multiple Logical Device: If set, indicates that the Device is a Logical Device (which could be an FM-owned LD) within an MLD. If cleared, indicates that the Device is an SLD or an RCD.1",
+                    "attributes": "HwInit"
+                },
+                {
+                    "bit": 14,
+                    "bit_width": 1,
+                    "name": "viral_capable",
+                    "description": "Viral_Capable: If set, indicates that the CXL device supports Viral handling. This value must be 1 for all devices.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 15,
+                    "bit_width": 1,
+                    "name": "pm_init_completion_reporting_capable",
+                    "description": "PM Init Completion Reporting Capable: If set, indicates that the CXL device is capable of supporting the Power Management Initialization Complete flag. All devices that are not RCDs shall set this capability bit. RCDs may implement this capability.1 This capability is not applicable to switches and root ports. Switches and root ports shall hardwire this bit to 0.",
+                    "attributes": "HwInit"
+                }
+            ]
+        },
+
+        "cxl_control": {
+            "offset": 12,
+            "size": 2,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 1,
+                    "name": "cache_enable",
+                    "description": "Cache_Enable: When set to 1, enables CXL.cache protocol operation when in Flex Bus.CXL mode. Locked by the CONFIG_LOCK bit1. If this bit is 0, the component is permitted to silently drop all CXL.cache transactions. Default value of this bit is 0.",
+                    "attributes": "RWL",
+                    "value_parse": {
+                        "0": "CXL.cache disabled",
+                        "1": "CXL.cache enabled"
+                    }
+                },
+                {
+                    "bit": 1,
+                    "bit_width": 1,
+                    "name": "io_enable",
+                    "description": "IO_Enable: When set to 1, enables CXL.io protocol operation when in Flex Bus.CXL mode. This bit always returns 1.",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "CXL.io disabled (should not happen)",
+                        "1": "CXL.io enabled"
+                    }
+                },
+                {
+                    "bit": 2,
+                    "bit_width": 1,
+                    "name": "mem_enable",
+                    "description": "Mem_Enable: When set to 1, enables CXL.mem protocol operation when in Flex Bus.CXL mode. Locked by the CONFIG_LOCK bit1. If this bit is 0, the component is permitted to silently drop all CXL.mem transactions. Default value of this bit is 0.",
+                    "attributes": "RWL",
+                    "value_parse": {
+                        "0": "CXL.mem disabled",
+                        "1": "CXL.mem enabled"
+                    }
+                },
+                {
+                    "bit": 3,
+                    "bit_width": 5,
+                    "name": "cache_sf_coverage",
+                    "description": "Cache_SF_Coverage: Performance hint to the device. Locked by the CONFIG_LOCK bit1. • 00h = Indicates no Snoop Filter coverage on the host • For all other values of N = Indicates Snoop Filter coverage on the host of 2^(N+15d) bytes (e.g., value of 5h indicates 1-MB snoop filter coverage) Default value of this field is 00h.",
+                    "attributes": "RWL"
+                },
+                {
+                    "bit": 8,
+                    "bit_width": 3,
+                    "name": "cache_sf_granularity",
+                    "description": "Cache_SF_Granularity: Performance hint to the device. Locked by the CONFIG_LOCK bit1. • 000b = Indicates 64B granular tracking on the host • 001b = Indicates 128B granular tracking on the host • 010b = Indicates 256B granular tracking on the host • 011b = Indicates 512B granular tracking on the host • 100b = Indicates 1KB granular tracking on the host • 101b = Indicates 2KB granular tracking on the host • 110b = Indicates 4KB granular tracking on the host • 111b = Reserved Default value of this field is 000b.",
+                    "attributes": "RWL",
+                    "value_parse": {
+                        "0": "64B tracking",
+                        "1": "128B tracking",
+                        "2": "256B tracking",
+                        "3": "512B tracking",
+                        "4": "1KB tracking",
+                        "5": "2KB tracking",
+                        "6": "4KB tracking",
+                        "7": "Reserved"
+                    }
+                },
+                {
+                    "bit": 11,
+                    "bit_width": 1,
+                    "name": "cache_clean_eviction",
+                    "description": "Cache_Clean_Eviction: Performance hint to the device. Locked by the CONFIG_LOCK bit1. • 0 = Indicates clean evictions from device caches are needed for best performance • 1 = Indicates clean evictions from device caches are NOT needed for best performance Default value of this bit is 0.",
+                    "attributes": "RWL",
+                    "value_parse": {
+                        "0": "Clean evictions needed",
+                        "1": "Clean evictions NOT needed"
+                    }
+                },
+                {
+                    "bit": 12,
+                    "bit_width": 1,
+                    "name": "direct_p2p_mem_enable",
+                    "description": "Direct P2P Mem Enable: This bit must be RWL if the Direct P2P Mem Capable bit in the DVSEC CXL Capability3 register is set; otherwise, this bit is permitted to be hardwired to 0. Software must not set this bit unless the Direct P2P Mem Capable bit is set.2 When set, enables Direct P2P CXL.mem protocol operation. If this bit is 0, the component is not permitted to initiate Direct P2P CXL.mem transactions. Default value of this bit is 0. Locked by the CONFIG_LOCK bit1.",
+                    "attributes": "RWL",
+                    "value_parse": {
+                        "0": "Direct P2P CXL.mem disabled",
+                        "1": "Direct P2P CXL.mem enabled"
+                    }
+                },
+                {
+                    "bit": 13,
+                    "bit_width": 1,
+                    "name": "reserved_13",
+                    "description": "Reserved",
+                    "attributes": "RsvdP"
+                },
+                {
+                    "bit": 14,
+                    "bit_width": 1,
+                    "name": "viral_enable",
+                    "description": "Viral_Enable: When set, enables Viral handling in the CXL device. Locked by the CONFIG_LOCK bit1. If 0, the CXL device may ignore the viral that it receives. Default value of this bit is 0.",
+                    "attributes": "RWL",
+                    "value_parse": {
+                        "0": "Viral handling disabled",
+                        "1": "Viral handling enabled"
+                    }
+                },
+                {
+                    "bit": 15,
+                    "bit_width": 1,
+                    "name": "reserved_15",
+                    "description": "Reserved",
+                    "attributes": "RsvdP"
+                }
+            ]
+        },
+
+        "cxl_status": {
+            "offset": 14,
+            "size": 2,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 14,
+                    "name": "reserved_13_0",
+                    "description": "Reserved",
+                    "attributes": "RsvdZ"
+                },
+                {
+                    "bit": 14,
+                    "bit_width": 1,
+                    "name": "viral_status",
+                    "description": "Viral_Status: When set, indicates that the CXL device has encountered a Viral condition. This bit does not indicate that the device is currently in Viral condition. See Section 12.4 for more details.",
+                    "attributes": "RW1CS",
+                    "value_parse": {
+                        "0": "No viral condition",
+                        "1": "Viral condition encountered"
+                    }
+                },
+                {
+                    "bit": 15,
+                    "bit_width": 1,
+                    "name": "reserved_15",
+                    "description": "Reserved",
+                    "attributes": "RsvdZ"
+                }
+            ]
+        },
+
+        "cxl_control2": {
+            "offset": 16,
+            "size": 2,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 1,
+                    "name": "disable_caching",
+                    "description": "Disable Caching: When set to 1, device shall no longer cache new modified lines in its local cache. Device shall continue to correctly respond to CXL.cache transactions. Default value of this bit is 0.",
+                    "attributes": "RW",
+                    "value_parse": {
+                        "0": "Caching enabled",
+                        "1": "Caching disabled"
+                    }
+                },
+                {
+                    "bit": 1,
+                    "bit_width": 1,
+                    "name": "initiate_cache_writeback_invalidate",
+                    "description": "Initiate Cache Write Back and Invalidation: When set to 1, the device shall write back all modified lines in the local cache and then invalidate all lines. The device shall send a CacheFlushed message to the host. Always reads back as 0.",
+                    "attributes": "RW",
+                    "value_parse": {
+                        "0": "Not initiating",
+                        "1": "Initiate write back and invalidate"
+                    }
+                },
+                {
+                    "bit": 2,
+                    "bit_width": 1,
+                    "name": "initiate_cxl_reset",
+                    "description": "Initiate CXL Reset: When set to 1, the device shall initiate CXL Reset as defined in Section 9.7. Always reads back as 0.",
+                    "attributes": "RW",
+                    "value_parse": {
+                        "0": "No reset initiated",
+                        "1": "Initiate reset"
+                    }
+                },
+                {
+                    "bit": 3,
+                    "bit_width": 1,
+                    "name": "cxl_reset_mem_clr_enable",
+                    "description": "CXL Reset Mem Clr Enable: When set, and the CXL Reset Mem Clr Capable bit in the Capability register returns 1, the device shall clear or randomize volatile HDM ranges as part of the CXL Reset operation. Default value is 0.",
+                    "attributes": "RW",
+                    "value_parse": {
+                        "0": "Memory clear disabled",
+                        "1": "Memory clear enabled"
+                    }
+                },
+                {
+                    "bit": 4,
+                    "bit_width": 1,
+                    "name": "desired_volatile_hdm_state_after_hot_reset",
+                    "description": "Desired Volatile HDM State after Hot Reset: This bit must be RWS if the corresponding capability bit is set; otherwise, may be hardwired to 0. • 0 = Follow the default volatile HDM state • 1 = Preserve volatile HDM across hot reset.",
+                    "attributes": "RWS/RO",
+                    "value_parse": {
+                        "0": "Use default state",
+                        "1": "Preserve HDM content"
+                    }
+                },
+                {
+                    "bit": 5,
+                    "bit_width": 1,
+                    "name": "modified_completion_enable",
+                    "description": "Modified Completion Enable: Must be RW if the capability bit is set. • 0 = Device not permitted to return modified data • 1 = Device permitted to return modified data using Cmp-M response. Default is 0.",
+                    "attributes": "RW/RO",
+                    "value_parse": {
+                        "0": "Modified completion disabled",
+                        "1": "Modified completion enabled"
+                    }
+                },
+                {
+                    "bit": 6,
+                    "bit_width": 10,
+                    "name": "reserved_15_6",
+                    "description": "Reserved",
+                    "attributes": "RsvdP"
+                }
+            ]
+        },
+
+        "cxl_status2": {
+            "offset": 18,
+            "size": 2,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 1,
+                    "name": "cache_invalid",
+                    "description": "Cache Invalid: When set, the device guarantees that it does not hold any valid lines and Disable Caching=1. This bit shall read as 0 when Disable Caching=0.",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "Cache lines may be valid",
+                        "1": "Cache is invalidated"
+                    }
+                },
+                {
+                    "bit": 1,
+                    "bit_width": 1,
+                    "name": "cxl_reset_complete",
+                    "description": "CXL Reset Complete: When set, the device has successfully completed CXL Reset as defined in Section 9.7.",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "Reset not complete",
+                        "1": "Reset completed"
+                    }
+                },
+                {
+                    "bit": 2,
+                    "bit_width": 1,
+                    "name": "cxl_reset_error",
+                    "description": "CXL Reset Error: When set, the device has completed CXL Reset with errors. Additional information may be available in error records.",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "No error",
+                        "1": "Reset error occurred"
+                    }
+                },
+                {
+                    "bit": 3,
+                    "bit_width": 1,
+                    "name": "volatile_hdm_preservation_error",
+                    "description": "Volatile HDM Preservation Error: Set if device failed to preserve Volatile HDM content across a Hot Reset as requested by software.",
+                    "attributes": "RW1CS/RsvdZ",
+                    "value_parse": {
+                        "0": "Preservation succeeded or not applicable",
+                        "1": "Preservation failed"
+                    }
+                },
+                {
+                    "bit": 4,
+                    "bit_width": 11,
+                    "name": "reserved_14_4",
+                    "description": "Reserved",
+                    "attributes": "RsvdZ"
+                },
+                {
+                    "bit": 15,
+                    "bit_width": 1,
+                    "name": "pm_init_complete",
+                    "description": "Power Management Initialization Complete: When set, indicates that the device has completed Power Management Initialization flow and is ready for PM messages.",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "Not initialized",
+                        "1": "Initialization complete"
+                    }
+                }
+            ]
+        },
+
+        "cxl_lock": {
+            "offset": 20,
+            "size": 2,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 1,
+                    "name": "config_lock",
+                    "description": "CONFIG_LOCK: When set, all RWL fields in this DVSEC become read-only. Cleared on Conventional Reset, unaffected by CXL Reset.",
+                    "attributes": "RWO",
+                    "value_parse": {
+                        "0": "Unlocked",
+                        "1": "Locked"
+                    }
+                },
+                {
+                    "bit": 1,
+                    "bit_width": 15,
+                    "name": "reserved_15_1",
+                    "description": "Reserved",
+                    "attributes": "RsvdP"
+                }
+            ]
+        },
+
+        "cxl_capability2": {
+            "offset": 22,
+            "size": 2,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 4,
+                    "name": "cache_size_unit",
+                    "description": "Cache Size Unit: A CXL device that is not CXL.cache-capable shall return the value of 0h.\n• 0h = Cache size is not reported\n• 1h = 64 KB\n• 2h = 1 MB\n• All other encodings are reserved",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "Cache size not reported",
+                        "1": "64 KB",
+                        "2": "1 MB"
+                    }
+                },
+                {
+                    "bit": 4,
+                    "bit_width": 2,
+                    "name": "fallback_capability",
+                    "description": "Fallback Capability: Defines the fallback operation mode of a Type 2 Device.\n• 00b = Device either does not support fallback mode or does not advertise fallback mode\n• 01b = PCIe\n• 10b = CXL Type 1\n• 11b = CXL Type 3",
+                    "attributes": "HwInit",
+                    "value_parse": {
+                        "0": "No fallback or not advertised",
+                        "1": "PCIe",
+                        "2": "CXL Type 1",
+                        "3": "CXL Type 3"
+                    }
+                },
+                {
+                    "bit": 6,
+                    "bit_width": 1,
+                    "name": "modified_completion_capable",
+                    "description": "Modified Completion Capable: When set to 1, it indicates that this device is capable of returning modified data using the Cmp-M response.",
+                    "attributes": "HwInit",
+                    "value_parse": {
+                        "0": "Not capable",
+                        "1": "Capable"
+                    }
+                },
+                {
+                    "bit": 7,
+                    "bit_width": 1,
+                    "name": "no_clean_writeback",
+                    "description": "No Clean Writeback: Specifies that a device shall not issue clean writebacks.\n• 0 = Device may or may not generate clean writebacks\n• 1 = Device guarantees to never generate clean writebacks at the device’s cacheline granularity",
+                    "attributes": "HwInit",
+                    "value_parse": {
+                        "0": "May generate clean writebacks",
+                        "1": "Never generates clean writebacks"
+                    }
+                },
+                {
+                    "bit": 8,
+                    "bit_width": 8,
+                    "name": "cache_size",
+                    "description": "Cache Size: Expressed in multiples of Cache Size Unit. If Cache Size=4 and Cache Size Unit=1h, the device has a 256-KB cache.\nA CXL device that is not CXL.cache-capable shall return the value of 00h.",
+                    "attributes": "RO"
+                }
+            ]
+        },
+
+        "range_1_size_high": {
+            "offset": 24,
+            "size": 4,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 32,
+                "name": "memory_size_high",
+                "description": "Memory_Size_High: Corresponds to bits 63:32 of the CXL Range 1 memory size regardless of whether the device implements CXL HDM Decoder Capability registers.",
+                "attributes": "RO"
+            }]
+        },
+
+        "range_1_size_low": {
+            "offset": 28,
+            "size": 4,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 1,
+                    "name": "memory_info_valid",
+                    "description": "Indicates that the CXL Range 1 Size High and Size Low registers are valid. Must be set within 1 second of reset deassertion.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 1,
+                    "bit_width": 1,
+                    "name": "memory_active",
+                    "description": "Indicates the CXL Range 1 memory is fully initialized and available for software use.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 2,
+                    "bit_width": 3,
+                    "name": "media_type",
+                    "description": "Memory media characteristics. For CXL.mem devices (non-eRCD), set to 010b. Deprecated values: 000b (volatile), 001b (non-volatile).",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "Volatile memory (deprecated from CXL 2.0)",
+                        "1": "Non-volatile memory (deprecated from CXL 2.0)",
+                        "2": "Characteristics communicated via CDAT",
+                        "others": "Reserved"
+                    }
+                },
+                {
+                    "bit": 5,
+                    "bit_width": 3,
+                    "name": "memory_class",
+                    "description": "Class of memory. For CXL.mem devices (non-eRCD), set to 010b. Deprecated values: 000b (Memory Class), 001b (Storage Class).",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "Memory Class (deprecated from CXL 2.0)",
+                        "1": "Storage Class (deprecated from CXL 2.0)",
+                        "2": "Characteristics communicated via CDAT",
+                        "others": "Reserved"
+                    }
+                },
+                {
+                    "bit": 8,
+                    "bit_width": 5,
+                    "name": "desired_interleave",
+                    "description": "Desired memory interleaving granularity or minimum interleave granularity for optimal performance. Software may program equal or larger granularity.",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "No Interleave",
+                        "1": "256 Bytes",
+                        "2": "4 KB",
+                        "3": "512 Bytes",
+                        "4": "1024 Bytes",
+                        "5": "2048 Bytes",
+                        "6": "8192 Bytes",
+                        "7": "16384 Bytes",
+                        "others": "Reserved"
+                    }
+                },
+                {
+                    "bit": 13,
+                    "bit_width": 3,
+                    "name": "memory_active_timeout",
+                    "description": "Max time to set Memory_Active bit after reset when Mem_HwInit_Mode=1. Same value for all LDs of an MLD.",
+                    "attributes": "HwInit",
+                    "value_parse": {
+                        "0": "1 second",
+                        "1": "4 seconds",
+                        "2": "16 seconds",
+                        "3": "64 seconds",
+                        "4": "256 seconds",
+                        "others": "Reserved"
+                    }
+                },
+                {
+                    "bit": 16,
+                    "bit_width": 1,
+                    "name": "memory_active_degraded",
+                    "description": "Indicates memory is initialized but with reduced capacity or performance. Mutually exclusive with Memory_Active.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 17,
+                    "bit_width": 11,
+                    "name": "reserved",
+                    "description": "Reserved bits.",
+                    "attributes": "RsvdP"
+                },
+                {
+                    "bit": 28,
+                    "bit_width": 4,
+                    "name": "memory_size_low",
+                    "description": "Corresponds to bits 31:28 of the CXL Range 1 memory size.",
+                    "attributes": "RO"
+                }
+            ]
+        },
+
+        "range_1_base_high": {
+            "offset": 32,
+            "size": 4,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 32,
+                "name": "memory_base_high",
+                "description": "Corresponds to bits 63:32 of CXL Range 1 base in the host address space. Locked by CONFIG_LOCK. If HDM Decoder is enabled, this register is not used during address decode; recommended to match HDM Decoder 0 Base High for backward compatibility. Default is 0h.",
+                "attributes": "RWL"
+            }]
+        },
+
+        "range_1_base_low": {
+            "offset": 36,
+            "size": 4,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 28,
+                    "name": "reserved",
+                    "description": "Reserved.",
+                    "attributes": "RsvdP"
+                },
+                {
+                    "bit": 28,
+                    "bit_width": 4,
+                    "name": "memory_base_low",
+                    "description": "Corresponds to bits 31:28 of CXL Range 1 base in the host address space. Locked by CONFIG_LOCK. If HDM Decoder is enabled, this field is not used during address decode; recommended to match HDM Decoder 0 Base Low for backward compatibility. Default is 0h.",
+                    "attributes": "RWL"
+                }
+            ]
+        },
+
+        "range_2_size_high": {
+            "offset": 40,
+            "size": 4,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 32,
+                "name": "memory_size_high",
+                "description": "Corresponds to bits 63:32 of the CXL Range 2 memory size regardless of whether the device implements CXL HDM Decoder Capability registers.",
+                "attributes": "RO"
+            }]
+        },
+
+        "range_2_size_low": {
+            "offset": 44,
+            "size": 4,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 1,
+                    "name": "memory_info_valid",
+                    "description": "When set, indicates that the CXL Range 2 Size High and Size Low registers are valid regardless of whether the device implements CXL HDM Decoder Capability registers. Must be set within 1 second of reset deassertion to the CXL device.",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "Invalid",
+                        "1": "Valid"
+                    }
+                },
+                {
+                    "bit": 1,
+                    "bit_width": 1,
+                    "name": "memory_active",
+                    "description": "When set, indicates that the CXL Range 2 memory is fully initialized and available for software use, regardless of whether the device implements CXL HDM Decoder Capability registers. When cleared, indicates that the memory may be unavailable. Must be set within Range 2 Memory_Active_Timeout after reset if Mem_HwInit_Mode=1.",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "Memory not active or unavailable",
+                        "1": "Memory active and available"
+                    }
+                },
+                {
+                    "bit": 2,
+                    "bit_width": 3,
+                    "name": "media_type",
+                    "description": "Indicates memory media characteristics regardless of HDM Decoder registers. 010b means memory characteristics communicated via CDAT. Other encodings reserved or deprecated.",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "Volatile memory (deprecated)",
+                        "1": "Non-volatile memory (deprecated)",
+                        "2": "Memory characteristics via CDAT",
+                        "7": "Not Memory (deprecated)"
+                    }
+                },
+                {
+                    "bit": 5,
+                    "bit_width": 3,
+                    "name": "memory_class",
+                    "description": "Indicates class of memory regardless of HDM Decoder registers. 010b means memory characteristics communicated via CDAT. Other encodings reserved or deprecated.",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "Memory Class (e.g., normal DRAM, deprecated)",
+                        "1": "Storage Class (deprecated)",
+                        "2": "Memory characteristics via CDAT"
+                    }
+                },
+                {
+                    "bit": 8,
+                    "bit_width": 5,
+                    "name": "desired_interleave",
+                    "description": "See Desired_Interleave field in DVSEC CXL Range 1 Size Low register for details.",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "No Interleave",
+                        "1": "256-Byte Granularity",
+                        "2": "4-KB Interleave",
+                        "3": "512 Bytes",
+                        "4": "1024 Bytes",
+                        "5": "2048 Bytes",
+                        "6": "8192 Bytes",
+                        "7": "16384 Bytes"
+                    }
+                },
+                {
+                    "bit": 13,
+                    "bit_width": 3,
+                    "name": "memory_active_timeout",
+                    "description": "Maximum time device can take to set Memory_Active bit after reset when Mem_HwInit_Mode=1. Value applies to all LDs of an MLD.",
+                    "attributes": "HwInit",
+                    "value_parse": {
+                        "0": "1 second",
+                        "1": "4 seconds",
+                        "2": "16 seconds",
+                        "3": "64 seconds",
+                        "4": "256 seconds"
+                    }
+                },
+                {
+                    "bit": 16,
+                    "bit_width": 1,
+                    "name": "memory_active_degraded",
+                    "description": "When set, indicates Range 2 memory is initialized but with reduced capacity or performance. Memory_Active and Memory_Active_Degraded are mutually exclusive.",
+                    "attributes": "RO",
+                    "value_parse": {
+                        "0": "Normal operation",
+                        "1": "Memory active but degraded"
+                    }
+                },
+                {
+                    "bit": 17,
+                    "bit_width": 11,
+                    "name": "reserved",
+                    "description": "Reserved.",
+                    "attributes": "RsvdP"
+                },
+                {
+                    "bit": 28,
+                    "bit_width": 4,
+                    "name": "memory_size_low",
+                    "description": "Corresponds to bits 31:28 of the CXL Range 2 memory size regardless of whether the device implements CXL HDM Decoder Capability registers.",
+                    "attributes": "RO"
+                }
+            ]
+        },
+
+        "range_2_base_high": {
+            "offset": 48,
+            "size": 4,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 32,
+                "name": "memory_base_high",
+                "description": "Memory_Base_High: Corresponds to bits 63:32 of CXL Range 2 base in the host address space. Locked by the CONFIG_LOCK bit in the DVSEC CXL Lock register. If a device implements CXL HDM Decoder Capability registers and software has enabled the HDM Decoder by setting the HDM Decoder Enable bit in the CXL HDM Decoder Global Control register, the value of this register is not used during address decode. It is recommended that software program this to match the corresponding CXL HDM Decoder Base High register for backward compatibility.",
+                "attributes": "RWL"
+            }]
+        },
+
+        "range_2_base_low": {
+            "offset": 52,
+            "size": 4,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 28,
+                    "name": "reserved",
+                    "description": "Reserved.",
+                    "attributes": "RsvdP"
+                },
+                {
+                    "bit": 28,
+                    "bit_width": 4,
+                    "name": "memory_base_low",
+                    "description": "Memory_Base_Low: Corresponds to bits 31:28 of the CXL Range 2 base in the host address space. Locked by the CONFIG_LOCK bit in the DVSEC CXL Lock register. If a device implements CXL HDM Decoder Capability registers and software has enabled the HDM Decoder by setting the HDM Decoder Enable bit in the CXL HDM Decoder Global Control register, the value of this field is not used during address decode. It is recommended that software program this to match the corresponding CXL HDM Decoder Base Low register for backward compatibility. Default value of this field is 0h.",
+                    "attributes": "RWL"
+                }
+            ]
+        },
+
+        "cxl_capability3": {
+            "offset": 56,
+            "size": 2,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 1,
+                    "name": "default_volatile_hdm_state_after_cold_reset",
+                    "description": "Default Volatile HDM State after Cold Reset. The device shall clear or randomize the volatile HDM content after a Cold reset if set to 1. The clear or randomize operation shall be completed before Memory_Active is set.",
+                    "attributes": "HwInit",
+                    "value_parse": {
+                        "0": "Content after Cold Reset is undefined; may or may not be cleared or randomized.",
+                        "1": "Device clears or randomizes volatile HDM content after Cold Reset."
+                    }
+                },
+                {
+                    "bit": 1,
+                    "bit_width": 1,
+                    "name": "default_volatile_hdm_state_after_warm_reset",
+                    "description": "Default Volatile HDM State after Warm Reset. The device shall clear or randomize the volatile HDM content after a Warm Reset if set to 1. The clear or randomize operation shall be completed before Memory_Active is set.",
+                    "attributes": "HwInit",
+                    "value_parse": {
+                        "0": "Content after Warm Reset is undefined; may or may not be cleared or randomized.",
+                        "1": "Device clears or randomizes volatile HDM content after Warm Reset."
+                    }
+                },
+                {
+                    "bit": 2,
+                    "bit_width": 1,
+                    "name": "default_volatile_hdm_state_after_hot_reset",
+                    "description": "Default Volatile HDM State after Hot Reset. The device shall clear or randomize the volatile HDM content after a Hot Reset if set to 1. The clear or randomize operation shall be completed before Memory_Active is set. Software may override this if the Configurability bit is set.",
+                    "attributes": "HwInit",
+                    "value_parse": {
+                        "0": "Content after Hot Reset is undefined; may or may not be cleared or randomized.",
+                        "1": "Device clears or randomizes volatile HDM content after Hot Reset."
+                    }
+                },
+                {
+                    "bit": 3,
+                    "bit_width": 1,
+                    "name": "volatile_hdm_state_after_hot_reset_configurability",
+                    "description": "Volatile HDM State after Hot Reset - Configurability. Indicates if the device supports preservation of volatile HDM state across a Hot Reset. Software may request preservation by setting the Desired Volatile HDM State before Hot Reset.",
+                    "attributes": "HwInit",
+                    "value_parse": {
+                        "0": "Does not support preservation of volatile HDM state across Hot Reset.",
+                        "1": "Supports preservation of volatile HDM state across Hot Reset."
+                    }
+                },
+                {
+                    "bit": 4,
+                    "bit_width": 1,
+                    "name": "direct_p2p_mem_capable",
+                    "description": "Direct P2P Mem Capable: Indicates if Direct P2P CXL.mem protocol is supported.",
+                    "attributes": "HwInit",
+                    "value_parse": {
+                        "0": "Direct P2P CXL.mem protocol is not supported.",
+                        "1": "Direct P2P CXL.mem protocol is supported."
+                    }
+                },
+                {
+                    "bit": 5,
+                    "bit_width": 11,
+                    "name": "reserved",
+                    "description": "Reserved",
+                    "attributes": "RsvdP"
+                }
+            ]
+        },
+
+        "Reserved": {
+            "offset": 58,
+            "size": 2,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 16,
+                "name": "reserved",
+                "description": "Reserved",
+                "attributes": "RsvdP"
+            }]
+        }
+    }
+}

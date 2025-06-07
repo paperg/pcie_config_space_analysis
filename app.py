@@ -1,3 +1,13 @@
+'''
+Author: Peng Guo & <peng.guo@montage-tech.com>
+Date: 2025-06-03 09:15:08
+LastEditors: pguo peng.guo@montage-tech.com
+LastEditTime: 2025-06-03 17:45:20
+FilePath: \pcie_config_space_analysis\app.py
+Description: 
+
+Copyright (c) 2025 by Montage Technology Corporation/pguo, All Rights Reserved. 
+'''
 from flask import Flask, render_template, jsonify, request
 from pcie_register import CommandRegister
 import os
@@ -49,4 +59,13 @@ def set_register():
     return jsonify({'success': True})
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    # app.run(debug=True) 
+    from thefuzz import fuzz
+    from thefuzz import process
+
+    choices = ['vendor_id', 'device_id', 'command', 'status', 'Advanced_Error_Reporting_Extended_Capability']
+    
+    while True:
+        query = input('Please input the register name: ')
+        print(query)
+        print(process.extractOne(query, choices))

@@ -1,0 +1,289 @@
+{
+    "structure": {
+        "advanced_error_reporting_extended_capability": {
+            "info": {
+                "cap_id": 1,
+                "offset": 64,
+                "size": 8
+            },
+            "registers": [
+                "uncorrectable_error_status_register"
+            ]
+        },
+        "designated_vendor_specific_extended_capability": {
+            "info": {
+                "cap_id": 35
+            },
+            "registers": [
+                "designated_vendor_specific_extended_capability_header",
+                "designated_vendor_specific_header_1",
+                "designated_vendor_specific_header_2"
+            ]
+        }
+    },
+
+    "register": {
+        "uncorrectable_error_status_register": {
+            "offset": 4,
+            "size": 4,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 1,
+                    "name": "undefined_bit_0",
+                    "default": 0,
+                    "description": "Undefined - The value read from this bit is undefined. In previous versions of this specification, this bit was used to indicate a Link Training Error. System software must ignore the value read from this bit. System software is permitted to write any value to this bit.",
+                    "attributes": "Undefined"
+                },
+                {
+                    "bit": 4,
+                    "bit_width": 1,
+                    "name": "data_link_protocol_error_status",
+                    "default": 0,
+                    "description": "Data Link Protocol Error Status",
+                    "attributes": "RW1CS\nVF ROZ"
+                },
+                {
+                    "bit": 5,
+                    "bit_width": 1,
+                    "name": "surprise_down_error_status",
+                    "default": 0,
+                    "description": "Surprise Down Error Status (Optional)",
+                    "attributes": "RW1CS\nVF ROZ"
+                },
+                {
+                    "bit": 12,
+                    "bit_width": 1,
+                    "name": "poisoned_tlp_received_status",
+                    "default": 0,
+                    "description": "Poisoned TLP Received Status",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 13,
+                    "bit_width": 1,
+                    "name": "flow_control_protocol_error_status",
+                    "default": 0,
+                    "description": "Flow Control Protocol Error Status (Optional)",
+                    "attributes": "RW1CS\nVF ROZ"
+                },
+                {
+                    "bit": 14,
+                    "bit_width": 1,
+                    "name": "completion_timeout_status",
+                    "default": 0,
+                    "description": "Completion Timeout Status",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 15,
+                    "bit_width": 1,
+                    "name": "completer_abort_status",
+                    "default": 0,
+                    "description": "Completer Abort Status (Optional)",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 16,
+                    "bit_width": 1,
+                    "name": "unexpected_completion_status",
+                    "default": 0,
+                    "description": "Unexpected Completion Status",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 17,
+                    "bit_width": 1,
+                    "name": "receiver_overflow_status",
+                    "default": 0,
+                    "description": "Receiver Overflow Status (Optional)",
+                    "attributes": "RW1CS\nVF ROZ"
+                },
+                {
+                    "bit": 18,
+                    "bit_width": 1,
+                    "name": "malformed_tlp_status",
+                    "default": 0,
+                    "description": "Malformed TLP Status",
+                    "attributes": "RW1CS\nVF ROZ"
+                },
+                {
+                    "bit": 19,
+                    "bit_width": 1,
+                    "name": "ecrc_error_status",
+                    "default": 0,
+                    "description": "ECRC Error Status (Optional)",
+                    "attributes": "RW1CS\nVF ROZ"
+                },
+                {
+                    "bit": 20,
+                    "bit_width": 1,
+                    "name": "unsupported_request_error_status",
+                    "default": 0,
+                    "description": "Unsupported Request Error Status",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 21,
+                    "bit_width": 1,
+                    "name": "acs_violation_status",
+                    "default": 0,
+                    "description": "ACS Violation Status (Optional)",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 22,
+                    "bit_width": 1,
+                    "name": "uncorrectable_internal_error_status",
+                    "default": 0,
+                    "description": "Uncorrectable Internal Error Status (Optional)",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 23,
+                    "bit_width": 1,
+                    "name": "mc_blocked_tlp_status",
+                    "default": 0,
+                    "description": "MC Blocked TLP Status (Optional)",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 24,
+                    "bit_width": 1,
+                    "name": "atomicop_egress_blocked_status",
+                    "default": 0,
+                    "description": "AtomicOp Egress Blocked Status (Optional)",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 25,
+                    "bit_width": 1,
+                    "name": "tlp_prefix_blocked_error_status",
+                    "default": 0,
+                    "description": "TLP Prefix Blocked Error Status (Optional)",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 26,
+                    "bit_width": 1,
+                    "name": "poisoned_tlp_egress_blocked_status",
+                    "default": 0,
+                    "description": "Poisoned TLP Egress Blocked Status (Optional)",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 27,
+                    "bit_width": 1,
+                    "name": "dmwr_request_egress_blocked_status",
+                    "default": 0,
+                    "description": "DMWr Request Egress Blocked Status (Optional)",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 28,
+                    "bit_width": 1,
+                    "name": "ide_check_failed_status",
+                    "default": 0,
+                    "description": "IDE Check Failed Status (Optional)",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 29,
+                    "bit_width": 1,
+                    "name": "misrouted_ide_tlp_status",
+                    "default": 0,
+                    "description": "Misrouted IDE TLP Status (Optional)",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 30,
+                    "bit_width": 1,
+                    "name": "pcrc_check_failed_status",
+                    "default": 0,
+                    "description": "PCRC Check Failed Status (Optional)",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 31,
+                    "bit_width": 1,
+                    "name": "tlp_translation_egress_blocked_status",
+                    "default": 0,
+                    "description": "TLP Translation Egress Blocked Status (Optional)",
+                    "attributes": "RW1CS"
+                }
+            ]
+        },
+
+        "designated_vendor_specific_extended_capability_header": {
+            "offset": 0,
+            "size": 4,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 16,
+                    "name": "pci_express_extended_capability_id",
+                    "default": 35,
+                    "description": "PCI Express Extended Capability ID - This field is a PCI-SIG defined ID number that indicates the nature\nand format of the Extended Capability.\nExtended Capability ID for the Designated Vendor-Specific Extended Capability is 0023h.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 16,
+                    "bit_width": 4,
+                    "name": "capability_version",
+                    "default": 1,
+                    "description": "Capability Version - This field is a PCI-SIG defined version number that indicates the version of the\nCapability structure present.\nMust be 1h for this version of the specification.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 20,
+                    "bit_width": 12,
+                    "name": "next_capability_offset",
+                    "default": 0,
+                    "description": "Next Capability Offset - This field contains the offset to the next PCI Express Capability structure or 000h\nif no other items exist in the linked list of Capabilities.\nFor Extended Capabilities implemented in Configuration Space, this offset is relative to the beginning of\nPCI-compatible Configuration Space and thus must always be either 000h (for terminating list of\nCapabilities) or greater than 0FFh.",
+                    "attributes": "RO"
+                }
+            ]
+        },
+
+        "designated_vendor_specific_header_1": {
+            "offset": 4,
+            "size": 4,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 16,
+                    "name": "dvsec_vendor_id",
+                    "default": 0,
+                    "description": "DVSEC Vendor ID - This field is the Vendor ID associated with the vendor that defined the contents of this\ncapability.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 16,
+                    "bit_width": 4,
+                    "name": "dvsec_revision",
+                    "default": 0,
+                    "description": "DVSEC Revision - This field is a vendor-defined version number that indicates the version of the DVSEC\nstructure.\nSoftware must qualify the DVSEC Vendor ID and DVSEC ID before interpreting this field.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 20,
+                    "bit_width": 12,
+                    "name": "dvsec_length",
+                    "default": 12,
+                    "description": "DVSEC Length - This field indicates the number of bytes in the entire DVSEC structure, including the PCI\nExpress Extended Capability Header, the DVSEC Header 1, DVSEC Header 2, and DVSEC vendor-specific\nregisters.",
+                    "attributes": "RO"
+                }
+            ]
+        },
+
+        "designated_vendor_specific_header_2": {
+            "offset": 8,
+            "size": 2,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 16,
+                "name": "dvsec_id",
+                "default": 0,
+                "description": "DVSEC ID - This field is a vendor-defined ID that indicates the nature and format of the DVSEC structure.\nSoftware must qualify the DVSEC Vendor ID before interpreting this field.",
+                "attributes": "RO"
+            }]
+        }
+    }
+}

@@ -1,0 +1,157 @@
+{
+    "structure": {
+        "type0_comman_configuration_space": {
+            "info": {
+                "offset": 0,
+                "size": 64
+            },
+            "registers": [
+                "vendor_id",
+                "device_id",
+                "command"
+            ]
+        }
+    },
+
+    "register": {
+        "vendor_id": {
+            "offset": 0,
+            "size": 2,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 16,
+                "name": "vendor_id",
+                "default": 65535,
+                "description": "For non-VFs, the Vendor ID register is HwInit and the value in this register identifies the manufacturer of the Function. In\nkeeping with PCI-SIG procedures, valid vendor identifiers must be allocated by the PCI-SIG to ensure uniqueness. Each\nvendor must have at least one Vendor ID. It is recommended that software read the Vendor ID register to determine if a\nFunction is present, where a value of FFFFh indicates that no Function is present.\nFor VFs, this field must return FFFFh when read. VI software should return the Vendor ID value from the associated PF as\nthe Vendor ID value for the VF.",
+                "attributes": "RO"
+            }]
+        },
+
+        "device_id": {
+            "offset": 2,
+            "size": 2,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 16,
+                "name": "device_id",
+                "default": 65535,
+                "description": "For non-VFs, the Device ID register is HwInit and the value in this register identifies the particular Function. The Device ID\nmust be allocated by the vendor. The Device ID, in conjunction with the Vendor ID and Revision ID, are used as one\nmechanism for software to determine which driver should be loaded. The vendor must ensure that the chosen values do\nnot result in the use of an incompatible device driver.\nFor VFs, this field must return FFFFh when read. VI software should return the VF Device ID (see § Section 9.3.3.11 ) value\nfrom the associated PF as the Device ID for the VF.",
+                "attributes": "RO"
+            }]
+        },
+
+        "command": {
+            "offset": 4,
+            "size": 2,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 1,
+                    "name": "io_space_enable",
+                    "default": 0,
+                    "value_parse": {
+                        "0": "I/O decoding disabled",
+                        "1": "I/O decoding enabled"
+                    },
+                    "description": "I/O Space Enable - Controls a Function's response to I/O Space accesses. When this bit is Clear, all\nreceived I/O accesses are caused to be handled as Unsupported Requests. When this bit is Set, the\nFunction is enabled to decode the address and further process I/O Space accesses. For a Function with a\nType 1 Configuration Space Header, this bit controls the response to I/O Space accesses received on its\nPrimary Side.\nDefault value of this bit is 0b.\nThis bit is permitted to be hardwired to Zero if a Function does not support I/O Space accesses.\nThis bit does not apply to VFs and must be hardwired to Zero.",
+                    "attributes": "RW\nVF ROZ"
+                },
+                {
+                    "bit": 1,
+                    "bit_width": 1,
+                    "name": "memory_space_enable",
+                    "default": 0,
+                    "value_parse": {
+                        "0": "Memory decoding disabled",
+                        "1": "Memory decoding enabled"
+                    },
+                    "description": "Memory Space Enable - Controls a Function's response to Memory Space accesses. When this bit is\nClear, all received Memory Space accesses are caused to be handled as Unsupported Requests. When\nthis bit is Set, the Function is enabled to decode the address and further process Memory Space\naccesses. For a Function with a Type 1 Configuration Space Header, this bit controls the response to\nMemory Space accesses received on its Primary Side.\nDefault value of this bit is 0b.\nThis bit is permitted to be hardwired to 0b if a Function does not support Memory Space accesses.\nThis bit does not apply to VFs and must be hardwired to Zero. VF Memory Space is controlled by the VF\nMSE bit in the SR-IOV Control Register.",
+                    "attributes": "RW\nVF ROZ"
+                },
+                {
+                    "bit": 2,
+                    "bit_width": 1,
+                    "name": "bus_master_enable",
+                    "default": 0,
+                    "value_parse": {
+                        "0": "Not allowed to issue Memory or I/O Requests",
+                        "1": "Allowed to issue Memory or I/O Requests"
+                    },
+                    "description": "Bus Master Enable - Controls the ability of a Function to issue Memory 149 and I/O Read/Write Requests,\nand the ability of a Port to forward Memory and I/O Read/Write Requests in the Upstream direction\n• Functions with a Type 0 Configuration Space Header:\nWhen this bit is Set, the Function is allowed to issue Memory or I/O Requests.\nWhen this bit is Clear, the Function is not allowed to issue any Memory or I/O Requests.\nNote that as MSI/MSI-X interrupt Messages are in-band memory writes, setting the Bus Master\nEnable bit to 0b disables MSI/MSI-X interrupt Messages as well.\nTransactions for a VF that has its Bus Master Enable Set must not be blocked by transactions\nfor VFs that have their Bus Master Enable Cleared.\nRequests other than Memory or I/O Requests are not controlled by this bit.\nDefault value of this bit is 0b.\nThis bit is hardwired to 0b if a Function does not generate Memory or I/O Requests.\n• Functions with a Type 1 Configurations Space Header:\nThis bit controls the initiating of and the forwarding of Memory or I/O Requests by a Port in the\nUpstream direction. When this bit is 0b, Memory and I/O Requests received at a Root Port or\nthe Downstream side of a Switch Port must be handled as Unsupported Requests (UR), and for\nNon-Posted Requests a Completion with UR Completion Status must be returned. This bit does\nnot affect forwarding of Completions in either the Upstream or Downstream direction.\nThe forwarding of Requests other than Memory or I/O Requests is not controlled by this bit.\nDefault value of this bit is 0b.",
+                    "attributes": "RW"
+                },
+                {
+                    "bit": 3,
+                    "bit_width": 1,
+                    "name": "special_cycle_enable",
+                    "default": 0,
+                    "description": "Special Cycle Enable - This bit was originally described in the [PCI]. Its functionality does not apply to\nPCI Express and the bit must be hardwired to 0b.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 4,
+                    "bit_width": 1,
+                    "name": "memory_write_invalidate",
+                    "default": 0,
+                    "description": "Memory Write and Invalidate - This bit was originally described in the [PCI] and the [PCI-to-PCI-Bridge].\nIts functionality does not apply to PCI Express and the bit must be hardwired to 0b. For PCI Express to\nPCI/PCI-X Bridges, refer to the [PCIe-to-PCI-PCI-X-Bridge] for requirements for this register.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 5,
+                    "bit_width": 1,
+                    "name": "vga_palette_snoop",
+                    "default": 0,
+                    "description": "VGA Palette Snoop - This bit was originally described in the [PCI] and the [PCI-to-PCI-Bridge]. Its\nfunctionality does not apply to PCI Express and the bit must be hardwired to 0b.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 6,
+                    "bit_width": 1,
+                    "name": "parity_error_response",
+                    "default": 0,
+                    "description": "Parity Error Response - See § Section 7.5.1.1.14 .\nThis bit controls the logging of poisoned TLPs in the Master Data Parity Error bit in the Status Register.\nAn RCiEP that is not associated with a Root Complex Event Collector is permitted to hardwire this bit to\n0b.\nDefault value of this bit is 0b.",
+                    "attributes": "RW\nVF RsvdP"
+                },
+                {
+                    "bit": 7,
+                    "bit_width": 1,
+                    "name": "id_sel_stepping_wait_cycle_control",
+                    "default": 0,
+                    "description": "IDSEL Stepping/Wait Cycle Control - This bit was originally described in the [PCI]. Its functionality does\nnot apply to PCI Express and the bit must be hardwired to 0b.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 8,
+                    "bit_width": 1,
+                    "name": "serr_enable",
+                    "default": 0,
+                    "value_parse": {
+                        "0": "SERR# reporting disabled",
+                        "1": "SERR# reporting enabled"
+                    },
+                    "description": "SERR# Enable - See § Section 7.5.1.1.14 .\nWhen Set, this bit enables reporting upstream of Non-fatal and Fatal errors detected by the Function.\nNote that errors are reported if enabled either through this bit or through the PCI Express specific bits in\nthe Device Control Register (see § Section 7.5.3.4 ).\nIn addition, for Functions with Type 1 Configuration Space Headers, this bit controls transmission by the\nprimary interface of ERR_NONFATAL and ERR_FATAL error Messages forwarded from the secondary\ninterface. This bit does not affect the transmission of forwarded ERR_COR messages.\nAn RCiEP that is not associated with a Root Complex Event Collector is permitted to hardwire this bit to\n0b.\nDefault value of this bit is 0b.",
+                    "attributes": "RW\nVF RsvdP"
+                },
+                {
+                    "bit": 9,
+                    "bit_width": 1,
+                    "name": "fast_back_to_back_enable",
+                    "default": 0,
+                    "description": "Fast Back-to-Back Transactions Enable - This bit was originally described in the [PCI]. Its functionality\ndoes not apply to PCI Express and the bit must be hardwired to 0b.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 10,
+                    "bit_width": 1,
+                    "name": "interrupt_disable",
+                    "default": 0,
+                    "value_parse": {
+                        "0": "INTx interrupts enabled",
+                        "1": "INTx interrupts disabled"
+                    },
+                    "description": "Interrupt Disable - Controls the ability of a Function to generate INTx emulation interrupts. When Set,\nFunctions are prevented from asserting INTx interrupts.\nAny INTx emulation interrupts already asserted by the Function must be deasserted when this bit is Set.\nAs described in § Section 2.2.8.1 , INTx interrupts use virtual wires that must, if asserted, be deasserted\nusing the appropriate Deassert_INTx message(s) when this bit is Set.\nOnly the INTx virtual wire interrupt(s) associated with the Function(s) for which this bit is Set are\naffected.\nFor Functions with a Type 0 Configuration Space Header that generate INTx interrupts, this bit is\nrequired. For Functions with a Type 0 Configuration Space Header that do not generate INTx interrupts,\nthis bit is optional. If not implemented, this bit must be hardwired to 0b.\nFor Functions with a Type 1 Configuration Space Header that generate INTx interrupts on their own\nbehalf, this bit is required. This bit has no effect on interrupts forwarded from the secondary side.\nFor Functions with a Type 1 Configuration Space Header that do not generate INTx interrupts on their\nown behalf this bit is optional. If not implemented, this bit must be hardwired to 0b.\nDefault value of this bit is 0b.\nThis bit does not apply to VFs and must be hardwired to Zero.",
+                    "attributes": "RW\nVF ROZ"
+                }
+            ]
+        }
+    }
+}
