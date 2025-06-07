@@ -190,32 +190,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // Mock memory regions data (this would come from backend)
         memoryRegions = [{
                 name: 'PCIe Config Space',
-                startAddress: 0x0000,
+                startAddress: 0x4000,
                 size: 0x1000,
                 type: 'pcie',
                 description: '4KB PCIe Configuration Space'
             },
             {
                 name: 'MEMBAR0',
-                startAddress: 0x2000000,
-                size: 0x100000,
+                startAddress: 0x6000,
+                size: 0x2000,
                 type: 'membar0',
                 description: '1MB Memory BAR 0'
             },
-            {
-                name: 'MEMBAR1',
-                startAddress: 0x2100000,
-                size: 0x200000,
-                type: 'membar1',
-                description: '2MB Memory BAR 1'
-            },
-            {
-                name: 'Reserved',
-                startAddress: 0x1000,
-                size: 0x1FFF000,
-                type: 'reserved',
-                description: 'Reserved Memory Space'
-            }
         ];
 
         // Sort by start address (lowest first, will be reversed by CSS)

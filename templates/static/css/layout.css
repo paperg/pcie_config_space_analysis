@@ -115,19 +115,19 @@ body.dark-theme .memory-layout .memory-regions-container {
   border: 2px solid white;
 }
 .memory-layout .memory-regions-container .memory-region .region-label {
-  font-size: 0.11rem;
+  font-size: 0.2rem;
   font-weight: bold;
   margin-bottom: 0.02rem;
   line-height: 1.2;
 }
 .memory-layout .memory-regions-container .memory-region .region-address {
-  font-size: 0.09rem;
+  font-size: 0.15rem;
   opacity: 0.9;
   font-family: 'Courier New', monospace;
   margin-bottom: 0.01rem;
 }
 .memory-layout .memory-regions-container .memory-region .region-size {
-  font-size: 0.08rem;
+  font-size: 0.15rem;
   opacity: 0.8;
 }
 .memory-layout .memory-regions-container .memory-region.region-0 {
@@ -172,7 +172,7 @@ body.dark-theme .memory-layout .memory-regions-container .memory-region.reserved
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  font-size: 0.12rem;
+  font-size: 0.25rem;
 }
 body.dark-theme .memory-data {
   background: #1a1a1a;
@@ -184,7 +184,7 @@ body.dark-theme .memory-data {
   background: #f8f9fa;
   border-bottom: 1px solid #ddd;
   font-weight: bold;
-  font-size: 0.12rem;
+  font-size: 0.2rem;
 }
 body.dark-theme .memory-data .data-header {
   background: #262626;
