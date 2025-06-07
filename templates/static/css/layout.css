@@ -203,7 +203,7 @@ body.dark-theme .memory-data .data-header {
   overflow: visible;
   padding: 0.1rem 0.2rem;
   font-family: 'Courier New', monospace;
-  font-size: 0.12rem;
+  font-size: 0.2rem;
   line-height: 1.4;
 }
 .memory-data .data-container .data-row {
@@ -233,7 +233,7 @@ body.dark-theme .memory-data .data-container .data-row .address {
   gap: 4px;
 }
 .memory-data .data-container .data-row .bytes .byte {
-  width: 0.2rem;
+  width: 0.35rem;
   text-align: center;
   font-family: 'Courier New', monospace;
   position: relative;
@@ -407,14 +407,14 @@ body.dark-theme .register-layout .bit-scale {
 .register-layout .bit-scale .bit-scale-row {
   display: flex;
   align-items: center;
-  font-size: 0.11rem;
+  font-size: 0.15rem;
   font-weight: bold;
 }
 .register-layout .bit-scale .bit-scale-row .offset-label {
   width: 0.6rem;
   text-align: center;
   color: #399bff;
-  font-size: 0.1rem;
+  font-size: 0.2rem;
 }
 body.dark-theme .register-layout .bit-scale .bit-scale-row .offset-label {
   color: #66b3ff;
@@ -428,7 +428,7 @@ body.dark-theme .register-layout .bit-scale .bit-scale-row .offset-label {
 }
 .register-layout .bit-scale .bit-scale-row .bits-container .bit-number {
   color: #666666;
-  font-size: 0.09rem;
+  font-size: 0.15rem;
   padding: 0.02rem 0;
 }
 body.dark-theme .register-layout .bit-scale .bit-scale-row .bits-container .bit-number {
@@ -466,7 +466,7 @@ body.dark-theme .register-layout .pcie-register-map .register-row {
   background: #f8f9fa;
   border-right: 1px solid #e0e0e0;
   font-family: 'Courier New', monospace;
-  font-size: 0.1rem;
+  font-size: 0.15rem;
   font-weight: bold;
   color: #399bff;
   position: sticky;
@@ -490,7 +490,7 @@ body.dark-theme .register-layout .pcie-register-map .register-row .register-offs
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  font-size: 0.09rem;
+  font-size: 0.15rem;
   text-align: center;
   border-right: 1px solid #e0e0e0;
   cursor: pointer;
@@ -547,7 +547,7 @@ body.dark-theme .register-layout .pcie-register-map .register-row .register-fiel
 }
 .register-layout .pcie-register-map .register-row .register-fields .register-field .register-name {
   font-weight: bold;
-  font-size: 0.09rem;
+  font-size: 0.15rem;
   margin-bottom: 0.04rem;
   line-height: 1.1;
   color: #000000;
@@ -561,7 +561,7 @@ body.dark-theme .register-layout .pcie-register-map .register-row .register-fiel
 }
 .register-layout .pcie-register-map .register-row .register-fields .register-field .register-value {
   font-family: 'Courier New', monospace;
-  font-size: 0.08rem;
+  font-size: 0.15rem;
   font-weight: bold;
   color: #399bff;
   text-align: center;
@@ -596,7 +596,7 @@ body.dark-theme .register-layout .selected-block-header h4 {
 }
 .register-layout .selected-block-header p {
   margin: 0.02rem 0;
-  font-size: 0.1rem;
+  font-size: 0.15rem;
   color: #666666;
   line-height: 1.3;
 }
