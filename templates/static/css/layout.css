@@ -160,6 +160,7 @@ body.dark-theme .memory-data .data-container .data-row .address {
   width: 0.2rem;
   text-align: center;
   font-family: 'Courier New', monospace;
+  position: relative;
 }
 .memory-data .data-container .data-row .bytes .byte.highlighted {
   background-color: #399bff;
@@ -173,6 +174,16 @@ body.dark-theme .memory-data .data-container .data-row .bytes .byte.highlighted 
   border-radius: 0.02rem;
   transition: all 0.2s ease;
   cursor: pointer;
+}
+.memory-data .data-container .data-row .bytes .byte.register-block:before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  pointer-events: auto;
+  z-index: 1;
 }
 .memory-data .data-container .data-row .bytes .byte.register-block.block-0 {
   background-color: rgba(255, 99, 71, 0.4);
@@ -550,6 +561,13 @@ body.dark-theme .device-info .info-item .info-value:hover {
   border-color: #66b3ff;
   background: #262626;
 }
+.device-selector {
+  flex: 2 !important;
+  max-width: 4rem;
+}
+.device-selector .selector-item {
+  gap: 0.04rem !important;
+}
 .device-search-container {
   position: relative;
   width: 100%;
@@ -583,7 +601,7 @@ body.dark-theme .device-search-container #deviceSearch:focus {
   top: 100%;
   left: 0;
   right: 0;
-  max-height: 3rem;
+  max-height: 2.5rem;
   overflow-y: auto;
   background: #ffffff;
   border: 1px solid #e0e0e0;
@@ -602,9 +620,9 @@ body.dark-theme .device-search-container .device-dropdown {
   display: block;
 }
 .device-search-container .device-dropdown .device-option {
-  padding: 0.08rem 0.12rem;
+  padding: 0.06rem 0.08rem;
   cursor: pointer;
-  font-size: 0.11rem;
+  font-size: 0.1rem;
   color: #000000;
   border-bottom: 1px solid #f0f0f0;
   transition: all 0.2s ease;
@@ -629,13 +647,15 @@ body.dark-theme .device-search-container .device-dropdown .device-option.selecte
 .device-search-container .device-dropdown .device-option .device-bdf {
   font-family: 'Courier New', monospace;
   color: #399bff;
-  margin-right: 0.1rem;
+  margin-right: 0.08rem;
+  font-weight: bold;
 }
 body.dark-theme .device-search-container .device-dropdown .device-option .device-bdf {
   color: #66b3ff;
 }
 .device-search-container .device-dropdown .device-option .device-desc {
   color: #666666;
+  font-size: 0.09rem;
 }
 body.dark-theme .device-search-container .device-dropdown .device-option .device-desc {
   color: #999999;

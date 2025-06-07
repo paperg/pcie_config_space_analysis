@@ -226,7 +226,7 @@ body {
                 }
             }
 
-            .bytes {
+                            .bytes {
                 display: flex;
                 gap: 4px;
 
@@ -234,6 +234,7 @@ body {
                     width: 0.2rem;
                     text-align: center;
                     font-family: 'Courier New', monospace;
+                    position: relative;
                     
                     &.highlighted {
                         background-color: @light-theme[primary];
@@ -249,6 +250,18 @@ body {
                         border-radius: 0.02rem;
                         transition: all 0.2s ease;
                         cursor: pointer;
+                        
+                        // Expand clickable area with pseudo-element
+                        &:before {
+                            content: '';
+                            position: absolute;
+                            top: -2px;
+                            left: -2px;
+                            right: -2px;
+                            bottom: -2px;
+                            pointer-events: auto;
+                            z-index: 1;
+                        }
                         
                         // 8 colors for different register blocks
                         &.block-0 { background-color: rgba(255, 99, 71, 0.4); }
@@ -657,6 +670,16 @@ body {
     }
 }
 
+// Device Selector Styles  
+.device-selector {
+    flex: 2 !important;
+    max-width: 4rem;
+    
+    .selector-item {
+        gap: 0.04rem !important;
+    }
+}
+
 .device-search-container {
     position: relative;
     width: 100%;
@@ -694,7 +717,7 @@ body {
         top: 100%;
         left: 0;
         right: 0;
-        max-height: 3rem;
+        max-height: 2.5rem;
         overflow-y: auto;
         background: @light-theme[bg];
         border: 1px solid #e0e0e0;
@@ -715,9 +738,9 @@ body {
         }
 
         .device-option {
-            padding: 0.08rem 0.12rem;
+            padding: 0.06rem 0.08rem;
             cursor: pointer;
-            font-size: 0.11rem;
+            font-size: 0.1rem;
             color: @light-theme[text];
             border-bottom: 1px solid #f0f0f0;
             transition: all 0.2s ease;
@@ -747,7 +770,8 @@ body {
             .device-bdf {
                 font-family: 'Courier New', monospace;
                 color: @light-theme[primary];
-                margin-right: 0.1rem;
+                margin-right: 0.08rem;
+                font-weight: bold;
 
                 body.dark-theme & {
                     color: @dark-theme[primary];
@@ -756,6 +780,7 @@ body {
 
             .device-desc {
                 color: @light-theme[secondary];
+                font-size: 0.09rem;
 
                 body.dark-theme & {
                     color: @dark-theme[secondary];

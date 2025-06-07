@@ -151,6 +151,13 @@ document.addEventListener('DOMContentLoaded', () => {
         deviceDropdown.classList.add('show');
     });
 
+    deviceSearch.addEventListener('blur', () => {
+        // Delay hiding to allow clicks on dropdown
+        setTimeout(() => {
+            deviceDropdown.classList.remove('show');
+        }, 200);
+    });
+
     // Close dropdown when clicking outside
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.device-search-container')) {
@@ -170,6 +177,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return byte.toString(16).padStart(2, '0').toUpperCase();
     };
 
+    // Track the last hovered register block
+    let lastHoveredRegisterBlock = null;
+
     // 创建数据行
     const createDataRow = (address, bytes, highlightOffsets = []) => {
         const row = document.createElement('div');
@@ -181,6 +191,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const bytesDiv = document.createElement('div');
         bytesDiv.className = 'bytes';
+
+        // Track register blocks in this row
+        const blocksInRow = new Set();
 
         bytes.forEach((byte, index) => {
             const byteSpan = document.createElement('span');
@@ -199,26 +212,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 byteSpan.classList.add('register-block', `block-${blockInfo.colorIndex}`);
                 byteSpan.dataset.blockId = blockInfo.id;
                 byteSpan.dataset.blockName = blockInfo.name;
-
-                // Add hover event for register block
-                byteSpan.addEventListener('mouseenter', () => {
-                    highlightRegisterBlock(blockInfo.id);
-                });
-
-                byteSpan.addEventListener('mouseleave', () => {
-                    clearRegisterBlockHighlight();
-                });
-
-                // Add click event to select register block
-                byteSpan.addEventListener('click', () => {
-                    selectRegisterBlock(blockInfo);
-                });
+                blocksInRow.add(blockInfo.id);
             }
-
-
 
             byteSpan.textContent = formatByte(byte);
             bytesDiv.appendChild(byteSpan);
+        });
+
+        // Add byte-level hover events for register blocks
+        bytesDiv.addEventListener('mouseover', (e) => {
+            // Find which register block is being hovered
+            const target = e.target;
+            if (target.classList.contains('byte') && target.dataset.blockId) {
+                const blockId = parseInt(target.dataset.blockId);
+                const blockInfo = registerBlocks[blockId];
+
+                if (blockInfo) {
+                    highlightRegisterBlock(blockId);
+                    // Show register block details in right panel and remember it
+                    lastHoveredRegisterBlock = blockInfo;
+                    generateRegisterMap(currentRegisterData[currentRegion] || [], blockInfo);
+                    registerCount.textContent = `${blockInfo.name} - ${blockInfo.registers.length} registers`;
+                }
+            }
+        });
+
+        bytesDiv.addEventListener('mouseleave', () => {
+            clearRegisterBlockHighlight();
+            // Don't clear the register layout - keep the last hovered block
         });
 
         row.appendChild(addressSpan);
@@ -271,15 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Select register block and show its details in right panel
-    const selectRegisterBlock = (blockInfo) => {
-        selectedRegisterBlock = blockInfo;
-        generateRegisterMap(currentRegisterData[currentRegion] || [], blockInfo);
-        registerCount.textContent = `${blockInfo.name} - ${blockInfo.registers.length} registers`;
 
-        // Highlight the selected block
-        highlightRegisterBlock(blockInfo.id);
-    };
 
 
 
@@ -294,13 +307,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 生成 PCIe 规范样式的寄存器分布图
     const generateRegisterMap = (currentData = [], selectedBlock = null) => {
-        registerMap.innerHTML = '';
-
         // If a specific block is selected, only show that block's registers
         if (selectedBlock && selectedBlock.registers) {
             generateSelectedBlockLayout(currentData, selectedBlock);
             return;
         }
+
+        registerMap.innerHTML = '';
 
         // Define PCIe register layout (first 64 bytes - standard header)
         const pcieLayout = [
@@ -610,6 +623,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Generate layout for selected register block only
     const generateSelectedBlockLayout = (currentData, selectedBlock) => {
+        // Clear previous content
+        registerMap.innerHTML = '';
+
         // Show block header
         const blockHeader = document.createElement('div');
         blockHeader.className = 'selected-block-header';
@@ -744,9 +760,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // Display memory data
             displayMemoryData(data);
 
-            // Generate register map for PCIe config space
+            // Initialize register map display
             if (region === 'pcie') {
-                generateRegisterMap(data);
+                // Show last hovered register block if exists, otherwise show default message
+                if (lastHoveredRegisterBlock) {
+                    generateRegisterMap(data, lastHoveredRegisterBlock);
+                    registerCount.textContent = `${lastHoveredRegisterBlock.name} - ${lastHoveredRegisterBlock.registers.length} registers`;
+                } else {
+                    registerMap.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">Hover over a register block in memory view to see details</div>';
+                    registerCount.textContent = 'PCIe Configuration Space';
+                }
             } else {
                 registerMap.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">No register map available for this region</div>';
                 registerCount.textContent = 'Not PCIe Config Space';
@@ -1119,10 +1142,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize
     loadPCIeDevices().then(() => {
-        // Auto-select first device if available
-        if (pcieDevices.length > 0) {
-            selectDevice(pcieDevices[0]);
-        }
+        // Leave device search empty by default
+        deviceSearch.value = '';
 
         // Auto-click PCIe config space on load
         setTimeout(() => {
