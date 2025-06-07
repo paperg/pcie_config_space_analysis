@@ -53,40 +53,116 @@ body.dark-theme .memory-layout {
   border-color: #333333;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
-.memory-layout .region {
+.memory-layout .memory-layout-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.12rem 0.15rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #ddd;
+}
+body.dark-theme .memory-layout .memory-layout-header {
+  background: #262626;
+  border-bottom-color: #333333;
+}
+.memory-layout .memory-layout-header h3 {
+  margin: 0;
+  color: #399bff;
+  font-size: 0.14rem;
+}
+body.dark-theme .memory-layout .memory-layout-header h3 {
+  color: #66b3ff;
+}
+.memory-layout .memory-layout-header .memory-stats {
+  font-size: 0.1rem;
+  color: #666666;
+}
+body.dark-theme .memory-layout .memory-layout-header .memory-stats {
+  color: #999999;
+}
+.memory-layout .memory-regions-container {
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column-reverse;
+  padding: 0.08rem;
+  gap: 1px;
+  background: #e0e0e0;
+}
+body.dark-theme .memory-layout .memory-regions-container {
+  background: #333333;
+}
+.memory-layout .memory-regions-container .memory-region {
+  display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  padding: 20px;
+  padding: 0.08rem;
   text-align: center;
   color: white;
   position: relative;
+  border-radius: 0.02rem;
+  min-height: 0.6rem;
 }
-.memory-layout .region:hover {
+.memory-layout .memory-regions-container .memory-region:hover {
   filter: brightness(1.1);
+  transform: scale(1.02);
 }
-.memory-layout .region.pcie-config {
-  background-color: #4a90e2;
-}
-.memory-layout .region.membar0 {
-  background-color: #50c878;
-}
-.memory-layout .region.active {
+.memory-layout .memory-regions-container .memory-region.active {
   filter: brightness(1.2);
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+  border: 2px solid white;
 }
-.memory-layout .region .region-label {
-  font-size: 0.2rem;
+.memory-layout .memory-regions-container .memory-region .region-label {
+  font-size: 0.11rem;
   font-weight: bold;
-  margin-bottom: 0.08rem;
+  margin-bottom: 0.02rem;
+  line-height: 1.2;
 }
-.memory-layout .region .region-size {
-  font-size: 0.16rem;
+.memory-layout .memory-regions-container .memory-region .region-address {
+  font-size: 0.09rem;
   opacity: 0.9;
+  font-family: 'Courier New', monospace;
+  margin-bottom: 0.01rem;
+}
+.memory-layout .memory-regions-container .memory-region .region-size {
+  font-size: 0.08rem;
+  opacity: 0.8;
+}
+.memory-layout .memory-regions-container .memory-region.region-0 {
+  background-color: #4a90e2;
+}
+.memory-layout .memory-regions-container .memory-region.region-1 {
+  background-color: #50c878;
+}
+.memory-layout .memory-regions-container .memory-region.region-2 {
+  background-color: #ff6b6b;
+}
+.memory-layout .memory-regions-container .memory-region.region-3 {
+  background-color: #ffa726;
+}
+.memory-layout .memory-regions-container .memory-region.region-4 {
+  background-color: #ab47bc;
+}
+.memory-layout .memory-regions-container .memory-region.region-5 {
+  background-color: #26a69a;
+}
+.memory-layout .memory-regions-container .memory-region.region-6 {
+  background-color: #ef5350;
+}
+.memory-layout .memory-regions-container .memory-region.region-7 {
+  background-color: #7e57c2;
+}
+.memory-layout .memory-regions-container .memory-region.reserved {
+  background-color: #bdbdbd;
+  color: #666;
+  font-style: italic;
+  opacity: 0.6;
+}
+body.dark-theme .memory-layout .memory-regions-container .memory-region.reserved {
+  background-color: #424242;
+  color: #999;
 }
 .memory-data {
   width: calc(100vw * 3 / 7);
@@ -312,7 +388,9 @@ body.dark-theme .register-layout .register-layout-header .register-stats {
 .register-layout .register-map-container {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 10px;
+  position: relative;
 }
 .register-layout .bit-scale {
   background: #f8f9fa;
@@ -361,6 +439,8 @@ body.dark-theme .register-layout .bit-scale .bit-scale-row .bits-container .bit-
   flex-direction: column;
   gap: 1px;
   background: #e0e0e0;
+  width: 100%;
+  box-sizing: border-box;
 }
 body.dark-theme .register-layout .pcie-register-map {
   background: #333333;
@@ -369,13 +449,17 @@ body.dark-theme .register-layout .pcie-register-map {
   display: flex;
   align-items: stretch;
   background: white;
-  min-height: 0.3rem;
+  min-height: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 body.dark-theme .register-layout .pcie-register-map .register-row {
   background: #1a1a1a;
 }
 .register-layout .pcie-register-map .register-row .register-offset {
   width: 0.6rem;
+  min-width: 0.6rem;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -385,6 +469,9 @@ body.dark-theme .register-layout .pcie-register-map .register-row {
   font-size: 0.1rem;
   font-weight: bold;
   color: #399bff;
+  position: sticky;
+  left: 0;
+  z-index: 5;
 }
 body.dark-theme .register-layout .pcie-register-map .register-row .register-offset {
   background: #262626;
@@ -395,20 +482,23 @@ body.dark-theme .register-layout .pcie-register-map .register-row .register-offs
   flex: 1;
   display: flex;
   align-items: stretch;
+  width: calc(100% - 0.6rem);
+  overflow: hidden;
 }
 .register-layout .pcie-register-map .register-row .register-fields .register-field {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
   font-size: 0.09rem;
-  font-weight: bold;
   text-align: center;
   border-right: 1px solid #e0e0e0;
   cursor: pointer;
   transition: all 0.3s ease;
-  line-height: 1.2;
-  padding: 0.02rem;
+  padding: 0.08rem 0.04rem;
   word-break: break-word;
+  min-height: 0.5rem;
+  box-sizing: border-box;
 }
 body.dark-theme .register-layout .pcie-register-map .register-row .register-fields .register-field {
   border-right-color: #333333;
@@ -455,16 +545,46 @@ body.dark-theme .register-layout .pcie-register-map .register-row .register-fiel
 body.dark-theme .register-layout .pcie-register-map .register-row .register-fields .register-field.control {
   background: rgba(75, 192, 192, 0.3);
 }
+.register-layout .pcie-register-map .register-row .register-fields .register-field .register-name {
+  font-weight: bold;
+  font-size: 0.09rem;
+  margin-bottom: 0.04rem;
+  line-height: 1.1;
+  color: #000000;
+  text-align: center;
+  word-wrap: break-word;
+  hyphens: auto;
+  max-width: 100%;
+}
+body.dark-theme .register-layout .pcie-register-map .register-row .register-fields .register-field .register-name {
+  color: #ffffff;
+}
+.register-layout .pcie-register-map .register-row .register-fields .register-field .register-value {
+  font-family: 'Courier New', monospace;
+  font-size: 0.08rem;
+  font-weight: bold;
+  color: #399bff;
+  text-align: center;
+  word-break: break-all;
+}
+body.dark-theme .register-layout .pcie-register-map .register-row .register-fields .register-field .register-value {
+  color: #66b3ff;
+}
 .register-layout .selected-block-header {
   background: #f8f9fa;
   padding: 0.15rem;
   margin-bottom: 0.1rem;
   border-radius: 0.06rem;
   border-left: 4px solid #399bff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 body.dark-theme .register-layout .selected-block-header {
   background: #262626;
   border-left-color: #66b3ff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 .register-layout .selected-block-header h4 {
   margin: 0 0 0.05rem 0;
@@ -571,6 +691,7 @@ body.dark-theme .device-info .info-item .info-value:hover {
 .device-search-container {
   position: relative;
   width: 100%;
+  height: fit-content;
 }
 .device-search-container #deviceSearch {
   width: 100%;

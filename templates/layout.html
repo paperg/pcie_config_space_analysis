@@ -64,13 +64,12 @@
     <div class="container">
       <!-- 左侧内存布局 (1/7) -->
       <div class="memory-layout">
-        <div class="region pcie-config" data-region="pcie">
-          <div class="region-label">PCIe Config Space</div>
-          <div class="region-size">4KB</div>
+        <div class="memory-layout-header">
+          <h3>Memory Layout</h3>
+          <div class="memory-stats">Physical Memory Map</div>
         </div>
-        <div class="region membar0" data-region="membar0">
-          <div class="region-label">MEMBAR0 Space</div>
-          <div class="region-size">Variable Size</div>
+        <div class="memory-regions-container" id="memory-regions-container">
+          <!-- Memory regions will be populated dynamically -->
         </div>
       </div>
 

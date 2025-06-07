@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const dataContainer = document.getElementById('data-container');
     const loadingIndicator = document.getElementById('loading');
-    const regions = document.querySelectorAll('.region');
     const registerMap = document.getElementById('register-map');
     const registerCount = document.getElementById('register-count');
     const deviceSearch = document.getElementById('deviceSearch');
@@ -51,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedDevice = null;
     let registerBlocks = [];
     let selectedRegisterBlock = null;
+    let memoryRegions = [];
 
     // Load PCIe devices from lspci.txt
     async function loadPCIeDevices() {
@@ -179,6 +179,87 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Track the last hovered register block
     let lastHoveredRegisterBlock = null;
+
+    // Generate memory layout
+    function generateMemoryLayout() {
+        const container = document.getElementById('memory-regions-container');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        // Mock memory regions data (this would come from backend)
+        memoryRegions = [{
+                name: 'PCIe Config Space',
+                startAddress: 0x0000,
+                size: 0x1000,
+                type: 'pcie',
+                description: '4KB PCIe Configuration Space'
+            },
+            {
+                name: 'MEMBAR0',
+                startAddress: 0x2000000,
+                size: 0x100000,
+                type: 'membar0',
+                description: '1MB Memory BAR 0'
+            },
+            {
+                name: 'MEMBAR1',
+                startAddress: 0x2100000,
+                size: 0x200000,
+                type: 'membar1',
+                description: '2MB Memory BAR 1'
+            },
+            {
+                name: 'Reserved',
+                startAddress: 0x1000,
+                size: 0x1FFF000,
+                type: 'reserved',
+                description: 'Reserved Memory Space'
+            }
+        ];
+
+        // Sort by start address (lowest first, will be reversed by CSS)
+        memoryRegions.sort((a, b) => a.startAddress - b.startAddress);
+
+        // Calculate total memory span
+        const maxAddress = Math.max(...memoryRegions.map(r => r.startAddress + r.size));
+        const minAddress = Math.min(...memoryRegions.map(r => r.startAddress));
+        const totalSpan = maxAddress - minAddress;
+
+        memoryRegions.forEach((region, index) => {
+            const regionDiv = document.createElement('div');
+            regionDiv.className = `memory-region ${region.type === 'reserved' ? 'reserved' : `region-${index % 8}`}`;
+            regionDiv.dataset.region = region.type;
+
+            // Calculate relative height based on size
+            const relativeHeight = (region.size / totalSpan) * 100;
+            regionDiv.style.height = `${Math.max(relativeHeight, 8)}%`; // Minimum 8% height
+
+            regionDiv.innerHTML = `
+                <div class="region-label">${region.name}</div>
+                <div class="region-address">0x${region.startAddress.toString(16).padStart(8, '0').toUpperCase()}</div>
+                <div class="region-size">${formatSize(region.size)}</div>
+            `;
+
+            // Add click event
+            regionDiv.addEventListener('click', () => {
+                handleRegionClick(region.type);
+            });
+
+            container.appendChild(regionDiv);
+        });
+    }
+
+    // Format size helper
+    function formatSize(bytes) {
+        if (bytes >= 1024 * 1024) {
+            return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
+        } else if (bytes >= 1024) {
+            return `${(bytes / 1024).toFixed(1)}KB`;
+        } else {
+            return `${bytes}B`;
+        }
+    }
 
     // 创建数据行
     const createDataRow = (address, bytes, highlightOffsets = []) => {
@@ -637,70 +718,128 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         registerMap.appendChild(blockHeader);
 
+        // Group registers by 4-byte (32-bit) aligned rows
+        const registerRows = groupRegistersByRows(selectedBlock.registers);
+
         // Generate rows for this block's registers
-        selectedBlock.registers.forEach(register => {
+        registerRows.forEach(row => {
             const rowElement = document.createElement('div');
             rowElement.className = 'register-row';
 
-            // Offset column
+            // Offset column - use the first register's offset as row offset
             const offsetDiv = document.createElement('div');
             offsetDiv.className = 'register-offset';
-            offsetDiv.textContent = `${register.offset.toString(16).padStart(4, '0').toUpperCase()}h`;
+            offsetDiv.textContent = `${row.offset.toString(16).padStart(4, '0').toUpperCase()}h`;
 
-            // Register field
+            // Register fields
             const fieldsDiv = document.createElement('div');
             fieldsDiv.className = 'register-fields';
 
-            const fieldDiv = document.createElement('div');
-            fieldDiv.className = 'register-field header'; // Use header color for simplicity
-            fieldDiv.style.width = '100%';
+            row.registers.forEach(register => {
+                const fieldDiv = document.createElement('div');
+                fieldDiv.className = `register-field ${getRegisterType(register)}`;
 
-            // Get register value from data
-            let value = 0;
-            if (currentData && currentData.length > register.offset) {
-                const bytesToRead = Math.min(4, register.size);
-                for (let i = 0; i < bytesToRead; i++) {
-                    if (register.offset + i < currentData.length) {
-                        value |= (currentData[register.offset + i] << (i * 8));
+                // Calculate width based on register size (bits)
+                const registerBits = register.size * 8;
+                fieldDiv.style.width = `${(registerBits / 32) * 100}%`;
+
+                // Get register value from data
+                let value = 0;
+                if (currentData && currentData.length > register.offset) {
+                    const bytesToRead = register.size;
+                    for (let i = 0; i < bytesToRead; i++) {
+                        if (register.offset + i < currentData.length) {
+                            value |= (currentData[register.offset + i] << (i * 8));
+                        }
                     }
                 }
-            }
 
-            fieldDiv.innerHTML = `
-                <div style="font-weight: bold; margin-bottom: 0.02rem;">${register.name}</div>
-                <div style="font-family: 'Courier New', monospace; font-size: 0.08rem;">
-                    Value: 0x${value.toString(16).padStart(8, '0').toUpperCase()}
-                </div>
-                <div style="font-size: 0.07rem; color: #666; margin-top: 0.02rem;">
-                    ${register.description || 'No description'}
-                </div>
-            `;
+                // Format value based on register size
+                const hexWidth = register.size * 2; // 2 hex chars per byte
+                const formattedValue = value.toString(16).padStart(hexWidth, '0').toUpperCase();
 
-            // Add click event to highlight in memory view
-            fieldDiv.addEventListener('click', () => {
-                const highlightOffsets = [];
-                for (let i = 0; i < register.size; i++) {
-                    highlightOffsets.push(register.offset + i);
-                }
-                displayMemoryData(currentData, highlightOffsets);
+                fieldDiv.innerHTML = `
+                    <div class="register-name">${register.name}</div>
+                    <div class="register-value">0x${formattedValue}</div>
+                `;
 
-                // Scroll to register position in memory view
-                const targetRow = Math.floor(register.offset / 16);
-                const rows = dataContainer.querySelectorAll('.data-row');
-                if (rows[targetRow]) {
-                    rows[targetRow].scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
-                }
+                // Add click event to highlight in memory view
+                fieldDiv.addEventListener('click', () => {
+                    const highlightOffsets = [];
+                    for (let i = 0; i < register.size; i++) {
+                        highlightOffsets.push(register.offset + i);
+                    }
+                    displayMemoryData(currentData, highlightOffsets);
+
+                    // Scroll to register position in memory view
+                    const targetRow = Math.floor(register.offset / 16);
+                    const rows = dataContainer.querySelectorAll('.data-row');
+                    if (rows[targetRow]) {
+                        rows[targetRow].scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                    }
+                });
+
+                fieldsDiv.appendChild(fieldDiv);
             });
 
-            fieldsDiv.appendChild(fieldDiv);
             rowElement.appendChild(offsetDiv);
             rowElement.appendChild(fieldsDiv);
             registerMap.appendChild(rowElement);
         });
     };
+
+    // Group registers into 4-byte aligned rows (like PCIe spec)
+    function groupRegistersByRows(registers) {
+        // Sort registers by offset
+        const sortedRegisters = [...registers].sort((a, b) => a.offset - b.offset);
+        const rows = [];
+
+        let currentRow = null;
+        let currentRowOffset = -1;
+
+        sortedRegisters.forEach(register => {
+            const alignedOffset = Math.floor(register.offset / 4) * 4; // 4-byte aligned
+
+            // Start new row if offset changes or current row would exceed 4 bytes
+            if (currentRowOffset !== alignedOffset ||
+                (currentRow && (currentRow.totalBytes + register.size > 4))) {
+
+                currentRowOffset = alignedOffset;
+                currentRow = {
+                    offset: alignedOffset,
+                    registers: [],
+                    totalBytes: 0
+                };
+                rows.push(currentRow);
+            }
+
+            currentRow.registers.push(register);
+            currentRow.totalBytes += register.size;
+        });
+
+        return rows;
+    }
+
+    // Get register type for styling
+    function getRegisterType(register) {
+        const name = register.name.toLowerCase();
+        if (name.includes('vendor') || name.includes('device') || name.includes('class') ||
+            name.includes('revision') || name.includes('header') || name.includes('subsystem')) {
+            return 'header';
+        } else if (name.includes('bar') || name.includes('base address') || name.includes('rom')) {
+            return 'bar';
+        } else if (name.includes('command') || name.includes('status') || name.includes('control') ||
+            name.includes('interrupt') || name.includes('latency') || name.includes('bist')) {
+            return 'control';
+        } else if (name.includes('capability') || name.includes('cap') || name.includes('pointer')) {
+            return 'capability';
+        } else {
+            return 'header'; // default
+        }
+    }
 
 
 
@@ -711,9 +850,12 @@ document.addEventListener('DOMContentLoaded', () => {
             dataContainer.innerHTML = '';
 
             // Remove active class from all regions
-            regions.forEach(r => r.classList.remove('active'));
+            document.querySelectorAll('.memory-region').forEach(r => r.classList.remove('active'));
             // Add active class to clicked region
-            document.querySelector(`[data-region="${region}"]`).classList.add('active');
+            const targetRegion = document.querySelector(`[data-region="${region}"]`);
+            if (targetRegion) {
+                targetRegion.classList.add('active');
+            }
 
             currentRegion = region;
 
@@ -850,13 +992,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                     {
                         offset: 0x04,
-                        name: 'Command Register',
+                        name: 'Command',
                         size: 2,
                         description: 'Controls device operation'
                     },
                     {
                         offset: 0x06,
-                        name: 'Status Register',
+                        name: 'Status',
                         size: 2,
                         description: 'Reports device status'
                     },
@@ -868,33 +1010,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                     {
                         offset: 0x09,
-                        name: 'Programming Interface',
-                        size: 1,
-                        description: 'Programming interface identifier'
-                    },
-                    {
-                        offset: 0x0A,
-                        name: 'Sub Class Code',
-                        size: 1,
-                        description: 'Device sub-class'
-                    },
-                    {
-                        offset: 0x0B,
-                        name: 'Base Class Code',
-                        size: 1,
-                        description: 'Device base class'
+                        name: 'Class Code',
+                        size: 3,
+                        description: 'Device class, subclass and interface'
                     },
                     {
                         offset: 0x0C,
                         name: 'Cache Line Size',
                         size: 1,
-                        description: 'Cache line size'
+                        description: 'Cache line size in 32-bit words'
                     },
                     {
                         offset: 0x0D,
                         name: 'Latency Timer',
                         size: 1,
-                        description: 'Latency timer'
+                        description: 'Master latency timer'
                     },
                     {
                         offset: 0x0E,
@@ -906,7 +1036,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         offset: 0x0F,
                         name: 'BIST',
                         size: 1,
-                        description: 'Built-in self test register'
+                        description: 'Built-in self test control/status'
                     },
                     {
                         offset: 0x10,
@@ -945,6 +1075,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         description: 'Memory or I/O base address'
                     },
                     {
+                        offset: 0x28,
+                        name: 'Cardbus CIS Pointer',
+                        size: 4,
+                        description: 'Pointer to Card Information Structure'
+                    },
+                    {
                         offset: 0x2C,
                         name: 'Subsystem Vendor ID',
                         size: 2,
@@ -952,33 +1088,57 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                     {
                         offset: 0x2E,
-                        name: 'Subsystem Device ID',
+                        name: 'Subsystem ID',
                         size: 2,
                         description: 'Subsystem device identifier'
                     },
                     {
                         offset: 0x30,
-                        name: 'Expansion ROM Base Address',
+                        name: 'Expansion ROM Base',
                         size: 4,
                         description: 'Expansion ROM base address'
                     },
                     {
                         offset: 0x34,
-                        name: 'Capabilities Pointer',
+                        name: 'Cap Pointer',
                         size: 1,
-                        description: 'Pointer to capabilities list'
+                        description: 'Capabilities list pointer'
+                    },
+                    {
+                        offset: 0x35,
+                        name: 'Reserved',
+                        size: 3,
+                        description: 'Reserved for future use'
+                    },
+                    {
+                        offset: 0x38,
+                        name: 'Reserved',
+                        size: 4,
+                        description: 'Reserved for future use'
                     },
                     {
                         offset: 0x3C,
                         name: 'Interrupt Line',
                         size: 1,
-                        description: 'Interrupt line number'
+                        description: 'Interrupt line routing information'
                     },
                     {
                         offset: 0x3D,
                         name: 'Interrupt Pin',
                         size: 1,
                         description: 'Interrupt pin (INTA#-INTD#)'
+                    },
+                    {
+                        offset: 0x3E,
+                        name: 'Min Grant',
+                        size: 1,
+                        description: 'Minimum bus grant time'
+                    },
+                    {
+                        offset: 0x3F,
+                        name: 'Max Latency',
+                        size: 1,
+                        description: 'Maximum latency'
                     }
                 ]
             },
@@ -989,13 +1149,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 description: 'Power management capability structure for controlling device power states',
                 registers: [{
                         offset: 0x40,
-                        name: 'PM Capability ID',
+                        name: 'Cap ID',
                         size: 1,
                         description: 'Power Management capability ID (0x01)'
                     },
                     {
                         offset: 0x41,
-                        name: 'PM Next Pointer',
+                        name: 'Next Cap',
                         size: 1,
                         description: 'Pointer to next capability'
                     },
@@ -1003,25 +1163,25 @@ document.addEventListener('DOMContentLoaded', () => {
                         offset: 0x42,
                         name: 'PM Capabilities',
                         size: 2,
-                        description: 'Power management capabilities'
+                        description: 'Power management capabilities register'
                     },
                     {
                         offset: 0x44,
                         name: 'PM Control/Status',
                         size: 2,
-                        description: 'Power management control and status'
+                        description: 'Power state control and status'
                     },
                     {
                         offset: 0x46,
-                        name: 'PM Bridge Support',
+                        name: 'PMCSR BSE',
                         size: 1,
                         description: 'Bridge support extensions'
                     },
                     {
                         offset: 0x47,
-                        name: 'PM Data',
+                        name: 'Data',
                         size: 1,
-                        description: 'Optional data register'
+                        description: 'Power management data register'
                     }
                 ]
             },
@@ -1032,39 +1192,57 @@ document.addEventListener('DOMContentLoaded', () => {
                 description: 'Message Signaled Interrupts capability for efficient interrupt handling',
                 registers: [{
                         offset: 0x80,
-                        name: 'MSI Capability ID',
+                        name: 'Cap ID',
                         size: 1,
                         description: 'MSI capability ID (0x05)'
                     },
                     {
                         offset: 0x81,
-                        name: 'MSI Next Pointer',
+                        name: 'Next Cap',
                         size: 1,
                         description: 'Pointer to next capability'
                     },
                     {
                         offset: 0x82,
-                        name: 'MSI Message Control',
+                        name: 'Message Control',
                         size: 2,
-                        description: 'MSI control register'
+                        description: 'MSI enable and configuration'
                     },
                     {
                         offset: 0x84,
-                        name: 'MSI Message Address Low',
+                        name: 'Message Address',
                         size: 4,
-                        description: 'Lower 32 bits of message address'
+                        description: 'MSI message target address'
                     },
                     {
                         offset: 0x88,
-                        name: 'MSI Message Address High',
+                        name: 'Message Upper Address',
                         size: 4,
-                        description: 'Upper 32 bits of message address'
+                        description: 'Upper 32 bits (64-bit capable)'
                     },
                     {
                         offset: 0x8C,
-                        name: 'MSI Message Data',
+                        name: 'Message Data',
                         size: 2,
-                        description: 'Message data pattern'
+                        description: 'MSI data payload'
+                    },
+                    {
+                        offset: 0x8E,
+                        name: 'Reserved',
+                        size: 2,
+                        description: 'Reserved for alignment'
+                    },
+                    {
+                        offset: 0x90,
+                        name: 'Mask Bits',
+                        size: 4,
+                        description: 'MSI per-vector mask'
+                    },
+                    {
+                        offset: 0x94,
+                        name: 'Pending Bits',
+                        size: 4,
+                        description: 'MSI pending interrupts'
                     }
                 ]
             },
@@ -1075,75 +1253,102 @@ document.addEventListener('DOMContentLoaded', () => {
                 description: 'PCI Express capability structure containing PCIe-specific control and status',
                 registers: [{
                         offset: 0xA0,
-                        name: 'PCIe Capability ID',
+                        name: 'Cap ID',
                         size: 1,
                         description: 'PCIe capability ID (0x10)'
                     },
                     {
                         offset: 0xA1,
-                        name: 'PCIe Next Pointer',
+                        name: 'Next Cap',
                         size: 1,
                         description: 'Pointer to next capability'
                     },
                     {
                         offset: 0xA2,
-                        name: 'PCIe Capabilities',
+                        name: 'PCIe Cap',
                         size: 2,
-                        description: 'PCIe capabilities register'
+                        description: 'PCIe capability register'
                     },
                     {
                         offset: 0xA4,
-                        name: 'PCIe Device Capabilities',
+                        name: 'Device Capabilities',
                         size: 4,
                         description: 'PCIe device capabilities'
                     },
                     {
                         offset: 0xA8,
-                        name: 'PCIe Device Control',
+                        name: 'Device Control',
                         size: 2,
-                        description: 'PCIe device control register'
+                        description: 'Device control register'
                     },
                     {
                         offset: 0xAA,
-                        name: 'PCIe Device Status',
+                        name: 'Device Status',
                         size: 2,
-                        description: 'PCIe device status register'
+                        description: 'Device status register'
                     },
                     {
                         offset: 0xAC,
-                        name: 'PCIe Link Capabilities',
+                        name: 'Link Capabilities',
                         size: 4,
                         description: 'PCIe link capabilities'
                     },
                     {
                         offset: 0xB0,
-                        name: 'PCIe Link Control',
+                        name: 'Link Control',
                         size: 2,
-                        description: 'PCIe link control register'
+                        description: 'Link control register'
                     },
                     {
                         offset: 0xB2,
-                        name: 'PCIe Link Status',
+                        name: 'Link Status',
                         size: 2,
-                        description: 'PCIe link status register'
+                        description: 'Link status register'
+                    },
+                    {
+                        offset: 0xB4,
+                        name: 'Slot Capabilities',
+                        size: 4,
+                        description: 'PCIe slot capabilities'
+                    },
+                    {
+                        offset: 0xB8,
+                        name: 'Slot Control',
+                        size: 2,
+                        description: 'Slot control register'
+                    },
+                    {
+                        offset: 0xBA,
+                        name: 'Slot Status',
+                        size: 2,
+                        description: 'Slot status register'
+                    },
+                    {
+                        offset: 0xBC,
+                        name: 'Root Control',
+                        size: 2,
+                        description: 'Root port control'
+                    },
+                    {
+                        offset: 0xBE,
+                        name: 'Root Capabilities',
+                        size: 2,
+                        description: 'Root port capabilities'
                     }
                 ]
             }
         ];
     };
 
-    // 为每个区域添加点击事件监听器
-    regions.forEach(region => {
-        region.addEventListener('click', () => {
-            const regionType = region.dataset.region;
-            handleRegionClick(regionType);
-        });
-    });
+
 
     // Initialize
     loadPCIeDevices().then(() => {
         // Leave device search empty by default
         deviceSearch.value = '';
+
+        // Generate memory layout
+        generateMemoryLayout();
 
         // Auto-click PCIe config space on load
         setTimeout(() => {

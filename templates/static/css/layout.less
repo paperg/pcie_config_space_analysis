@@ -110,43 +110,117 @@ body {
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
-    .region {
+    .memory-layout-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.12rem 0.15rem;
+        background: #f8f9fa;
+        border-bottom: 1px solid @border-color;
+
+        body.dark-theme & {
+            background: #262626;
+            border-bottom-color: #333333;
+        }
+
+        h3 {
+            margin: 0;
+            color: @light-theme[primary];
+            font-size: 0.14rem;
+
+            body.dark-theme & {
+                color: @dark-theme[primary];
+            }
+        }
+
+        .memory-stats {
+            font-size: 0.1rem;
+            color: @light-theme[secondary];
+
+            body.dark-theme & {
+                color: @dark-theme[secondary];
+            }
+        }
+    }
+
+    .memory-regions-container {
         flex: 1;
-        .flex-center();
-        flex-direction: column;
-        cursor: pointer;
-        .transition();
-        padding: 20px;
-        text-align: center;
-        color: white;
-        position: relative;
+        display: flex;
+        flex-direction: column-reverse; // Low address at bottom
+        padding: 0.08rem;
+        gap: 1px;
+        background: #e0e0e0;
 
-        &:hover {
-            filter: brightness(@hover-brightness);
+        body.dark-theme & {
+            background: #333333;
         }
 
-        &.pcie-config {
-            background-color: @primary-color;
-        }
+        .memory-region {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            .transition();
+            padding: 0.08rem;
+            text-align: center;
+            color: white;
+            position: relative;
+            border-radius: 0.02rem;
+            min-height: 0.6rem;
 
-        &.membar0 {
-            background-color: @secondary-color;
-        }
+            &:hover {
+                filter: brightness(@hover-brightness);
+                transform: scale(1.02);
+            }
 
-        &.active {
-            filter: brightness(1.2);
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
-        }
+            &.active {
+                filter: brightness(1.2);
+                box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+                border: 2px solid white;
+            }
 
-        .region-label {
-            font-size: 0.20rem;
-            font-weight: bold;
-            margin-bottom: 0.08rem;
-        }
+            .region-label {
+                font-size: 0.11rem;
+                font-weight: bold;
+                margin-bottom: 0.02rem;
+                line-height: 1.2;
+            }
 
-        .region-size {
-            font-size: 0.16rem;
-            opacity: 0.9;
+            .region-address {
+                font-size: 0.09rem;
+                opacity: 0.9;
+                font-family: 'Courier New', monospace;
+                margin-bottom: 0.01rem;
+            }
+
+            .region-size {
+                font-size: 0.08rem;
+                opacity: 0.8;
+            }
+
+            // Different colors for different regions
+            &.region-0 { background-color: #4a90e2; }
+            &.region-1 { background-color: #50c878; }
+            &.region-2 { background-color: #ff6b6b; }
+            &.region-3 { background-color: #ffa726; }
+            &.region-4 { background-color: #ab47bc; }
+            &.region-5 { background-color: #26a69a; }
+            &.region-6 { background-color: #ef5350; }
+            &.region-7 { background-color: #7e57c2; }
+
+            // Reserved/empty regions
+            &.reserved {
+                background-color: #bdbdbd;
+                color: #666;
+                font-style: italic;
+                opacity: 0.6;
+
+                body.dark-theme & {
+                    background-color: #424242;
+                    color: #999;
+                }
+            }
         }
     }
 }
@@ -383,7 +457,9 @@ body {
     .register-map-container {
         flex: 1;
         overflow-y: auto;
+        overflow-x: hidden;
         padding: 10px;
+        position: relative;
     }
 
     // Bit scale header
@@ -443,6 +519,8 @@ body {
         flex-direction: column;
         gap: 1px;
         background: #e0e0e0;
+        width: 100%;
+        box-sizing: border-box;
 
         body.dark-theme & {
             background: #333333;
@@ -452,7 +530,9 @@ body {
             display: flex;
             align-items: stretch;
             background: white;
-            min-height: 0.3rem;
+            min-height: 0.5rem;
+            width: 100%;
+            box-sizing: border-box;
 
             body.dark-theme & {
                 background: @dark-theme[bg];
@@ -460,6 +540,8 @@ body {
 
             .register-offset {
                 width: 0.6rem;
+                min-width: 0.6rem;
+                flex-shrink: 0;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -469,6 +551,9 @@ body {
                 font-size: 0.1rem;
                 font-weight: bold;
                 color: @light-theme[primary];
+                position: sticky;
+                left: 0;
+                z-index: 5;
 
                 body.dark-theme & {
                     background: #262626;
@@ -481,20 +566,23 @@ body {
                 flex: 1;
                 display: flex;
                 align-items: stretch;
+                width: calc(100% - 0.6rem);
+                overflow: hidden;
 
                 .register-field {
                     display: flex;
-                    align-items: center;
+                    flex-direction: column;
                     justify-content: center;
+                    align-items: center;
                     font-size: 0.09rem;
-                    font-weight: bold;
                     text-align: center;
                     border-right: 1px solid #e0e0e0;
                     cursor: pointer;
                     .transition();
-                    line-height: 1.2;
-                    padding: 0.02rem;
+                    padding: 0.08rem 0.04rem;
                     word-break: break-word;
+                    min-height: 0.5rem;
+                    box-sizing: border-box;
 
                     body.dark-theme & {
                         border-right-color: #333333;
@@ -535,6 +623,35 @@ body {
                         &.bar { background: rgba(255, 206, 86, 0.3); }
                         &.control { background: rgba(75, 192, 192, 0.3); }
                     }
+
+                    .register-name {
+                        font-weight: bold;
+                        font-size: 0.09rem;
+                        margin-bottom: 0.04rem;
+                        line-height: 1.1;
+                        color: @light-theme[text];
+                        text-align: center;
+                        word-wrap: break-word;
+                        hyphens: auto;
+                        max-width: 100%;
+
+                        body.dark-theme & {
+                            color: @dark-theme[text];
+                        }
+                    }
+
+                    .register-value {
+                        font-family: 'Courier New', monospace;
+                        font-size: 0.08rem;
+                        font-weight: bold;
+                        color: @light-theme[primary];
+                        text-align: center;
+                        word-break: break-all;
+
+                        body.dark-theme & {
+                            color: @dark-theme[primary];
+                        }
+                    }
                 }
             }
         }
@@ -547,10 +664,15 @@ body {
         margin-bottom: 0.1rem;
         border-radius: 0.06rem;
         border-left: 4px solid @light-theme[primary];
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
         body.dark-theme & {
             background: #262626;
             border-left-color: @dark-theme[primary];
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         h4 {
@@ -683,6 +805,7 @@ body {
 .device-search-container {
     position: relative;
     width: 100%;
+    height: fit-content;
 
     #deviceSearch {
         width: 100%;
