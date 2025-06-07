@@ -4,15 +4,65 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PCIe Memory Layout Viewer</title>
+    <script src="static/js/jquery.js"></script>
     <!-- Custom CSS -->
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/layout.css') }}"
-    />
+    <link rel="stylesheet" href="static/css/layout.css" />
+    <link rel="stylesheet" href="static/css/index.css" />
   </head>
   <body>
+    <!-- Navigation Bar -->
+    <div class="nav">
+      <div class="nav-title">
+        <span class="title-text">PCIe Memory Layout Viewer</span>
+        <span class="author-info">by GP</span>
+      </div>
+      <div class="nav-controls">
+        <div class="theme-switch">
+          <button id="themeToggle" class="theme-toggle-btn">
+            <span class="light-icon">☀️</span>
+            <span class="dark-icon">🌙</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Register Controls -->
+    <div class="sticky-controls">
+      <div class="register-controls">
+        <div class="register-selectors">
+          <div class="selector-item device-selector">
+            <label>PCIe Device:</label>
+            <div class="device-search-container">
+              <input
+                type="text"
+                id="deviceSearch"
+                placeholder="Search PCIe devices..."
+                autocomplete="off"
+              />
+              <div id="deviceDropdown" class="device-dropdown">
+                <!-- Device options will be populated dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="device-info">
+          <div class="info-item">
+            <span class="info-label">Device Name:</span>
+            <span class="info-value" id="device-name-value"
+              >No Device Selected</span
+            >
+          </div>
+          <div class="info-item">
+            <span class="info-label">BDF:</span>
+            <span class="info-value" id="device-bdf-value">--:--.-</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
     <div class="container">
-      <!-- 左侧内存布局 -->
+      <!-- 左侧内存布局 (1/7) -->
       <div class="memory-layout">
         <div class="region pcie-config" data-region="pcie">
           <div class="region-label">PCIe Config Space</div>
@@ -24,7 +74,7 @@
         </div>
       </div>
 
-      <!-- 右侧数据展示 -->
+      <!-- 中间数据展示 (3/7) -->
       <div class="memory-data">
         <div class="data-header">
           <span class="address-col">Address</span>
@@ -35,9 +85,41 @@
         </div>
         <div id="loading" class="loading" style="display: none">Loading...</div>
       </div>
+
+      <!-- 右侧寄存器组分布视图 (剩余 3/7) -->
+      <div class="register-layout">
+        <div class="register-layout-header">
+          <h3>PCIe Configuration Space Registers</h3>
+          <div class="register-stats">
+            <span id="register-count">4KB Config Space</span>
+          </div>
+        </div>
+        <div class="register-map-container">
+          <!-- Bit scale header -->
+          <div class="bit-scale">
+            <div class="bit-scale-row">
+              <div class="offset-label">Offset</div>
+              <div class="bits-container">
+                <span class="bit-number">31</span>
+                <span class="bit-number">24</span>
+                <span class="bit-number">23</span>
+                <span class="bit-number">16</span>
+                <span class="bit-number">15</span>
+                <span class="bit-number">8</span>
+                <span class="bit-number">7</span>
+                <span class="bit-number">0</span>
+              </div>
+            </div>
+          </div>
+          <div id="register-map" class="pcie-register-map">
+            <!-- PCIe 寄存器布局将通过 JavaScript 动态生成 -->
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Custom JavaScript -->
-    <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
+    <script src="static/js/mock_data.js"></script>
+    <script src="static/js/layout.js"></script>
   </body>
 </html>

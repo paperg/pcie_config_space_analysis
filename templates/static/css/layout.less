@@ -6,6 +6,33 @@
 @border-color: #ddd;
 @hover-brightness: 1.1;
 
+// Theme Colors (consistent with index.less)
+@light-theme: {
+    bg: #ffffff;
+    text: #000000;
+    border: #000000;
+    primary: #399bff;
+    secondary: #666666;
+    hover: #f0f0f0;
+    highlight: #e3f2fd;
+    error: #ff4444;
+    warning: #ff9800;
+    success: #5bc0de;
+};
+
+@dark-theme: {
+    bg: #1a1a1a;
+    text: #ffffff;
+    border: #ffffff;
+    primary: #66b3ff;
+    secondary: #999999;
+    hover: #333333;
+    highlight: #1a3a5f;
+    error: #ff8080;
+    warning: #ffb74d;
+    success: #66b3ff;
+};
+
 // Mixins
 .flex-center() {
     display: flex;
@@ -18,34 +45,70 @@
 }
 
 // Base styles
-body {
-    margin: 0;
+* {
+    box-sizing: border-box;
     padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background-color: @background-color;
-    color: @text-color;
+    margin: 0;
 }
 
+body {
+    font-family: "Consolas", "Microsoft YaHei", "Segoe UI", monospace;
+    background-color: @light-theme[bg];
+    color: @light-theme[text];
+    transition: all 0.3s ease;
+    overflow-x: hidden;
+
+    &.dark-theme {
+        background-color: @dark-theme[bg];
+        color: @dark-theme[text];
+    }
+}
+
+// Sticky Controls
+.sticky-controls {
+    position: sticky;
+    top: 0.6rem; // Below nav bar
+    z-index: 900;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(5px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    margin-bottom: 0.2rem;
+
+    body.dark-theme & {
+        background: rgba(26, 26, 26, 0.95);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+}
+
+// Main Container - Updated layout proportions
 .container {
     display: flex;
     width: 100vw;
-    height: 100vh;
-    padding: 20px;
+    height: calc(100vh - 1.4rem); // Subtract nav and controls height
+    padding: 0.2rem;
     box-sizing: border-box;
-    gap: 20px;
+    gap: 0.2rem;
+    font-size: 0.14rem; // 调整基础字体大小
 }
 
-// Memory Layout (Left Column)
+// Memory Layout (1/7 of viewport width)
 .memory-layout {
-    width: 20%;
+    width: calc(100vw / 7);
     height: 100%;
     display: flex;
     flex-direction: column;
     border: 1px solid @border-color;
-    border-radius: 8px;
+    border-radius: 0.08rem;
     overflow: hidden;
     background: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0.02rem 0.04rem rgba(0, 0, 0, 0.1);
+    font-size: 0.16rem;
+
+    body.dark-theme & {
+        background: @dark-theme[bg];
+        border-color: #333333;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
 
     .region {
         flex: 1;
@@ -70,38 +133,56 @@ body {
             background-color: @secondary-color;
         }
 
+        &.active {
+            filter: brightness(1.2);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
         .region-label {
-            font-size: 1.2em;
+            font-size: 0.20rem;
             font-weight: bold;
-            margin-bottom: 8px;
+            margin-bottom: 0.08rem;
         }
 
         .region-size {
-            font-size: 0.9em;
+            font-size: 0.16rem;
             opacity: 0.9;
         }
     }
 }
 
-// Memory Data (Right Column)
+// Memory Data (3/7 of viewport width)
 .memory-data {
-    flex: 1;
+    width: calc(100vw * 3 / 7);
     background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 0.08rem;
+    box-shadow: 0 0.02rem 0.04rem rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    font-size: 0.12rem;
+
+    body.dark-theme & {
+        background: @dark-theme[bg];
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
 
     .data-header {
         display: flex;
-        padding: 15px 20px;
+        padding: 0.1rem 0.2rem;
         background: #f8f9fa;
         border-bottom: 1px solid @border-color;
         font-weight: bold;
+        font-size: 0.12rem;
+
+        body.dark-theme & {
+            background: #262626;
+            border-bottom-color: #333333;
+            color: @dark-theme[text];
+        }
 
         .address-col {
-            width: 120px;
+            width: 0.8rem;
         }
 
         .data-col {
@@ -110,26 +191,39 @@ body {
     }
 
     .data-container {
-        flex: 1;
-        overflow-y: auto;
-        padding: 10px 20px;
+        height: auto;
+        max-height: none;
+        overflow: visible;
+        padding: 0.1rem 0.2rem;
         font-family: 'Courier New', monospace;
-        font-size: 14px;
-        line-height: 1.5;
+        font-size: 0.12rem;
+        line-height: 1.4;
 
         .data-row {
             display: flex;
             padding: 4px 0;
             border-bottom: 1px solid #eee;
 
+            body.dark-theme & {
+                border-bottom-color: #333333;
+            }
+
             &:hover {
                 background-color: #f8f9fa;
+
+                body.dark-theme & {
+                    background-color: #333333;
+                }
             }
 
             .address {
-                width: 120px;
+                width: 0.8rem;
                 color: #666;
-                padding-right: 15px;
+                padding-right: 0.15rem;
+
+                body.dark-theme & {
+                    color: @dark-theme[secondary];
+                }
             }
 
             .bytes {
@@ -137,8 +231,77 @@ body {
                 gap: 4px;
 
                 .byte {
-                    width: 24px;
+                    width: 0.2rem;
                     text-align: center;
+                    font-family: 'Courier New', monospace;
+                    
+                    &.highlighted {
+                        background-color: @light-theme[primary];
+                        color: white;
+                        border-radius: 0.02rem;
+                        
+                        body.dark-theme & {
+                            background-color: @dark-theme[primary];
+                        }
+                    }
+
+                    &.register-block {
+                        border-radius: 0.02rem;
+                        transition: all 0.2s ease;
+                        cursor: pointer;
+                        
+                        // 8 colors for different register blocks
+                        &.block-0 { background-color: rgba(255, 99, 71, 0.4); }
+                        &.block-1 { background-color: rgba(54, 162, 235, 0.4); }
+                        &.block-2 { background-color: rgba(255, 206, 86, 0.4); }
+                        &.block-3 { background-color: rgba(75, 192, 192, 0.4); }
+                        &.block-4 { background-color: rgba(153, 102, 255, 0.4); }
+                        &.block-5 { background-color: rgba(255, 159, 64, 0.4); }
+                        &.block-6 { background-color: rgba(199, 199, 199, 0.4); }
+                        &.block-7 { background-color: rgba(83, 102, 255, 0.4); }
+
+                        &:hover {
+                            opacity: 0.8;
+                            transform: scale(1.05);
+                            box-shadow: 0 0 0.05rem rgba(0, 0, 0, 0.3);
+                        }
+
+                        // Highlight effect when block is selected
+                        &.block-highlight {
+                            border: 2px solid @light-theme[primary];
+                            box-shadow: 0 0 0.08rem rgba(57, 155, 255, 0.6);
+                            z-index: 10;
+                            position: relative;
+                        }
+
+                        body.dark-theme & {
+                            &.block-0 { background-color: rgba(255, 99, 71, 0.6); }
+                            &.block-1 { background-color: rgba(54, 162, 235, 0.6); }
+                            &.block-2 { background-color: rgba(255, 206, 86, 0.6); }
+                            &.block-3 { background-color: rgba(75, 192, 192, 0.6); }
+                            &.block-4 { background-color: rgba(153, 102, 255, 0.6); }
+                            &.block-5 { background-color: rgba(255, 159, 64, 0.6); }
+                            &.block-6 { background-color: rgba(199, 199, 199, 0.6); }
+                            &.block-7 { background-color: rgba(83, 102, 255, 0.6); }
+                            
+                            &.block-highlight {
+                                border-color: @dark-theme[primary];
+                                box-shadow: 0 0 0.08rem rgba(102, 179, 255, 0.8);
+                            }
+                        }
+                    }
+
+                    &.block-highlight {
+                        box-shadow: 0 0 0.05rem rgba(255, 255, 255, 0.8), inset 0 0 0.05rem rgba(0, 0, 0, 0.2);
+                        border: 1px solid rgba(255, 255, 255, 0.8);
+                        z-index: 10;
+                        position: relative;
+
+                        body.dark-theme & {
+                            box-shadow: 0 0 0.05rem rgba(255, 255, 255, 0.9), inset 0 0 0.05rem rgba(255, 255, 255, 0.1);
+                            border-color: rgba(255, 255, 255, 0.9);
+                        }
+                    }
                 }
             }
         }
@@ -149,5 +312,509 @@ body {
         height: 100%;
         font-size: 1.2em;
         color: #666;
+
+        body.dark-theme & {
+            color: @dark-theme[secondary];
+        }
+    }
+}
+
+// Register Layout (Remaining 3/7 of viewport width)
+.register-layout {
+    width: calc(100vw * 3 / 7);
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    body.dark-theme & {
+        background: @dark-theme[bg];
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .register-layout-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background: #f8f9fa;
+        border-bottom: 1px solid @border-color;
+
+        body.dark-theme & {
+            background: #262626;
+            border-bottom-color: #333333;
+        }
+
+        h3 {
+            margin: 0;
+            color: @light-theme[primary];
+            font-size: 1.1em;
+
+            body.dark-theme & {
+                color: @dark-theme[primary];
+            }
+        }
+
+        .register-stats {
+            font-size: 0.9em;
+            color: @light-theme[secondary];
+
+            body.dark-theme & {
+                color: @dark-theme[secondary];
+            }
+        }
+    }
+
+    .register-map-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+    }
+
+    // Bit scale header
+    .bit-scale {
+        background: #f8f9fa;
+        border-bottom: 2px solid @light-theme[primary];
+        padding: 0.05rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+
+        body.dark-theme & {
+            background: #262626;
+            border-bottom-color: @dark-theme[primary];
+        }
+
+        .bit-scale-row {
+            display: flex;
+            align-items: center;
+            font-size: 0.11rem;
+            font-weight: bold;
+
+            .offset-label {
+                width: 0.6rem;
+                text-align: center;
+                color: @light-theme[primary];
+                font-size: 0.1rem;
+
+                body.dark-theme & {
+                    color: @dark-theme[primary];
+                }
+            }
+
+            .bits-container {
+                flex: 1;
+                display: grid;
+                grid-template-columns: repeat(8, 1fr);
+                gap: 0;
+                text-align: center;
+
+                .bit-number {
+                    color: @light-theme[secondary];
+                    font-size: 0.09rem;
+                    padding: 0.02rem 0;
+
+                    body.dark-theme & {
+                        color: @dark-theme[secondary];
+                    }
+                }
+            }
+        }
+    }
+
+    // PCIe Register Map
+    .pcie-register-map {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        background: #e0e0e0;
+
+        body.dark-theme & {
+            background: #333333;
+        }
+
+        .register-row {
+            display: flex;
+            align-items: stretch;
+            background: white;
+            min-height: 0.3rem;
+
+            body.dark-theme & {
+                background: @dark-theme[bg];
+            }
+
+            .register-offset {
+                width: 0.6rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #f8f9fa;
+                border-right: 1px solid #e0e0e0;
+                font-family: 'Courier New', monospace;
+                font-size: 0.1rem;
+                font-weight: bold;
+                color: @light-theme[primary];
+
+                body.dark-theme & {
+                    background: #262626;
+                    border-right-color: #333333;
+                    color: @dark-theme[primary];
+                }
+            }
+
+            .register-fields {
+                flex: 1;
+                display: flex;
+                align-items: stretch;
+
+                .register-field {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.09rem;
+                    font-weight: bold;
+                    text-align: center;
+                    border-right: 1px solid #e0e0e0;
+                    cursor: pointer;
+                    .transition();
+                    line-height: 1.2;
+                    padding: 0.02rem;
+                    word-break: break-word;
+
+                    body.dark-theme & {
+                        border-right-color: #333333;
+                    }
+
+                    &:last-child {
+                        border-right: none;
+                    }
+
+                    &:hover {
+                        background: rgba(57, 155, 255, 0.1);
+
+                        body.dark-theme & {
+                            background: rgba(102, 179, 255, 0.1);
+                        }
+                    }
+
+                    &.reserved {
+                        background: #f8f9fa;
+                        color: #999;
+                        font-style: italic;
+
+                        body.dark-theme & {
+                            background: #262626;
+                            color: #666;
+                        }
+                    }
+
+                    // Different colors for different register types
+                    &.header { background: rgba(255, 99, 71, 0.2); }
+                    &.capability { background: rgba(54, 162, 235, 0.2); }
+                    &.bar { background: rgba(255, 206, 86, 0.2); }
+                    &.control { background: rgba(75, 192, 192, 0.2); }
+
+                    body.dark-theme & {
+                        &.header { background: rgba(255, 99, 71, 0.3); }
+                        &.capability { background: rgba(54, 162, 235, 0.3); }
+                        &.bar { background: rgba(255, 206, 86, 0.3); }
+                        &.control { background: rgba(75, 192, 192, 0.3); }
+                    }
+                }
+            }
+        }
+    }
+    
+    // Selected block header styles
+    .selected-block-header {
+        background: #f8f9fa;
+        padding: 0.15rem;
+        margin-bottom: 0.1rem;
+        border-radius: 0.06rem;
+        border-left: 4px solid @light-theme[primary];
+
+        body.dark-theme & {
+            background: #262626;
+            border-left-color: @dark-theme[primary];
+        }
+
+        h4 {
+            margin: 0 0 0.05rem 0;
+            color: @light-theme[primary];
+            font-size: 0.14rem;
+
+            body.dark-theme & {
+                color: @dark-theme[primary];
+            }
+        }
+
+        p {
+            margin: 0.02rem 0;
+            font-size: 0.1rem;
+            color: @light-theme[secondary];
+            line-height: 1.3;
+
+            body.dark-theme & {
+                color: @dark-theme[secondary];
+            }
+        }
+    }
+}
+
+// Device Search Styles
+.device-selector {
+    flex: 2 !important;
+    max-width: 4rem;
+    
+    .selector-item {
+        gap: 0.04rem !important;
+    }
+}
+
+// Device Info (override register-info styles)
+.device-info {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    gap: 0.08rem;
+    padding: 0.1rem;
+    background: @light-theme[bg];
+    border-radius: 0.08rem;
+    border: 1px solid #e0e0e0;
+    min-width: 5rem;
+    max-width: 10rem;
+    user-select: none;
+
+    .info-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.06rem;
+        padding: 0.06rem;
+        background: #f5f5f5;
+        border-radius: 0.04rem;
+        transition: all 0.3s ease;
+
+        &:hover {
+            background: #eeeeee;
+        }
+
+        .info-label {
+            font-size: 0.14rem;
+            color: @light-theme[primary];
+            font-weight: bold;
+            user-select: none;
+            text-align: left;
+        }
+
+        .info-value {
+            font-family: "Consolas", monospace;
+            color: @light-theme[secondary];
+            padding: 0.06rem;
+            background: @light-theme[bg];
+            border-radius: 0.04rem;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 0.16rem;
+            border: 1px solid #e0e0e0;
+            width: 100%;
+
+            &:hover {
+                border-color: @light-theme[primary];
+                background: #f5f5f5;
+            }
+        }
+    }
+
+    body.dark-theme & {
+        background: @dark-theme[bg];
+        border-color: #333333;
+
+        .info-item {
+            background: #262626;
+
+            &:hover {
+                background: #333333;
+            }
+
+            .info-label {
+                color: @dark-theme[primary];
+            }
+
+            .info-value {
+                color: @dark-theme[secondary];
+                background: @dark-theme[bg];
+                border-color: #333333;
+
+                &:hover {
+                    border-color: @dark-theme[primary];
+                    background: #262626;
+                }
+            }
+        }
+    }
+}
+
+.device-search-container {
+    position: relative;
+    width: 100%;
+
+    #deviceSearch {
+        width: 100%;
+        font-size: 0.12rem;
+        padding: 0.06rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.04rem;
+        background: @light-theme[bg];
+        color: @light-theme[secondary];
+        transition: all 0.3s ease;
+
+        &:focus {
+            outline: none;
+            border-color: @light-theme[primary];
+            box-shadow: 0 0 0 1px rgba(57, 155, 255, 0.2);
+        }
+
+        body.dark-theme & {
+            background: @dark-theme[bg];
+            border-color: #333333;
+            color: @dark-theme[secondary];
+
+            &:focus {
+                border-color: @dark-theme[primary];
+                box-shadow: 0 0 0 1px rgba(102, 179, 255, 0.2);
+            }
+        }
+    }
+
+    .device-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        max-height: 3rem;
+        overflow-y: auto;
+        background: @light-theme[bg];
+        border: 1px solid #e0e0e0;
+        border-top: none;
+        border-radius: 0 0 0.04rem 0.04rem;
+        box-shadow: 0 0.02rem 0.08rem rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        display: none;
+
+        body.dark-theme & {
+            background: @dark-theme[bg];
+            border-color: #333333;
+            box-shadow: 0 0.02rem 0.08rem rgba(0, 0, 0, 0.3);
+        }
+
+        &.show {
+            display: block;
+        }
+
+        .device-option {
+            padding: 0.08rem 0.12rem;
+            cursor: pointer;
+            font-size: 0.11rem;
+            color: @light-theme[text];
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.2s ease;
+
+            &:hover {
+                background: @light-theme[hover];
+            }
+
+            &.selected {
+                background: @light-theme[primary];
+                color: white;
+            }
+
+            body.dark-theme & {
+                color: @dark-theme[text];
+                border-bottom-color: #333333;
+
+                &:hover {
+                    background: @dark-theme[hover];
+                }
+
+                &.selected {
+                    background: @dark-theme[primary];
+                }
+            }
+
+            .device-bdf {
+                font-family: 'Courier New', monospace;
+                color: @light-theme[primary];
+                margin-right: 0.1rem;
+
+                body.dark-theme & {
+                    color: @dark-theme[primary];
+                }
+            }
+
+            .device-desc {
+                color: @light-theme[secondary];
+
+                body.dark-theme & {
+                    color: @dark-theme[secondary];
+                }
+            }
+        }
+    }
+}
+
+// Scrollbar styling
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f0f0f0;
+
+    body.dark-theme & {
+        background: #333333;
+    }
+}
+
+::-webkit-scrollbar-thumb {
+    background: @light-theme[primary];
+    border-radius: 3px;
+
+    body.dark-theme & {
+        background: @dark-theme[primary];
+    }
+
+    &:hover {
+        background: #2980ff;
+
+        body.dark-theme & {
+            background: #4d99ff;
+        }
+    }
+}
+
+// Loading animation
+@keyframes loading-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid @light-theme[primary];
+    border-radius: 50%;
+    display: inline-block;
+    animation: loading-spin 1s linear infinite;
+    margin-right: 10px;
+
+    body.dark-theme & {
+        border-color: #333333;
+        border-top-color: @dark-theme[primary];
     }
 } 
