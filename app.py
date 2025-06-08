@@ -322,10 +322,104 @@ def get_register():
 
 @app.route('/api/register', methods=['POST'])
 def set_register():
-    data = request.get_json()
-    value = int(data.get('value', 0))
-    print(f'set_register: {value}')
-    return jsonify({'success': True})
+    """
+    更新寄存器值
+    参数：
+    - bdf: 设备BDF
+    - value: 新的寄存器值
+    - offset: 寄存器偏移地址 (可选)
+    - name: 寄存器名称 (可选)
+    """
+    try:
+        global current_device_bdf, current_config_space_parser
+        
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'message': 'Missing request data'}), 400
+            
+        bdf = data.get('bdf')
+        value = data.get('value')
+        offset = data.get('offset')
+        name = data.get('name')
+        
+        if not bdf:
+            return jsonify({'success': False, 'message': 'Missing bdf parameter'}), 400
+            
+        if value is None:
+            return jsonify({'success': False, 'message': 'Missing value parameter'}), 400
+            
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            return jsonify({'success': False, 'message': 'Invalid value format'}), 400
+            
+        if not offset and not name:
+            return jsonify({'success': False, 'message': 'Missing offset or name parameter'}), 400
+        
+        # 确保我们有该设备的数据
+        if current_device_bdf != bdf or current_config_space_parser is None:
+            try:
+                current_device_bdf = bdf
+                current_config_space = get_pcie_config_space_for_device(bdf)
+                current_config_space_parser = PCIeRegisterParser(current_config_space)
+            except Exception as e:
+                return jsonify({
+                    'success': False, 
+                    'message': f'Failed to load device data: {str(e)}'
+                }), 404
+        
+        # 查找目标寄存器
+        target_register = None
+        
+        if name:
+            # 按名称查找
+            try:
+                target_register = current_config_space_parser[name]
+            except KeyError:
+                pass
+        
+        if not target_register and offset is not None:
+            # 按偏移地址查找
+            offset = int(offset, 16) if isinstance(offset, str) and offset.startswith('0x') else int(offset)
+            
+            for reg_struct in current_config_space_parser.all_structures:
+                for reg in reg_struct.registers:
+                    if reg.offset == offset:
+                        target_register = reg
+                        break
+                if target_register:
+                    break
+        
+        if not target_register:
+            return jsonify({
+                'success': False, 
+                'message': 'Register not found'
+            }), 404
+        
+        # 模拟寄存器写入
+        # 在实际应用中，这里应该写入到真实的PCIe配置空间
+        print(f'Writing value 0x{value:08x} to register {target_register.name} at offset 0x{target_register.offset:03x} for device {bdf}')
+        
+        # 更新内存中的值（模拟写入）
+        target_register.value = value
+        
+        # 返回成功响应
+        return jsonify({
+            'success': True,
+            'message': 'Register updated successfully',
+            'register': target_register.name,
+            'offset': target_register.offset,
+            'value': value
+        })
+        
+    except Exception as e:
+        print(f'Error in set_register: {e}')
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False, 
+            'message': f'Internal server error: {str(e)}'
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True) 

@@ -212,12 +212,14 @@ $(document).ready(function () {
 
     // Add a back button to return to layout page
     function addBackButton(registerData) {
-        const navControls = $('.nav-controls');
+        const registerInfo = $('.register-info');
         const backButton = $(`
-            <button class="back-btn" id="backBtn" title="返回 Layout 页面">
-                <span class="back-icon">←</span>
-                <span class="back-text">Back to Layout</span>
-            </button>
+            <div class="info-item back-item">
+                <button class="back-btn" id="backBtn" title="返回 Layout 页面">
+                    <span class="back-icon">←</span>
+                    <span class="back-text">Back</span>
+                </button>
+            </div>
         `);
 
         backButton.on('click', function () {
@@ -225,37 +227,57 @@ $(document).ready(function () {
             window.location.href = '/';
         });
 
-        navControls.prepend(backButton);
+        registerInfo.append(backButton);
 
         // Add some basic styling for the back button
         if (!$('#back-btn-styles').length) {
             $('head').append(`
                 <style id="back-btn-styles">
+                    .back-item {
+                        border: none !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        background: transparent !important;
+                    }
                     .back-btn {
-                        background: #399bff;
-                        color: white;
-                        border: none;
-                        padding: 0.5rem 1rem;
-                        border-radius: 0.3rem;
-                        cursor: pointer;
-                        font-size: 0.9rem;
-                        margin-right: 1rem;
                         display: flex;
                         align-items: center;
-                        gap: 0.3rem;
-                        transition: background-color 0.2s;
+                        gap: 0.1rem;
+                        background: transparent;
+                        border: 0.01rem solid #ddd;
+                        color: #666;
+                        padding: 0.12rem 0.2rem;
+                        border-radius: 0.06rem;
+                        cursor: pointer;
+                        font-size: 0.18rem;
+                        transition: all 0.2s ease;
+                        font-family: inherit;
+                        height: 0.32rem;
+                        min-width: 0.8rem;
+                        justify-content: center;
                     }
                     .back-btn:hover {
-                        background: #2578d4;
+                        background: #f5f5f5;
+                        border-color: #999;
+                        color: #333;
+                        transform: translateY(-1px);
                     }
                     .back-icon {
-                        font-size: 1.1rem;
+                        font-size: 0.16rem;
+                        line-height: 1;
+                    }
+                    .back-text {
+                        font-size: 0.16rem;
+                        line-height: 1;
                     }
                     body.dark-theme .back-btn {
-                        background: #66b3ff;
+                        border-color: #444;
+                        color: #999;
                     }
                     body.dark-theme .back-btn:hover {
-                        background: #4d9fff;
+                        background: #2a2a2a;
+                        border-color: #666;
+                        color: #ccc;
                     }
                 </style>
             `);
@@ -1122,113 +1144,109 @@ $(document).ready(function () {
     async function applyRegisterChanges() {
         if (!isValueModified) return;
 
+        // Determine device BDF and register info
+        let deviceBdf = null;
+        let registerOffset = null;
+        let registerName = null;
+
+        // Get device BDF from server data or current info
+        if (window.serverData && window.serverData.deviceBdf) {
+            deviceBdf = window.serverData.deviceBdf;
+        }
+
+        // Get register info from current register info
+        if (currentRegisterInfo) {
+            registerOffset = currentRegisterInfo.offset;
+            registerName = currentRegisterInfo.name;
+        }
+
+        if (!deviceBdf || (!registerOffset && !registerName)) {
+            showErrorDialog('Failed: Missing device or register information');
+            return;
+        }
+
         try {
-            // Simulate backend response
-            // Randomly generate a test scenario
-            const testScenario = Math.floor(Math.random() * 3); // 0, 1, or 2
-            let responseData;
+            // Call backend API to update register value
+            const requestData = {
+                bdf: deviceBdf,
+                value: currentRegisterValue
+            };
 
-            // Simulate network delay
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            switch (testScenario) {
-                case 0:
-                    // Scenario 1: Success, value unchanged
-                    responseData = {
-                        success: true,
-                        value: currentRegisterValue
-                    };
-                    break;
-                case 1:
-                    // Scenario 2: Success, value modified
-                    // Generate a random value different from current value
-                    const maxValue = Math.pow(2, currentBitCount) - 1;
-                    const randomValue = Math.floor(Math.random() * maxValue);
-                    responseData = {
-                        success: true,
-                        value: randomValue
-                    };
-                    break;
-                case 2:
-                    // Scenario 3: Failure, other error
-                    responseData = {
-                        success: false,
-                        message: 'Failed: Register access denied'
-                    };
-                    break;
+            if (registerName) {
+                requestData.name = registerName;
+            }
+            if (registerOffset !== null) {
+                requestData.offset = registerOffset;
             }
 
-            // Simulate API response
-            console.log('Simulated backend response:', responseData);
+            console.log('Sending register update request:', requestData);
+
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const responseData = await response.json();
+            console.log('Backend response:', responseData);
 
             if (responseData.success) {
-                if (responseData.value === currentRegisterValue) {
-                    // Value unchanged, update display directly
+                // Success - clear modified state
+                isValueModified = false;
+                clearModifiedBits();
+                updateApplyButtonState();
+
+                // Show success message
+                showSuccessMessage('Register updated successfully');
+
+                // Optionally refresh the register data
+                if (responseData.value !== undefined && responseData.value !== currentRegisterValue) {
+                    // If backend returned a different value, update display
+                    currentRegisterValue = responseData.value >>> 0;
+                    initialRegisterValue = responseData.value >>> 0;
                     updateRegister(responseData.value, currentBitCount, currentBitRanges, currentRegisterInfo);
-                } else {
-                    // Calculate which bits have changed
-                    const mismatchedBits = [];
-                    for (let i = 0; i < currentBitCount; i++) {
-                        const originalBit = (currentRegisterValue >> i) & 1;
-                        const newBit = (responseData.value >> i) & 1;
-                        if (originalBit !== newBit) {
-                            mismatchedBits.push(i);
-                        }
-                    }
-
-                    // Update current value to backend returned value
-                    currentRegisterValue = responseData.value >>> 0; // 确保是32位无符号整数
-                    initialRegisterValue = responseData.value >>> 0; // 更新初始值
-
-                    // Update all display locations
-                    // 1. Update register info display with proper hex formatting
-                    const hexValue = currentRegisterValue.toString(16).toUpperCase().padStart(currentBitCount / 4, '0');
-                    const display = $('#register-value-display');
-                    display.text(`0x${hexValue}`).addClass('error');
-                    $('#register-value').text(`0x${hexValue}`);
-
-                    // 2. Update all bit-box values and mark mismatched bits
-                    const boxes = $('.bit-box');
-                    for (let i = 0; i < currentBitCount; i++) {
-                        const bitValue = (currentRegisterValue >> i) & 1;
-                        if (boxes[i]) {
-                            const $box = $(boxes[i]);
-                            const isMismatched = mismatchedBits.includes(i);
-
-                            // Update bit value
-                            $box.text(bitValue)
-                                .removeClass('bit-0 bit-1 modified')
-                                .addClass(bitValue ? 'bit-1' : 'bit-0');
-
-                            // Mark mismatched bits in red
-                            if (isMismatched) {
-                                $box.addClass('error-bit');
-                            }
-                        }
-                    }
-
-                    // 3. Update bit field descriptions
-                    updateBitDescriptions(currentBitRanges, currentRegisterValue);
-
-                    // 4. Update connection line styles
-                    $('.register-box').attr('data-value', currentRegisterValue);
-                    calculateCoordinates();
-
-                    // Clear modified bits since we're showing the new value
-                    modifiedBits.clear();
-
-                    // Show error dialog
-                    showErrorDialog('Failed: Register value does not match expected value');
                 }
             } else {
-                // Handle other error cases
-                showErrorDialog(responseData.message || 'Failed: Unknown error');
+                // Handle backend error
+                showErrorDialog(responseData.message || 'Failed: Register update failed');
             }
         } catch (error) {
             // Handle network errors etc.
             console.error('Error updating register:', error);
-            showErrorDialog('Failed: Network error');
+            showErrorDialog('Failed: Network error - ' + error.message);
         }
+    }
+
+    // Add success message function
+    function showSuccessMessage(message) {
+        // Remove any existing success dialog
+        $('.success-dialog').remove();
+
+        const dialog = $(`
+            <div class="success-dialog">
+                <div class="success-dialog-content">
+                    <div class="success-dialog-message">${message}</div>
+                    <button class="success-dialog-button">OK</button>
+                </div>
+            </div>
+        `);
+
+        dialog.find('.success-dialog-button').on('click', function () {
+            dialog.remove();
+        });
+
+        // Auto-remove after 3 seconds
+        setTimeout(() => {
+            dialog.remove();
+        }, 3000);
+
+        $('body').append(dialog);
     }
 
     // Add error dialog styles
@@ -1297,6 +1315,71 @@ $(document).ready(function () {
             }
             body.dark-theme .error-dialog-button {
                 background: #66b3ff;
+            }
+            
+            .success-dialog {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                z-index: 1000;
+                padding-top: 15vh;
+            }
+            .success-dialog-content {
+                background: white;
+                padding: 0.2rem;
+                border-radius: 0.08rem;
+                box-shadow: 0 0.05rem 0.2rem rgba(0, 0, 0, 0.2);
+                text-align: center;
+                min-width: 3.2rem;
+                max-width: 4.8rem;
+                border: 1px solid #e0e0e0;
+                transform: translateY(-0.5rem);
+            }
+            .success-dialog-message {
+                margin-bottom: 0.2rem;
+                color: #28a745;
+                font-size: 0.16rem;
+                line-height: 1.4;
+                padding: 0 0.15rem;
+                font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+            }
+            .success-dialog-button {
+                padding: 0.08rem 0.3rem;
+                background: #28a745;
+                color: white;
+                border: none;
+                border-radius: 0.04rem;
+                cursor: pointer;
+                font-size: 0.14rem;
+                font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+                transition: all 0.2s ease;
+                min-width: 1.2rem;
+            }
+            .success-dialog-button:hover {
+                background: #218838;
+                transform: translateY(-0.01rem);
+            }
+            .success-dialog-button:active {
+                transform: translateY(0);
+                background: #1e7e34;
+            }
+            body.dark-theme .success-dialog-content {
+                background: #1a1a1a;
+                color: #fff;
+                box-shadow: 0 0.05rem 0.2rem rgba(0, 0, 0, 0.4);
+                border-color: #333333;
+            }
+            body.dark-theme .success-dialog-message {
+                color: #28c940;
+            }
+            body.dark-theme .success-dialog-button {
+                background: #28c940;
             }
             body.dark-theme .error-dialog-button:hover {
                 background: #4d99ff;
