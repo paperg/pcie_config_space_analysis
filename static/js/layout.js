@@ -55,20 +55,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load PCIe devices from lspci.txt
     async function loadPCIeDevices() {
         try {
-            const response = await fetch('/pciecfg/mock_data/lspci.txt');
+            const response = await fetch('/api/device');
             if (response.ok) {
-                const text = await response.text();
-                const lines = text.trim().split('\n');
-                pcieDevices = lines.map(line => {
-                    const match = line.match(/^([0-9a-f]{2}:[0-9a-f]{2}\.[0-9a-f])\s+(.+)$/i);
-                    if (match) {
-                        return {
-                            bdf: match[1],
-                            description: match[2].trim()
-                        };
-                    }
-                    return null;
-                }).filter(device => device !== null);
+                const jsonData = await response.json();
+                console.log('Loaded devices:', jsonData);
+                pcieDevices = jsonData.map(device => ({
+                    bdf: device.bdf,
+                    description: device.description || device.name || 'Unknown Device'
+                }));
             }
         } catch (error) {
             console.error('Error loading PCIe devices:', error);
@@ -181,59 +175,79 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastHoveredRegisterBlock = null;
 
     // Generate memory layout
-    function generateMemoryLayout() {
+    async function generateMemoryLayout() {
         const container = document.getElementById('memory-regions-container');
         if (!container) return;
 
         container.innerHTML = '';
 
-        // Mock memory regions data (this would come from backend)
-        memoryRegions = [{
-                name: 'PCIe Config Space',
-                startAddress: 0x4000,
-                size: 0x1000,
-                type: 'pcie',
-                description: '4KB PCIe Configuration Space'
-            },
-            {
-                name: 'MEMBAR0',
-                startAddress: 0x6000,
-                size: 0x2000,
-                type: 'membar0',
-                description: '1MB Memory BAR 0'
-            },
-        ];
+        try {
+            // get memory region from /api/memory/region
+            const response = await fetch('/api/memory/region');
+            const regionData = await response.json();
+            console.log('Memory region data:', regionData);
 
-        // Sort by start address (lowest first, will be reversed by CSS)
-        memoryRegions.sort((a, b) => a.startAddress - b.startAddress);
+            const memoryRegions = regionData.regions || [];
 
-        // Calculate total memory span
-        const maxAddress = Math.max(...memoryRegions.map(r => r.startAddress + r.size));
-        const minAddress = Math.min(...memoryRegions.map(r => r.startAddress));
-        const totalSpan = maxAddress - minAddress;
+            // Store register data for later use
+            if (regionData.registers_data) {
+                currentRegisterData = regionData.registers_data;
+                console.log('Loaded register blocks data:', currentRegisterData.length, 'register blocks');
 
-        memoryRegions.forEach((region, index) => {
-            const regionDiv = document.createElement('div');
-            regionDiv.className = `memory-region ${region.type === 'reserved' ? 'reserved' : `region-${index % 8}`}`;
-            regionDiv.dataset.region = region.type;
+                // Update register blocks for highlighting
+                setupRegisterBlocksFromData(regionData.registers_data);
 
-            // Calculate relative height based on size
-            const relativeHeight = (region.size / totalSpan) * 100;
-            regionDiv.style.height = `${Math.max(relativeHeight, 8)}%`; // Minimum 8% height
+                // Generate register map with real data
+                generateRegisterMap(regionData.registers_data);
+            }
 
-            regionDiv.innerHTML = `
+            // Store raw config space data
+            if (regionData.raw_data) {
+                console.log('Loaded raw config space data:', regionData.raw_data.length, 'bytes');
+                // Display the raw data immediately
+                displayMemoryData(regionData.raw_data);
+            }
+
+            // Check if we have regions to display
+            if (memoryRegions.length === 0) {
+                console.warn('No memory regions found');
+                return;
+            }
+
+            // Sort by start address (lowest first, will be reversed by CSS)
+            memoryRegions.sort((a, b) => a.startAddress - b.startAddress);
+
+            // Calculate total memory span
+            const maxAddress = Math.max(...memoryRegions.map(r => r.startAddress + r.size));
+            const minAddress = Math.min(...memoryRegions.map(r => r.startAddress));
+            const totalSpan = maxAddress - minAddress;
+
+            memoryRegions.forEach((region, index) => {
+                const regionDiv = document.createElement('div');
+                regionDiv.className = `memory-region ${region.type === 'reserved' ? 'reserved' : `region-${index % 8}`}`;
+                regionDiv.dataset.region = region.type;
+
+                // Calculate relative height based on size
+                const relativeHeight = (region.size / totalSpan) * 100;
+                regionDiv.style.height = `${Math.max(relativeHeight, 8)}%`; // Minimum 8% height
+
+                regionDiv.innerHTML = `
                 <div class="region-label">${region.name}</div>
                 <div class="region-address">0x${region.startAddress.toString(16).padStart(8, '0').toUpperCase()}</div>
                 <div class="region-size">${formatSize(region.size)}</div>
             `;
 
-            // Add click event
-            regionDiv.addEventListener('click', () => {
-                handleRegionClick(region.type);
-            });
+                // Add click event
+                regionDiv.addEventListener('click', () => {
+                    handleRegionClick(region.type);
+                });
 
-            container.appendChild(regionDiv);
-        });
+                container.appendChild(regionDiv);
+            });
+        } catch (error) {
+            console.error('Error loading memory regions:', error);
+            // Fallback to default empty container
+        }
     }
 
     // Format size helper
@@ -359,13 +373,125 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // Tooltip functions for register blocks
+    let currentTooltip = null;
+
+    const showRegisterBlockTooltip = (block, targetElement) => {
+        hideRegisterBlockTooltip(); // Remove existing tooltip
+
+        const tooltip = document.createElement('div');
+        tooltip.className = 'register-block-tooltip';
+        tooltip.innerHTML = `
+            <div class="tooltip-header">
+                <strong>${block.name}</strong>
+            </div>
+            <div class="tooltip-content">
+                <div class="tooltip-info">
+                    <span><strong>Offset:</strong> 0x${block.offset.toString(16).padStart(3, '0').toUpperCase()}</span>
+                    <span><strong>Size:</strong> ${block.size} bytes</span>
+                    <span><strong>Registers:</strong> ${block.registers.length}</span>
+                </div>
+                <div class="tooltip-registers">
+                    ${block.registers.map(reg => `
+                        <div class="tooltip-register">
+                            <div class="tooltip-reg-name">${reg.name}</div>
+                            <div class="tooltip-reg-details">
+                                <span>@ 0x${reg.offset.toString(16).padStart(3, '0').toUpperCase()}</span>
+                                <span>${reg.size}B</span>
+                                <span>= 0x${reg.value.toString(16).padStart(reg.size * 2, '0').toUpperCase()}</span>
+                            </div>
+                            ${reg.fields && reg.fields.length > 0 ? `
+                                <div class="tooltip-fields">
+                                    ${reg.fields.map(field => `
+                                        <div class="tooltip-field">
+                                            <span class="field-name">${field.name}</span>
+                                            <span class="field-bits">[${field.bit_offset + field.bit_width - 1}:${field.bit_offset}]</span>
+                                            <span class="field-value">= 0x${field.value.toString(16).toUpperCase()}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(tooltip);
+        currentTooltip = tooltip;
+
+        // Position tooltip
+        const rect = targetElement.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+
+        let left = rect.right + 10;
+        let top = rect.top;
+
+        // Adjust if tooltip goes off screen
+        if (left + tooltipRect.width > window.innerWidth) {
+            left = rect.left - tooltipRect.width - 10;
+        }
+        if (top + tooltipRect.height > window.innerHeight) {
+            top = window.innerHeight - tooltipRect.height - 10;
+        }
+
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+    };
+
+    const hideRegisterBlockTooltip = () => {
+        if (currentTooltip) {
+            currentTooltip.remove();
+            currentTooltip = null;
+        }
+    };
+
 
 
 
 
     // Load device config space
-    const loadDeviceConfigSpace = (bdf) => {
-        // Simulate PCIe config space region click
+    const loadDeviceConfigSpace = async (bdf) => {
+        console.log('Loading config space for device:', bdf);
+
+        try {
+            // Call API to load config space for selected device
+            const response = await fetch(`/api/memory/region?bdf=${encodeURIComponent(bdf)}`);
+            if (response.ok) {
+                const regionData = await response.json();
+                console.log('Loaded config space data for device:', bdf, regionData);
+
+                // Store register data
+                if (regionData.registers_data) {
+                    currentRegisterData = regionData.registers_data;
+                    console.log('Updated register blocks data:', currentRegisterData.length, 'register blocks');
+
+                    // Update register blocks for highlighting
+                    setupRegisterBlocksFromData(regionData.registers_data);
+                }
+
+                // Store raw config space data
+                if (regionData.raw_data) {
+                    console.log('Updated raw config space data:', regionData.raw_data.length, 'bytes');
+                    // Display the raw data in the memory data view
+                    displayMemoryData(regionData.raw_data);
+                }
+
+                // Update the register map
+                generateRegisterMap(currentRegisterData);
+
+                // Update register count display
+                const registerCountElement = document.getElementById('register-count');
+                if (registerCountElement && regionData.registers_data) {
+                    const totalRegisters = regionData.registers_data.reduce((sum, block) => sum + block.registers.length, 0);
+                    registerCountElement.textContent = `${regionData.registers_data.length} Blocks, ${totalRegisters} Registers`;
+                }
+            }
+        } catch (error) {
+            console.error('Error loading device config space:', error);
+        }
+
+        // Also simulate PCIe config space region click for UI consistency
         const pcieRegion = document.querySelector('[data-region="pcie"]');
         if (pcieRegion) {
             pcieRegion.click();
@@ -382,7 +508,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         registerMap.innerHTML = '';
 
-        // Define PCIe register layout (first 64 bytes - standard header)
+        // If we have real register data, use it
+        if (currentData && currentData.length > 0) {
+            console.log('Generating register map with real data:', currentData.length, 'registers');
+            generateRegisterMapFromRealData(currentData);
+            return;
+        }
+
+        // Fallback to predefined PCIe register layout (first 64 bytes - standard header)
+        console.log('Using fallback PCIe register layout');
         const pcieLayout = [
             // Row 1: 0x00-0x03
             {
@@ -689,6 +823,108 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Generate layout for selected register block only
+    // Generate register map from real backend data
+    const generateRegisterMapFromRealData = (registerBlocks) => {
+        registerMap.innerHTML = '';
+
+        if (!registerBlocks || registerBlocks.length === 0) {
+            registerMap.innerHTML = '<div class="no-registers">No register blocks data available</div>';
+            return;
+        }
+
+        console.log('Generating register map from blocks:', registerBlocks);
+
+        // Create header
+        const header = document.createElement('div');
+        header.className = 'register-map-header';
+        header.innerHTML = '<h4>Register Blocks Overview</h4>';
+        registerMap.appendChild(header);
+
+        // Create blocks container
+        const blocksContainer = document.createElement('div');
+        blocksContainer.className = 'register-blocks-container';
+
+        registerBlocks.forEach((block, blockIndex) => {
+            const blockDiv = document.createElement('div');
+            blockDiv.className = `register-block block-${blockIndex % 8}`;
+            blockDiv.dataset.blockIndex = blockIndex;
+
+            const blockHeader = document.createElement('div');
+            blockHeader.className = 'block-header';
+            blockHeader.innerHTML = `
+                <div class="block-name">${block.name}</div>
+                <div class="block-info">
+                    <span class="block-offset">@ 0x${block.offset.toString(16).padStart(3, '0').toUpperCase()}</span>
+                    <span class="block-size">${block.size} bytes</span>
+                    <span class="block-reg-count">${block.registers.length} regs</span>
+                </div>
+            `;
+
+            const registersContainer = document.createElement('div');
+            registersContainer.className = 'block-registers';
+            registersContainer.style.display = 'none'; // Initially hidden
+
+            // Add registers in this block
+            block.registers.forEach(reg => {
+                const regDiv = document.createElement('div');
+                regDiv.className = 'register-item';
+                regDiv.innerHTML = `
+                    <div class="reg-name">${reg.name}</div>
+                    <div class="reg-details">
+                        <span class="reg-offset">0x${reg.offset.toString(16).padStart(3, '0').toUpperCase()}</span>
+                        <span class="reg-size">${reg.size}B</span>
+                        <span class="reg-value">0x${reg.value.toString(16).padStart(reg.size * 2, '0').toUpperCase()}</span>
+                    </div>
+                `;
+
+                // Add fields info if available
+                if (reg.fields && reg.fields.length > 0) {
+                    const fieldsDiv = document.createElement('div');
+                    fieldsDiv.className = 'reg-fields';
+                    reg.fields.forEach(field => {
+                        const fieldDiv = document.createElement('div');
+                        fieldDiv.className = 'field-item';
+                        fieldDiv.innerHTML = `
+                            <span class="field-name">${field.name}</span>
+                            <span class="field-bits">[${field.bit_offset + field.bit_width - 1}:${field.bit_offset}]</span>
+                            <span class="field-value">0x${field.value.toString(16).toUpperCase()}</span>
+                        `;
+                        fieldsDiv.appendChild(fieldDiv);
+                    });
+                    regDiv.appendChild(fieldsDiv);
+                }
+
+                registersContainer.appendChild(regDiv);
+            });
+
+            blockDiv.appendChild(blockHeader);
+            blockDiv.appendChild(registersContainer);
+
+            // Add hover events for block
+            blockDiv.addEventListener('mouseenter', () => {
+                highlightRegisterBlock(blockIndex);
+                registersContainer.style.display = 'block';
+                showRegisterBlockTooltip(block, blockDiv);
+            });
+
+            blockDiv.addEventListener('mouseleave', () => {
+                clearRegisterBlockHighlight();
+                registersContainer.style.display = 'none';
+                hideRegisterBlockTooltip();
+            });
+
+            blocksContainer.appendChild(blockDiv);
+        });
+
+        registerMap.appendChild(blocksContainer);
+
+        // Update register count
+        if (registerCount) {
+            const totalRegisters = registerBlocks.reduce((sum, block) => sum + block.registers.length, 0);
+            registerCount.textContent = `${registerBlocks.length} Blocks, ${totalRegisters} Registers`;
+        }
+    };
+
     const generateSelectedBlockLayout = (currentData, selectedBlock) => {
         // Clear previous content
         registerMap.innerHTML = '';
@@ -958,6 +1194,28 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Setup register blocks for PCIe config space
+    // Setup register blocks from real data
+    const setupRegisterBlocksFromData = (registerBlocksData) => {
+        registerBlocks = [];
+        if (!registerBlocksData || registerBlocksData.length === 0) {
+            console.warn('No register blocks data available for highlighting');
+            return;
+        }
+
+        registerBlocksData.forEach((blockData, index) => {
+            registerBlocks.push({
+                offset: blockData.offset || 0,
+                size: blockData.size || 4,
+                name: blockData.name || `Register Block ${index}`,
+                description: blockData.description || '',
+                registers: blockData.registers || [],
+                colorIndex: index % 8 // Cycle through 8 colors
+            });
+        });
+
+        console.log('Setup register blocks for highlighting:', registerBlocks.length, 'blocks');
+    };
+
     const setupRegisterBlocks = () => {
         registerBlocks = [{
                 offset: 0x00,
@@ -1330,6 +1588,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize
     loadPCIeDevices().then(() => {
+        if (selectedDevice == null) {
+            return;
+        }
+        console.log(selectedDevice)
         // Leave device search empty by default
         deviceSearch.value = '';
 

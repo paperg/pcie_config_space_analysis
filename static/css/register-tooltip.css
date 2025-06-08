@@ -1,0 +1,316 @@
+/* Register Block Tooltip Styles */
+.register-block-tooltip {
+    position: fixed;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    max-width: 400px;
+    max-height: 500px;
+    overflow-y: auto;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.tooltip-header {
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tooltip-content {
+    color: var(--text-secondary);
+}
+
+.tooltip-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.tooltip-info span {
+    display: flex;
+    justify-content: space-between;
+}
+
+.tooltip-registers {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tooltip-register {
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    padding: 6px;
+    border-left: 3px solid var(--accent-color);
+}
+
+.tooltip-reg-name {
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.tooltip-reg-details {
+    display: flex;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.tooltip-reg-details span {
+    background: var(--bg-quaternary);
+    padding: 2px 4px;
+    border-radius: 2px;
+    font-family: 'Courier New', monospace;
+}
+
+.tooltip-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 4px;
+}
+
+.tooltip-field {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 10px;
+    color: var(--text-tertiary);
+    padding: 1px 4px;
+    background: var(--bg-quaternary);
+    border-radius: 2px;
+}
+
+.tooltip-field .field-name {
+    flex: 1;
+    font-weight: 500;
+}
+
+.tooltip-field .field-bits {
+    color: var(--text-secondary);
+    font-family: 'Courier New', monospace;
+}
+
+.tooltip-field .field-value {
+    color: var(--accent-color);
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+}
+
+/* Register Blocks Container Styles */
+.register-blocks-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+}
+
+.register-block {
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.register-block:hover {
+    border-color: var(--accent-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.block-header {
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.block-name {
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.block-info {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.block-info span {
+    background: var(--bg-tertiary);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+}
+
+.block-registers {
+    padding: 8px 12px;
+    background: var(--bg-primary);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.register-item {
+    margin-bottom: 8px;
+    padding: 6px;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+    border-left: 3px solid var(--accent-color);
+}
+
+.reg-name {
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.reg-details {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 4px;
+    font-size: 11px;
+}
+
+.reg-details span {
+    background: var(--bg-tertiary);
+    padding: 2px 4px;
+    border-radius: 2px;
+    font-family: 'Courier New', monospace;
+    color: var(--text-secondary);
+}
+
+.reg-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 4px;
+}
+
+.field-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 10px;
+    color: var(--text-tertiary);
+    padding: 2px 4px;
+    background: var(--bg-tertiary);
+    border-radius: 2px;
+}
+
+.field-item .field-name {
+    flex: 1;
+    font-weight: 500;
+}
+
+.field-item .field-bits {
+    color: var(--text-secondary);
+    font-family: 'Courier New', monospace;
+}
+
+.field-item .field-value {
+    color: var(--accent-color);
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+}
+
+/* Register Map Header */
+.register-map-header {
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 8px;
+}
+
+.register-map-header h4 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+/* Color blocks for different register types */
+.register-block.block-0 {
+    border-left-color: #FF6B6B;
+}
+
+.register-block.block-1 {
+    border-left-color: #4ECDC4;
+}
+
+.register-block.block-2 {
+    border-left-color: #45B7D1;
+}
+
+.register-block.block-3 {
+    border-left-color: #96CEB4;
+}
+
+.register-block.block-4 {
+    border-left-color: #FFEAA7;
+}
+
+.register-block.block-5 {
+    border-left-color: #DDA0DD;
+}
+
+.register-block.block-6 {
+    border-left-color: #98D8C8;
+}
+
+.register-block.block-7 {
+    border-left-color: #F7DC6F;
+}
+
+/* Memory data highlighting colors */
+.byte.register-block.block-0 {
+    background-color: rgba(255, 107, 107, 0.3);
+}
+
+.byte.register-block.block-1 {
+    background-color: rgba(78, 205, 196, 0.3);
+}
+
+.byte.register-block.block-2 {
+    background-color: rgba(69, 183, 209, 0.3);
+}
+
+.byte.register-block.block-3 {
+    background-color: rgba(150, 206, 180, 0.3);
+}
+
+.byte.register-block.block-4 {
+    background-color: rgba(255, 234, 167, 0.3);
+}
+
+.byte.register-block.block-5 {
+    background-color: rgba(221, 160, 221, 0.3);
+}
+
+.byte.register-block.block-6 {
+    background-color: rgba(152, 216, 200, 0.3);
+}
+
+.byte.register-block.block-7 {
+    background-color: rgba(247, 220, 111, 0.3);
+}
+
+.byte.register-block.block-highlight {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 1px;
+}
+
+/* No registers message */
+.no-registers {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 20px;
+    font-style: italic;
+}
