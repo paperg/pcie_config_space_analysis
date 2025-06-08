@@ -1,74 +1,110 @@
 /* Register Block Tooltip Styles */
 .register-block-tooltip {
     position: fixed;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     z-index: 10000;
-    max-width: 400px;
-    max-height: 500px;
+    max-width: 300px;
+    max-height: auto;
     overflow-y: auto;
-    font-size: 12px;
-    line-height: 1.4;
+    font-size: 10px;
+    line-height: 1.3;
+    opacity: 1;
+}
+
+body.dark-theme .register-block-tooltip {
+    background: #2d2d2d;
+    border-color: #555;
+    color: #ffffff;
 }
 
 .tooltip-header {
-    color: var(--text-primary);
-    margin-bottom: 8px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid var(--border-color);
+    color: #333;
+    margin-bottom: 6px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid #ddd;
+    font-size: 11px;
+}
+
+body.dark-theme .tooltip-header {
+    color: #ffffff;
+    border-bottom-color: #555;
 }
 
 .tooltip-content {
-    color: var(--text-secondary);
+    color: #666;
+}
+
+body.dark-theme .tooltip-content {
+    color: #ccc;
 }
 
 .tooltip-info {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin-bottom: 8px;
+    gap: 3px;
+    margin-bottom: 6px;
 }
 
 .tooltip-info span {
     display: flex;
     justify-content: space-between;
+    font-size: 9px;
 }
 
 .tooltip-registers {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
 }
 
 .tooltip-register {
-    background: var(--bg-tertiary);
-    border-radius: 4px;
-    padding: 6px;
-    border-left: 3px solid var(--accent-color);
+    background: #f5f5f5;
+    border-radius: 3px;
+    padding: 4px;
+    border-left: 2px solid #399bff;
+}
+
+body.dark-theme .tooltip-register {
+    background: #3a3a3a;
+    border-left-color: #66b3ff;
 }
 
 .tooltip-reg-name {
     font-weight: bold;
-    color: var(--text-primary);
-    margin-bottom: 4px;
+    color: #333;
+    margin-bottom: 3px;
+    font-size: 9px;
+}
+
+body.dark-theme .tooltip-reg-name {
+    color: #ffffff;
 }
 
 .tooltip-reg-details {
     display: flex;
-    gap: 8px;
-    font-size: 11px;
-    color: var(--text-secondary);
-    margin-bottom: 4px;
+    gap: 6px;
+    font-size: 8px;
+    color: #666;
+    margin-bottom: 0;
+}
+
+body.dark-theme .tooltip-reg-details {
+    color: #ccc;
 }
 
 .tooltip-reg-details span {
-    background: var(--bg-quaternary);
-    padding: 2px 4px;
+    background: #e8e8e8;
+    padding: 1px 3px;
     border-radius: 2px;
     font-family: 'Courier New', monospace;
+}
+
+body.dark-theme .tooltip-reg-details span {
+    background: #4a4a4a;
 }
 
 .tooltip-fields {

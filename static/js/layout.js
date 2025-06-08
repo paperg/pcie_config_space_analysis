@@ -418,17 +418,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <span>${reg.size}B</span>
                                 <span>= 0x${reg.value.toString(16).padStart(reg.size * 2, '0').toUpperCase()}</span>
                             </div>
-                            ${reg.fields && reg.fields.length > 0 ? `
-                                <div class="tooltip-fields">
-                                    ${reg.fields.map(field => `
-                                        <div class="tooltip-field">
-                                            <span class="field-name">${field.name}</span>
-                                            <span class="field-bits">[${field.bit_offset + field.bit_width - 1}:${field.bit_offset}]</span>
-                                            <span class="field-value">= 0x${field.value.toString(16).toUpperCase()}</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            ` : ''}
                         </div>
                     `).join('')}
                 </div>
@@ -438,18 +427,19 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(tooltip);
         currentTooltip = tooltip;
 
-        // Position tooltip at mouse position
+        // Position tooltip at mouse right-bottom position
         const tooltipRect = tooltip.getBoundingClientRect();
 
-        let left = mouseEvent.pageX + 10;
-        let top = mouseEvent.pageY + 10;
+        // Always position to the right-bottom of mouse cursor
+        let left = mouseEvent.pageX + 15;
+        let top = mouseEvent.pageY + 15;
 
-        // Adjust if tooltip goes off screen
+        // Adjust only if tooltip goes completely off screen
         if (left + tooltipRect.width > window.innerWidth) {
-            left = mouseEvent.pageX - tooltipRect.width - 10;
+            left = window.innerWidth - tooltipRect.width - 10;
         }
         if (top + tooltipRect.height > window.innerHeight) {
-            top = mouseEvent.pageY - tooltipRect.height - 10;
+            top = window.innerHeight - tooltipRect.height - 10;
         }
 
         tooltip.style.left = `${left}px`;
