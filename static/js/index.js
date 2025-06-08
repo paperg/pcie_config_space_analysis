@@ -8,6 +8,169 @@ $(document).ready(function () {
     let currentBitCount = 32;
     let currentRegisterInfo = {};
 
+    // Check for register data from URL parameters
+    function checkUrlParameters() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const registerParam = urlParams.get('register');
+        const bdf = urlParams.get('bdf');
+        const offset = urlParams.get('offset');
+        const name = urlParams.get('name');
+
+        if (registerParam) {
+            try {
+                const registerData = JSON.parse(decodeURIComponent(registerParam));
+                console.log('Received register data from URL:', registerData);
+
+                // Update the register display with the passed data
+                initializeFromUrlData(registerData);
+
+                // Add a back button to return to layout page
+                addBackButton(registerData);
+
+            } catch (error) {
+                console.error('Error parsing register data from URL:', error);
+            }
+        } else if (bdf && (offset || name)) {
+            // 如果没有完整的register参数，但有bdf和offset/name，则从后端API获取
+            fetchRegisterFromBackend(bdf, offset, name);
+        }
+    }
+
+    // 从后端API获取寄存器详细信息
+    async function fetchRegisterFromBackend(bdf, offset, name) {
+        try {
+            const params = new URLSearchParams();
+            params.set('bdf', bdf);
+            if (offset) params.set('offset', offset);
+            if (name) params.set('name', name);
+
+            const response = await fetch(`/api/register?${params.toString()}`);
+
+            if (response.ok) {
+                const registerData = await response.json();
+                console.log('Fetched register data from backend:', registerData);
+
+                // Update the register display with the fetched data
+                initializeFromUrlData(registerData);
+
+                // Add a back button to return to layout page
+                addBackButton(registerData);
+            } else {
+                console.error('Failed to fetch register data:', response.statusText);
+                showErrorMessage('无法获取寄存器信息');
+            }
+        } catch (error) {
+            console.error('Error fetching register data from backend:', error);
+            showErrorMessage('获取寄存器信息时发生错误');
+        }
+    }
+
+    // 显示错误消息
+    function showErrorMessage(message) {
+        const registerNameValue = $('#register-name-value');
+        registerNameValue.text(message).css('color', '#ff4444');
+    }
+
+    // Initialize register display from URL data
+    function initializeFromUrlData(registerData) {
+        // Update register info display
+        if (registerData.name) {
+            $('#register-name-value').text(registerData.name);
+        }
+        if (registerData.offset !== undefined) {
+            $('#register-offset-value').text(`0x${registerData.offset.toString(16).padStart(4, '0').toUpperCase()}`);
+        }
+        if (registerData.value !== undefined) {
+            $('#register-value-display').text(`0x${registerData.value.toString(16).padStart(registerData.size * 2, '0').toUpperCase()}`);
+            currentRegisterValue = registerData.value;
+            initialRegisterValue = registerData.value;
+        }
+
+        // Store register info
+        currentRegisterInfo = registerData;
+        currentBitCount = (registerData.size || 4) * 8; // Convert bytes to bits
+
+        // Create bit fields from register data
+        let bitRanges = {};
+        if (registerData.fields && registerData.fields.length > 0) {
+            registerData.fields.forEach(field => {
+                bitRanges[field.name] = {
+                    start: field.startBit || 0,
+                    end: field.endBit || (field.startBit || 0),
+                    description: field.description || 'No description available',
+                    attributes: field.attributes || 'RW',
+                    default: field.defaultValue || 0
+                };
+            });
+        } else {
+            // Create a default full-width field if no fields are specified
+            bitRanges[registerData.name || 'Register'] = {
+                start: 0,
+                end: currentBitCount - 1,
+                description: `${registerData.blockName || 'Register'} value`,
+                attributes: 'RW',
+                default: 0
+            };
+        }
+
+        currentBitRanges = bitRanges;
+
+        // Update the register display
+        updateRegister(currentRegisterValue, currentBitCount, bitRanges, registerData);
+    }
+
+    // Add a back button to return to layout page
+    function addBackButton(registerData) {
+        const navControls = $('.nav-controls');
+        const backButton = $(`
+            <button class="back-btn" id="backBtn" title="返回 Layout 页面">
+                <span class="back-icon">←</span>
+                <span class="back-text">Back to Layout</span>
+            </button>
+        `);
+
+        backButton.on('click', function () {
+            // Return to layout page (root path)
+            window.location.href = '/';
+        });
+
+        navControls.prepend(backButton);
+
+        // Add some basic styling for the back button
+        if (!$('#back-btn-styles').length) {
+            $('head').append(`
+                <style id="back-btn-styles">
+                    .back-btn {
+                        background: #399bff;
+                        color: white;
+                        border: none;
+                        padding: 0.5rem 1rem;
+                        border-radius: 0.3rem;
+                        cursor: pointer;
+                        font-size: 0.9rem;
+                        margin-right: 1rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.3rem;
+                        transition: background-color 0.2s;
+                    }
+                    .back-btn:hover {
+                        background: #2578d4;
+                    }
+                    .back-icon {
+                        font-size: 1.1rem;
+                    }
+                    body.dark-theme .back-btn {
+                        background: #66b3ff;
+                    }
+                    body.dark-theme .back-btn:hover {
+                        background: #4d9fff;
+                    }
+                </style>
+            `);
+        }
+    }
+
     var whei = $(window).width()
     $("html").css({
         fontSize: whei / 20
@@ -33,6 +196,9 @@ $(document).ready(function () {
             localStorage.setItem('theme', 'dark');
         }
     });
+
+    // Check URL parameters for register data
+    checkUrlParameters();
 
     // Add debounce function
     function debounce(func, wait) {

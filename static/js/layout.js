@@ -122,7 +122,35 @@ document.addEventListener('DOMContentLoaded', () => {
         loadDeviceConfigSpace(device.bdf);
     }
 
-    // Device search event listeners
+    // Device search event listeners with keyboard navigation
+    let selectedOptionIndex = -1;
+    let currentOptions = [];
+
+    const updateSelectedOption = (newIndex) => {
+        // Remove previous selection
+        const prevSelected = deviceDropdown.querySelector('.device-option.keyboard-selected');
+        if (prevSelected) {
+            prevSelected.classList.remove('keyboard-selected');
+        }
+
+        // Update index with bounds checking
+        if (newIndex >= 0 && newIndex < currentOptions.length) {
+            selectedOptionIndex = newIndex;
+            const selectedOption = currentOptions[selectedOptionIndex];
+            selectedOption.classList.add('keyboard-selected');
+
+            // Scroll into view if needed
+            selectedOption.scrollIntoView({
+                block: 'nearest'
+            });
+        }
+    };
+
+    const refreshCurrentOptions = () => {
+        currentOptions = Array.from(deviceDropdown.querySelectorAll('.device-option'));
+        selectedOptionIndex = -1;
+    };
+
     deviceSearch.addEventListener('input', (e) => {
         const searchTerm = e.target.value;
         if (searchTerm.length > 0) {
@@ -132,16 +160,53 @@ document.addEventListener('DOMContentLoaded', () => {
             populateDeviceDropdown();
             deviceDropdown.classList.add('show');
         }
+        refreshCurrentOptions();
+    });
+
+    deviceSearch.addEventListener('keydown', (e) => {
+        if (!deviceDropdown.classList.contains('show')) return;
+
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                if (currentOptions.length > 0) {
+                    updateSelectedOption(selectedOptionIndex + 1);
+                }
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                if (currentOptions.length > 0) {
+                    updateSelectedOption(selectedOptionIndex - 1);
+                }
+                break;
+            case 'Enter':
+                e.preventDefault();
+                if (selectedOptionIndex >= 0 && selectedOptionIndex < currentOptions.length) {
+                    const selectedOption = currentOptions[selectedOptionIndex];
+                    const bdf = selectedOption.dataset.bdf;
+                    const device = pcieDevices.find(d => d.bdf === bdf);
+                    if (device) {
+                        selectDevice(device);
+                    }
+                }
+                break;
+            case 'Escape':
+                deviceDropdown.classList.remove('show');
+                selectedOptionIndex = -1;
+                break;
+        }
     });
 
     deviceSearch.addEventListener('focus', () => {
         deviceDropdown.classList.add('show');
+        refreshCurrentOptions();
     });
 
     deviceSearch.addEventListener('blur', () => {
         // Delay hiding to allow clicks on dropdown
         setTimeout(() => {
             deviceDropdown.classList.remove('show');
+            selectedOptionIndex = -1;
         }, 200);
     });
 
@@ -149,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.device-search-container')) {
             deviceDropdown.classList.remove('show');
+            selectedOptionIndex = -1;
         }
     });
 
@@ -647,22 +713,42 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="register-size">${register.size}B</div>
                     `;
 
-                    // Add click event to highlight in memory view
-                    fieldDiv.addEventListener('click', () => {
-                        const highlightOffsets = [];
-                        for (let i = 0; i < register.size; i++) {
-                            highlightOffsets.push(register.offset + i);
-                        }
-                        displayMemoryData(currentRawData, highlightOffsets);
+                    // Add click event to navigate to register detail page
+                    fieldDiv.addEventListener('click', (e) => {
+                        // Check if Ctrl key is pressed for opening in new tab
+                        const openInNewTab = e.ctrlKey || e.metaKey;
 
-                        // Scroll to register position in memory view
-                        const targetRow = Math.floor(register.offset / 16);
-                        const rows = dataContainer.querySelectorAll('.data-row');
-                        if (rows[targetRow]) {
-                            rows[targetRow].scrollIntoView({
-                                behavior: 'smooth',
-                                block: 'center'
-                            });
+                        // Prepare register data for navigation
+                        const registerData = {
+                            name: register.name,
+                            offset: register.offset,
+                            size: register.size,
+                            value: value,
+                            blockName: register.blockName,
+                            blockIndex: register.blockIndex,
+                            type: getRegisterType(register),
+                            bdf: selectedDevice ? selectedDevice.bdf : null,
+                            deviceName: selectedDevice ? selectedDevice.description : null
+                        };
+
+                        // Include fields if available
+                        if (register.fields && register.fields.length > 0) {
+                            registerData.fields = register.fields;
+                        }
+
+                        // Create URL with register parameters for backend
+                        const params = new URLSearchParams({
+                            bdf: registerData.bdf || '',
+                            offset: registerData.offset.toString(),
+                            name: registerData.name,
+                            register: encodeURIComponent(JSON.stringify(registerData))
+                        });
+                        const url = `/index.html?${params.toString()}`;
+
+                        if (openInNewTab) {
+                            window.open(url, '_blank');
+                        } else {
+                            window.location.href = url;
                         }
                     });
 
@@ -764,24 +850,42 @@ document.addEventListener('DOMContentLoaded', () => {
                     fieldDiv.appendChild(fieldsDiv);
                 }
 
-                // Add click event to highlight in memory view
-                fieldDiv.addEventListener('click', () => {
-                    const highlightOffsets = [];
-                    for (let i = 0; i < register.size; i++) {
-                        highlightOffsets.push(register.offset + i);
+                // Add click event to navigate to register detail page
+                fieldDiv.addEventListener('click', (e) => {
+                    // Check if Ctrl key is pressed for opening in new tab
+                    const openInNewTab = e.ctrlKey || e.metaKey;
+
+                    // Prepare register data for navigation
+                    const registerData = {
+                        name: register.name,
+                        offset: register.offset,
+                        size: register.size,
+                        value: value,
+                        blockName: selectedBlock.name,
+                        blockIndex: 0, // Single block view
+                        type: getRegisterType(register),
+                        bdf: selectedDevice ? selectedDevice.bdf : null,
+                        deviceName: selectedDevice ? selectedDevice.description : null
+                    };
+
+                    // Include fields if available
+                    if (register.fields && register.fields.length > 0) {
+                        registerData.fields = register.fields;
                     }
 
-                    // Use the raw data array for highlighting
-                    displayMemoryData(currentRawData, highlightOffsets);
+                    // Create URL with register parameters for backend
+                    const params = new URLSearchParams({
+                        bdf: registerData.bdf || '',
+                        offset: registerData.offset.toString(),
+                        name: registerData.name,
+                        register: encodeURIComponent(JSON.stringify(registerData))
+                    });
+                    const url = `/index.html?${params.toString()}`;
 
-                    // Scroll to register position in memory view
-                    const targetRow = Math.floor(register.offset / 16);
-                    const rows = dataContainer.querySelectorAll('.data-row');
-                    if (rows[targetRow]) {
-                        rows[targetRow].scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
+                    if (openInNewTab) {
+                        window.open(url, '_blank');
+                    } else {
+                        window.location.href = url;
                     }
                 });
 
