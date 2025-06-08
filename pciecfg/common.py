@@ -33,7 +33,7 @@ class Register:
     type: str = "pci"  # 'pci' | 'pcie' | 'pcie_extended' | 'CXL'
     fields: List[Field] = None
     raw: bytes = None
-    _value: int = 0
+    value: int = 0
 
     def __init__(self, reg_type, reg_name, reg_json: Dict, config_space: bytes):
         """
@@ -78,13 +78,13 @@ class Register:
         if isinstance(key, str):
             for field in self.fields:
                 if field.name == key:
-                    value = field.extract(self._value)
+                    value = field.extract(self.value)
                     return f"0x{value:X}"  # 返回十六进制表示
 
         elif isinstance(key, int):
             for field in self.fields:
                 if field.bit_offset <= key < field.bit_offset + field.bit_width:
-                    value = field.extract(self._value)
+                    value = field.extract(self.value)
                     return f"0x{value:X}"  # 返回十六进制表示
             raise KeyError(f"No field contains bit {key}")
         else:
