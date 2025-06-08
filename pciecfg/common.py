@@ -69,10 +69,10 @@ class Register:
         # 从配置空间切片取值
         if self.offset is not None and self.size is not None:
             self.raw = config_space[self.offset:self.offset + self.size]
-            self._value = int.from_bytes(self.raw, byteorder='little')
+            self.value = int.from_bytes(self.raw, byteorder='little')
         else:
             self.raw = b""
-            self._value = 0
+            self.value = 0
 
     def __getitem__(self, key):
         if isinstance(key, str):
@@ -111,7 +111,7 @@ class Register:
 
         # 解析字段
         for field in self.fields:
-            value = field.extract(self._value)
+            value = field.extract(self.value)
             value_hex = f"0x{value:X}"  # 以十六进制格式显示字段值
             lines.append(
                 f"    bit{field.bit_range().rjust(9)} {field.name.ljust(30)} = {value_hex}"
