@@ -738,10 +738,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         // Create URL with register parameters for backend
                         const params = new URLSearchParams({
-                            bdf: registerData.bdf || '',
-                            offset: registerData.offset.toString(),
-                            name: registerData.name,
-                            register: encodeURIComponent(JSON.stringify(registerData))
+                            name: registerData.name
                         });
                         const url = `/index.html?${params.toString()}`;
 
@@ -875,10 +872,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Create URL with register parameters for backend
                     const params = new URLSearchParams({
-                        bdf: registerData.bdf || '',
-                        offset: registerData.offset.toString(),
-                        name: registerData.name,
-                        register: encodeURIComponent(JSON.stringify(registerData))
+                        name: registerData.name
                     });
                     const url = `/index.html?${params.toString()}`;
 

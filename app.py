@@ -1,13 +1,13 @@
 from flask import Flask, render_template, jsonify, request
 import os
-from pciecfg.main import build_all_structures
+from pciecfg.main import PCIeRegisterParser
 
 app = Flask(__name__)
 
 # Global variable to store current device data
 current_device_bdf = None
-current_config_space = None
-current_registers = None
+current_config_space_parser = None
+current_register_blocks = None
 
 
 def get_pcie_config_space_for_device(bdf):
@@ -36,18 +36,50 @@ def register_detail():
     可以通过URL参数传递寄存器信息
     """
     # 获取URL参数
-    register_data = request.args.get('register')
-    bdf = request.args.get('bdf')
     register_name = request.args.get('name')
+    print(f"Requested register: {register_name}")
     
     # 如果有寄存器数据参数，则传递给模板
     context = {}
-    if register_data:
-        context['register_data'] = register_data
-    if bdf:
-        context['device_bdf'] = bdf
-    if register_name:
-        context['register_name'] = register_name
+    if register_name and current_config_space_parser:
+        try:
+            # 从parser中获取寄存器对象
+            register_obj = current_config_space_parser[register_name]
+            print(f"Found register: {register_obj.name}")
+            
+            # 将寄存器对象转换为JSON可序列化的字典
+            register_data = {
+                'name': register_obj.name,
+                'offset': register_obj.offset,
+                'size': register_obj.size,
+                'value': register_obj.value,
+                'type': getattr(register_obj, 'type', 'unknown'),
+                'fields': []
+            }
+            
+            # 转换字段信息
+            for field in register_obj.fields:
+                field_data = {
+                    'name': field.name,
+                    'bit_offset': field.bit_offset,
+                    'bit_width': field.bit_width,
+                    'startBit': field.bit_offset,
+                    'endBit': field.bit_offset + field.bit_width - 1,
+                    'default': field.default,
+                    'value': field.extract(register_obj.value),
+                    'description': field.description,
+                    'attributes': field.attributes,
+                    'value_parse': field.value_parse
+                }
+                register_data['fields'].append(field_data)
+            
+            context['register_name'] = register_name
+            context['register_data'] = register_data
+            context['device_bdf'] = current_device_bdf
+            
+        except Exception as e:
+            print(f"Error getting register {register_name}: {e}")
+            context['error'] = f"无法找到寄存器: {register_name}"
     
     return render_template('/index.html', **context)
 
@@ -84,7 +116,7 @@ def get_device():
 @app.route('/api/memory/region')
 def get_memory_region():
     try:
-        global current_device_bdf, current_config_space, current_registers
+        global current_device_bdf, current_config_space, current_config_space_parser
         
         # 获取设备BDF参数（如果有的话）
         bdf = request.args.get('bdf', current_device_bdf)
@@ -92,18 +124,22 @@ def get_memory_region():
         # 如果指定了新的BDF，更新当前设备数据
 
         current_device_bdf = bdf
-        current_config_space = get_pcie_config_space_for_device(bdf)
-        current_register_blocks = build_all_structures(current_config_space)
-        print(f'Loaded config space for device {bdf}, found {len(current_register_blocks)} register blocks')
+        try:
+            current_config_space = get_pcie_config_space_for_device(bdf)
+            if current_config_space is None:
+                raise Exception('No config space found')
+            current_config_space_parser = PCIeRegisterParser(current_config_space)
+            print(f'Loaded config space for device {bdf}')
+        except Exception as e:
+            print(f'Error loading config space for device {bdf}: {e}')
+            return jsonify({
+                'error': 'No config space found'
+            }), 404
 
-        if current_config_space is None:
-            # 如果没有当前数据，使用默认配置空间
-            current_config_space = get_pcie_config_space_for_device('00:00.0')  # 使用函数确保一致性
-            current_register_blocks = build_all_structures(current_config_space)
-            print(f'Loaded default config space, found {len(current_register_blocks)} register blocks')
         
         # 构建寄存器数据以供前端使用
         registers_data = []
+        current_register_blocks = current_config_space_parser.all_structures
         if current_register_blocks:
             for reg_struct in current_register_blocks:
                 try:
@@ -288,17 +324,8 @@ def get_register():
 def set_register():
     data = request.get_json()
     value = int(data.get('value', 0))
-    print(value)
+    print(f'set_register: {value}')
     return jsonify({'success': True})
 
 if __name__ == '__main__':
     app.run(debug=True) 
-    # from thefuzz import fuzz
-    # from thefuzz import process
-
-    # choices = ['vendor_id', 'device_id', 'command', 'status', 'Advanced_Error_Reporting_Extended_Capability']
-    
-    # while True:
-    #     query = input('Please input the register name: ')
-    #     print(query)
-    #     print(process.extractOne(query, choices))

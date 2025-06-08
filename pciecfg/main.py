@@ -19,7 +19,10 @@ class PCIeRegisterParser:
             for reg in reg_struct.registers:
                 self.all_structures_map[reg.name] = reg
                 for field in reg.fields:
-                    self.all_structures_map[field.name] = field
+                    if field.name not in self.all_structures_map:
+                        self.all_structures_map[field.name] = field
+                    else:
+                        self.all_structures_map[field.name + '_field'] = field
 
     def __getitem__(self, key):
         correct_key, score = process.extractOne(key, self.all_structures_map.keys())
@@ -48,7 +51,7 @@ if __name__ == "__main__":
     with open("pciecfg/mock_data/config_space.bin", "rb") as f:
         config_space = bytearray(f.read())
         all_structures = PCIeRegisterParser(config_space)
-        print(all_structures['vendor_id'])
+        print(all_structures['vendor_id Register'])
         # for reg_struct in all_structures:
         #     print(reg_struct.name)
         #     for reg in reg_struct.registers:

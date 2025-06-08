@@ -97,7 +97,21 @@
       <div id="bit-description-list" class="bit-description-list"></div>
     </div>
 
-    <script type="text/javascript" src="static/js/mock_data.js"></script>
+    {% if register_data %}
+    <!-- Server data -->
+    <script type="text/javascript">
+      // Register data from backend
+      window.serverData = {{ register_data|tojson }};
+      window.serverData.registerName = {{ register_name|tojson }};
+      window.serverData.deviceBdf = {{ device_bdf|tojson }};
+      console.log('Server data:', window.serverData);
+    </script>
+    {% elif error %}
+    <script type="text/javascript">
+      window.serverData = { error: {{ error|tojson }} };
+    </script>
+    {% endif %}
+
     <script type="text/javascript" src="static/js/index.js"></script>
   </body>
 </html>

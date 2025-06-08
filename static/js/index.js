@@ -7,18 +7,44 @@ $(document).ready(function () {
     let currentBitRanges = {};
     let currentBitCount = 32;
     let currentRegisterInfo = {};
+    let modifiedBits = new Set();
 
-    // Check for register data from URL parameters
+    // Create tooltip element
+    const tooltip = $('<div>')
+        .addClass('register-tooltip')
+        .appendTo('body');
+
+    // Check for register data from URL parameters or server data
     function checkUrlParameters() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const registerParam = urlParams.get('register');
-        const bdf = urlParams.get('bdf');
-        const offset = urlParams.get('offset');
-        const name = urlParams.get('name');
+        // 首先检查服务器端传递的数据
+        if (window.serverData) {
+            if (window.serverData.error) {
+                console.error('Server error:', window.serverData.error);
+                showErrorMessage(window.serverData.error);
+                return;
+            }
 
-        if (registerParam) {
+            if (window.serverData.name || window.serverData.registerName) {
+                console.log('Received register data from server:', window.serverData);
+
+                // Update the register display with the server data
+                initializeFromServerData(window.serverData);
+
+                // Add a back button to return to layout page
+                addBackButton(window.serverData);
+                return;
+            }
+        }
+
+        // 如果没有服务器数据，检查URL参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const registerName = urlParams.get('register_name');
+        const register = urlParams.get('register');
+        console.log('URL params:', registerName, register);
+
+        if (registerName) {
             try {
-                const registerData = JSON.parse(decodeURIComponent(registerParam));
+                const registerData = JSON.parse(decodeURIComponent(register));
                 console.log('Received register data from URL:', registerData);
 
                 // Update the register display with the passed data
@@ -30,10 +56,67 @@ $(document).ready(function () {
             } catch (error) {
                 console.error('Error parsing register data from URL:', error);
             }
-        } else if (bdf && (offset || name)) {
-            // 如果没有完整的register参数，但有bdf和offset/name，则从后端API获取
-            fetchRegisterFromBackend(bdf, offset, name);
+        } else {
+            console.log('No register data from URL or server');
         }
+    }
+
+    // Initialize register display from server data
+    function initializeFromServerData(serverData) {
+        const registerData = serverData;
+
+        // Update register info display
+        if (registerData.name) {
+            $('#register-name-value').text(registerData.name);
+        }
+        if (registerData.offset !== undefined) {
+            $('#register-offset-value').text(`0x${registerData.offset.toString(16).padStart(4, '0').toUpperCase()}`);
+        }
+        if (registerData.value !== undefined) {
+            $('#register-value-display').text(`0x${registerData.value.toString(16).padStart(registerData.size * 2, '0').toUpperCase()}`);
+            currentRegisterValue = registerData.value;
+            initialRegisterValue = registerData.value;
+        }
+
+        // Store register info
+        currentRegisterInfo = registerData;
+        currentBitCount = (registerData.size || 4) * 8; // Convert bytes to bits
+
+        // Create bit fields from register data
+        let bitRanges = {};
+        if (registerData.fields && registerData.fields.length > 0) {
+            registerData.fields.forEach(field => {
+                // Create range key in the format "start-end"
+                const startBit = field.endBit || (field.bit_offset + field.bit_width - 1) || 0;
+                const endBit = field.startBit || field.bit_offset || 0;
+                const rangeKey = `${startBit}-${endBit}`;
+
+                bitRanges[rangeKey] = {
+                    field: field.name,
+                    start: startBit,
+                    end: endBit,
+                    description: field.description || 'No description available',
+                    attributes: field.attributes || 'RW',
+                    default: field.default || 0
+                };
+            });
+        } else {
+            // Create a default full-width field if no fields are specified
+            const rangeKey = `${currentBitCount - 1}-0`;
+            bitRanges[rangeKey] = {
+                field: registerData.name || 'Register',
+                start: currentBitCount - 1,
+                end: 0,
+                description: `${registerData.name || 'Register'} value`,
+                attributes: 'RW',
+                default: 0
+            };
+        }
+
+        currentBitRanges = bitRanges;
+
+        // Update the register display
+        updateRegister(currentRegisterValue, currentBitCount, bitRanges, registerData);
     }
 
     // 从后端API获取寄存器详细信息
@@ -90,13 +173,19 @@ $(document).ready(function () {
         currentRegisterInfo = registerData;
         currentBitCount = (registerData.size || 4) * 8; // Convert bytes to bits
 
-        // Create bit fields from register data
+        // Create bit fields from register data  
         let bitRanges = {};
         if (registerData.fields && registerData.fields.length > 0) {
             registerData.fields.forEach(field => {
-                bitRanges[field.name] = {
-                    start: field.startBit || 0,
-                    end: field.endBit || (field.startBit || 0),
+                // Create range key in the format "start-end"
+                const startBit = field.endBit || (field.bit_offset + field.bit_width - 1) || 0;
+                const endBit = field.startBit || field.bit_offset || 0;
+                const rangeKey = `${startBit}-${endBit}`;
+
+                bitRanges[rangeKey] = {
+                    field: field.name,
+                    start: startBit,
+                    end: endBit,
                     description: field.description || 'No description available',
                     attributes: field.attributes || 'RW',
                     default: field.defaultValue || 0
@@ -104,9 +193,11 @@ $(document).ready(function () {
             });
         } else {
             // Create a default full-width field if no fields are specified
-            bitRanges[registerData.name || 'Register'] = {
-                start: 0,
-                end: currentBitCount - 1,
+            const rangeKey = `${currentBitCount - 1}-0`;
+            bitRanges[rangeKey] = {
+                field: registerData.name || 'Register',
+                start: currentBitCount - 1,
+                end: 0,
                 description: `${registerData.blockName || 'Register'} value`,
                 attributes: 'RW',
                 default: 0
@@ -199,6 +290,24 @@ $(document).ready(function () {
 
     // Check URL parameters for register data
     checkUrlParameters();
+
+    // Initialize based on whether we have server data
+    $(document).ready(function () {
+        if (window.serverData && (window.serverData.name || window.serverData.registerName)) {
+            // We have server data, hide the register selectors
+            hideRegisterSelectors();
+            console.log('Using server data for register display');
+        } else {
+            // No server data, show selectors and fall back to default display
+            showRegisterSelectors();
+            console.log('No server data available, showing empty register display');
+
+            // Show default empty state
+            $('#register-name-value').text('No Register Selected');
+            $('#register-offset-value').text('--');
+            $('#register-value-display').text('--');
+        }
+    });
 
     // Add debounce function
     function debounce(func, wait) {
@@ -495,7 +604,7 @@ $(document).ready(function () {
                 .text(info.description),
                 $('<span>')
                 .addClass('bit-attributes')
-                .text(info.attributes.join(', '))
+                .text(Array.isArray(info.attributes) ? info.attributes.join(', ') : (info.attributes || 'N/A'))
             );
             descriptionList.append(item);
         });
@@ -667,7 +776,7 @@ $(document).ready(function () {
                                     <div><span class="tooltip-label">Value:</span> <span class="tooltip-value">0x${fieldValue.toString(16).toUpperCase().padStart(hexWidth, '0')}</span></div>
                                     <div><span class="tooltip-label">Default:</span> <span class="tooltip-value">0x${fieldInfo.default.toString(16).toUpperCase().padStart(hexWidth, '0')}</span></div>
                                     <div><span class="tooltip-label">Description:</span> <span class="tooltip-value">${fieldInfo.description || 'No description'}</span></div>
-                                    <div><span class="tooltip-label">Attributes:</span> <span class="tooltip-value">${fieldInfo.attributes.join(', ')}</span></div>
+                                    <div><span class="tooltip-label">Attributes:</span> <span class="tooltip-value">${Array.isArray(fieldInfo.attributes) ? fieldInfo.attributes.join(', ') : (fieldInfo.attributes || 'N/A')}</span></div>
                                 </div>
                             `;
                         }
@@ -781,96 +890,17 @@ $(document).ready(function () {
         });
     }
 
-    // Update register display
-    function updateRegisterDisplay(register) {
-        if (!register) return;
+    // Note: This function is kept for backward compatibility but not used with server data
 
-        // Update register info
-        $('#register-name-value').text(register.label.split(' (')[0]);
-        // Remove 0x prefix if it exists in the offset value
-        const offsetValue = register.offset.replace(/^0x/i, '');
-        $('#register-offset-value').text(`0x${offsetValue}`);
-
-        // Get register value from mock data
-        const registerValue = MOCK_DATA.defaultValues[register.value] || 0;
-
-        // Update all displays using updateRegister function
-        updateRegister(
-            registerValue,
-            register.bitCount || 32, // Use register's bitCount or default to 32
-            register.bitRanges, {
-                name: register.label.split(' (')[0],
-                offset: register.offset
-            }
-        );
+    // Hide register selectors when using server data
+    function hideRegisterSelectors() {
+        $('.register-selectors').hide();
     }
 
-    // Initialize space type selector with mock data
-    const spaceTypeSelect = $('#spaceType');
-    MOCK_DATA.spaceTypes.forEach(spaceType => {
-        spaceTypeSelect.append(
-            $('<option>')
-            .val(spaceType.value)
-            .text(spaceType.label)
-        );
-    });
-
-    // Initialize register selector when space type changes
-    function updateRegisterOptions(spaceType) {
-        const registerSelect = $('#registerSelect');
-        registerSelect.empty();
-
-        const registers = MOCK_DATA.registers[spaceType] || [];
-        registers.forEach(register => {
-            registerSelect.append(
-                $('<option>')
-                .val(register.value)
-                .text(register.label)
-            );
-        });
-
-        // Select first register by default and update display
-        if (registers.length > 0) {
-            const firstRegister = registers[0];
-            registerSelect.val(firstRegister.value);
-
-            // Update all displays using updateRegister function
-            updateRegister(
-                MOCK_DATA.defaultValues[firstRegister.value] || 0,
-                firstRegister.bitCount || 32,
-                firstRegister.bitRanges, {
-                    name: firstRegister.label.split(' (')[0],
-                    offset: firstRegister.offset
-                }
-            );
-        }
+    // Show register selectors for fallback mode
+    function showRegisterSelectors() {
+        $('.register-selectors').show();
     }
-
-    // Handle space type change
-    spaceTypeSelect.on('change', function () {
-        updateRegisterOptions($(this).val());
-    });
-
-    // Handle register selection change
-    $('#registerSelect').on('change', function () {
-        const spaceType = spaceTypeSelect.val();
-        const registerValue = $(this).val();
-        const register = MOCK_DATA.registers[spaceType].find(r => r.value === registerValue);
-        updateRegisterDisplay(register);
-    });
-
-    // Initialize with first space type
-    $(document).ready(function () {
-        // Initialize with first space type
-        updateRegisterOptions(spaceTypeSelect.val());
-
-        // Force initial update of all displays
-        const firstSpaceType = spaceTypeSelect.val();
-        const firstRegister = MOCK_DATA.registers[firstSpaceType][0];
-        if (firstRegister) {
-            updateRegisterDisplay(firstRegister);
-        }
-    });
 
     // Update register value display
     function updateRegisterValueDisplay(value) {
@@ -1070,8 +1100,6 @@ $(document).ready(function () {
     }
 
     // Add a new function to track modified bits
-    let modifiedBits = new Set();
-
     function markBitAsModified(bitIndex) {
         modifiedBits.add(bitIndex);
         $(`.bit-box[data-bit="${bitIndex}"]`).addClass('modified');
@@ -1457,10 +1485,7 @@ $(document).ready(function () {
         `)
         .appendTo('head');
 
-    // Add tooltip element
-    const tooltip = $('<div>')
-        .addClass('register-tooltip')
-        .appendTo('body');
+
 
     // Update register function
     function updateRegister(registerValue, bitCount, bitRanges = {}, registerInfo = {}) {
