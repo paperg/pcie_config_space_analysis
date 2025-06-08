@@ -212,10 +212,10 @@ $(document).ready(function () {
 
     // Add a back button to return to layout page
     function addBackButton(registerData) {
-        const registerInfo = $('.register-info');
+        const registerControls = $('.register-controls');
         const backButton = $(`
-            <div class="info-item back-item">
-                <button class="back-btn" id="backBtn" title="返回 Layout 页面">
+            <div class="back-button-container">
+                <button class="back-btn" id="backBtn" title="返回上一页">
                     <span class="back-icon">←</span>
                     <span class="back-text">Back</span>
                 </button>
@@ -223,21 +223,22 @@ $(document).ready(function () {
         `);
 
         backButton.on('click', function () {
-            // Return to layout page (root path)
-            window.location.href = '/';
+            // Use browser back navigation (like browser back button)
+            window.history.back();
         });
 
-        registerInfo.append(backButton);
+        registerControls.append(backButton);
 
         // Add some basic styling for the back button
         if (!$('#back-btn-styles').length) {
             $('head').append(`
                 <style id="back-btn-styles">
-                    .back-item {
-                        border: none !important;
-                        padding: 0 !important;
-                        margin: 0 !important;
-                        background: transparent !important;
+                    .back-button-container {
+                        position: absolute;
+                        right: 0.2rem;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        z-index: 10;
                     }
                     .back-btn {
                         display: flex;
@@ -255,6 +256,8 @@ $(document).ready(function () {
                         height: 0.32rem;
                         min-width: 0.8rem;
                         justify-content: center;
+                        margin-left: 0.2rem;
+                        margin-right: 0.2rem;
                     }
                     .back-btn:hover {
                         background: #f5f5f5;

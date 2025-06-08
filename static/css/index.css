@@ -3,6 +3,7 @@
   padding: 0;
   margin: 0;
 }
+
 body {
   font-family: "Consolas", "Microsoft YaHei", "Segoe UI", monospace;
   background-color: #ffffff;
@@ -10,38 +11,47 @@ body {
   transition: all 0.3s ease;
   overflow-x: hidden;
 }
+
 body.dark-theme {
   background-color: #1a1a1a;
   color: #ffffff;
 }
+
 a {
   text-decoration: none;
   color: #399bff;
 }
+
 a:hover {
   color: #06c;
   text-decoration: none !important;
 }
+
 a.active,
 a:focus {
   outline: none !important;
   text-decoration: none;
 }
+
 img {
   border: none;
   max-width: 100%;
 }
+
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
   position: absolute;
 }
+
 ::-webkit-scrollbar-thumb {
   background-color: #5bc0de;
 }
+
 ::-webkit-scrollbar-track {
   background-color: #ddd;
 }
+
 .nav {
   width: 100%;
   height: 0.6rem;
@@ -58,6 +68,7 @@ img {
   top: 0;
   z-index: 1000;
 }
+
 .nav .nav-title {
   font-weight: 600;
   color: #399bff;
@@ -66,10 +77,12 @@ img {
   gap: 0.2rem;
   margin-right: 1rem;
 }
+
 .nav .nav-title .title-text {
   font-size: 0.28rem;
   letter-spacing: 0.02rem;
 }
+
 .nav .nav-title .author-info {
   font-size: 0.16rem;
   color: #666666;
@@ -77,27 +90,33 @@ img {
   padding-left: 0.2rem;
   border-left: 1px solid #000000;
 }
+
 .nav .nav-controls {
   display: flex;
   align-items: center;
   gap: 0.3rem;
   margin-left: auto;
 }
+
 body.dark-theme .nav {
   background: rgba(26, 26, 26, 0.95);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
+
 body.dark-theme .nav .nav-title {
   color: #66b3ff;
 }
+
 body.dark-theme .nav .nav-title .author-info {
   color: #999999;
   border-left-color: #ffffff;
 }
+
 .theme-switch {
   display: flex;
   align-items: center;
 }
+
 .theme-toggle-btn {
   background: #ffffff;
   color: #000000;
@@ -111,33 +130,42 @@ body.dark-theme .nav .nav-title .author-info {
   justify-content: center;
   transition: all 0.3s ease;
 }
+
 .theme-toggle-btn:hover {
   background-color: #f0f0f0;
 }
+
 .theme-toggle-btn .dark-icon,
 .theme-toggle-btn .light-icon {
   user-select: none;
 }
+
 .theme-toggle-btn .dark-icon {
   display: none;
 }
+
 .theme-toggle-btn .light-icon {
   display: inline;
 }
+
 body.dark-theme .theme-toggle-btn {
   background: #1a1a1a;
   color: #ffffff;
   border-color: #ffffff;
 }
+
 body.dark-theme .theme-toggle-btn:hover {
   background-color: #333333;
 }
+
 body.dark-theme .theme-toggle-btn .dark-icon {
   display: inline;
 }
+
 body.dark-theme .theme-toggle-btn .light-icon {
   display: none;
 }
+
 .register {
   position: relative;
   margin: auto;
@@ -153,10 +181,12 @@ body.dark-theme .theme-toggle-btn .light-icon {
   backdrop-filter: blur(5px);
   min-height: fit-content;
 }
+
 body.dark-theme .register {
   background: rgba(26, 26, 26, 0.8);
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
 }
+
 .register-box {
   display: flex;
   flex-direction: row-reverse;
@@ -165,6 +195,7 @@ body.dark-theme .register {
   min-height: fit-content;
   margin-right: 0.2rem;
 }
+
 .register-name {
   position: relative;
   top: 0.9rem;
@@ -174,6 +205,7 @@ body.dark-theme .register {
   min-width: max-content;
   margin-right: -0.2rem;
 }
+
 .bit-name {
   font-size: 0.16rem;
   height: 0.27rem;
@@ -185,19 +217,23 @@ body.dark-theme .register {
   color: #666666;
   margin: 0.01rem 0;
 }
+
 .bit-name.highlight {
   color: #399bff;
   font-weight: bold;
   transform: scale(1.1);
   text-shadow: 0 0 5px rgba(57, 155, 255, 0.3);
 }
+
 body.dark-theme .bit-name {
   color: #999999;
 }
+
 body.dark-theme .bit-name.highlight {
   color: #66b3ff;
   text-shadow: 0 0 5px rgba(102, 179, 255, 0.3);
 }
+
 #svg-line {
   position: absolute;
   top: 0;
@@ -207,30 +243,36 @@ body.dark-theme .bit-name.highlight {
   pointer-events: none;
   overflow: visible;
 }
+
 .line,
 .line-dashed {
   stroke: #000000;
   stroke-width: 2;
   pointer-events: none;
 }
+
 .line.highlight,
 .line-dashed.highlight {
   stroke: #399bff;
   stroke-width: 3;
   filter: drop-shadow(0 0 2px rgba(57, 155, 255, 0.3));
 }
+
 body.dark-theme .line,
 body.dark-theme .line-dashed {
   stroke: #ffffff;
 }
+
 body.dark-theme .line.highlight,
 body.dark-theme .line-dashed.highlight {
   stroke: #66b3ff;
   filter: drop-shadow(0 0 2px rgba(102, 179, 255, 0.3));
 }
+
 .line-dashed {
   stroke-dasharray: 5, 5;
 }
+
 .bit-box {
   height: 0.45rem;
   width: 0.45rem;
@@ -244,31 +286,38 @@ body.dark-theme .line-dashed.highlight {
   cursor: pointer;
   position: relative;
 }
+
 .bit-box:hover {
   transform: scale(1.1);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   z-index: 1;
 }
+
 .bit-box.bit-0:hover {
   background-color: #f0f0f0;
   border-color: #666666;
 }
+
 .bit-box.bit-1:hover {
   background-color: #e1f0ff;
   border-color: #0066cc;
 }
+
 .bit-box.highlight-box {
   transform: scale(1.1);
   box-shadow: 0 0 10px rgba(57, 155, 255, 0.5);
   border-color: #399bff;
   z-index: 1;
 }
+
 .bit-box.highlight-box.bit-0 {
   background-color: #e6f0ff;
 }
+
 .bit-box.highlight-box.bit-1 {
   background-color: #cce5ff;
 }
+
 .bit-box.modified::after {
   content: '';
   position: absolute;
@@ -281,49 +330,62 @@ body.dark-theme .line-dashed.highlight {
   border: 0.01rem solid #fff;
   box-shadow: 0 0 0.02rem rgba(0, 0, 0, 0.2);
 }
+
 .bit-box.modified.bit-0,
 .bit-box.modified.bit-1 {
   border-color: #ff9800;
   background-color: rgba(255, 152, 0, 0.1);
 }
+
 .bit-box.modified.bit-1 {
   background-color: rgba(255, 152, 0, 0.15);
 }
+
 body.dark-theme .bit-box {
   border-color: #ffffff;
 }
+
 body.dark-theme .bit-box.modified::after {
   background-color: #ffb74d;
   border-color: #1a1a1a;
   box-shadow: 0 0 0.02rem rgba(0, 0, 0, 0.4);
 }
+
 body.dark-theme .bit-box.modified.bit-0,
 body.dark-theme .bit-box.modified.bit-1 {
   border-color: #ffb74d;
   background-color: rgba(255, 183, 77, 0.15);
 }
+
 body.dark-theme .bit-box.modified.bit-1 {
   background-color: rgba(255, 183, 77, 0.2);
 }
+
 body.dark-theme .bit-box.highlight-box {
   box-shadow: 0 0 10px rgba(102, 179, 255, 0.5);
   border-color: #66b3ff;
 }
+
 body.dark-theme .bit-box.highlight-box.bit-0 {
   background-color: #1a3a5f;
 }
+
 body.dark-theme .bit-box.highlight-box.bit-1 {
   background-color: #2a4a6f;
 }
+
 body.dark-theme .bit-box.bit-0:hover {
   background-color: #333333;
   border-color: #999999;
 }
+
 body.dark-theme .bit-box.bit-1:hover {
   background-color: #1a3a5f;
   border-color: #4d8fcc;
 }
+
 .register-controls {
+  position: relative;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -337,11 +399,13 @@ body.dark-theme .bit-box.bit-1:hover {
   border: 1px solid #e0e0e0;
   box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.05);
 }
+
 body.dark-theme .register-controls {
   background: #1a1a1a;
   border-color: #333333;
   box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.2);
 }
+
 .register-selectors {
   flex: 1;
   display: flex;
@@ -355,6 +419,7 @@ body.dark-theme .register-controls {
   max-width: 8rem;
   user-select: none;
 }
+
 .register-selectors .selector-item {
   flex: 1;
   display: flex;
@@ -365,9 +430,11 @@ body.dark-theme .register-controls {
   border-radius: 0.04rem;
   transition: all 0.3s ease;
 }
+
 .register-selectors .selector-item:hover {
   background: #eeeeee;
 }
+
 .register-selectors .selector-item label {
   font-size: 0.14rem;
   color: #399bff;
@@ -375,6 +442,7 @@ body.dark-theme .register-controls {
   font-weight: bold;
   text-align: left;
 }
+
 .register-selectors .selector-item select {
   width: 100%;
   font-size: 0.14rem;
@@ -386,49 +454,61 @@ body.dark-theme .register-controls {
   cursor: pointer;
   transition: all 0.3s ease;
 }
+
 .register-selectors .selector-item select:hover {
   border-color: #399bff;
   background: #f5f5f5;
 }
+
 .register-selectors .selector-item select:focus {
   outline: none;
   border-color: #399bff;
   box-shadow: 0 0 0 1px rgba(57, 155, 255, 0.2);
 }
+
 .register-selectors .selector-item select option {
   background: #ffffff;
   color: #666666;
 }
+
 body.dark-theme .register-selectors {
   background: #1a1a1a;
   border-color: #333333;
 }
+
 body.dark-theme .register-selectors .selector-item {
   background: #262626;
 }
+
 body.dark-theme .register-selectors .selector-item:hover {
   background: #333333;
 }
+
 body.dark-theme .register-selectors .selector-item label {
   color: #66b3ff;
 }
+
 body.dark-theme .register-selectors .selector-item select {
   background: #1a1a1a;
   border-color: #333333;
   color: #999999;
 }
+
 body.dark-theme .register-selectors .selector-item select:hover {
   border-color: #66b3ff;
   background: #262626;
 }
+
 body.dark-theme .register-selectors .selector-item select:focus {
   border-color: #66b3ff;
   box-shadow: 0 0 0 1px rgba(102, 179, 255, 0.2);
 }
+
 body.dark-theme .register-selectors .selector-item select option {
   background: #1a1a1a;
   color: #999999;
 }
+
 .register-info {
   flex: 1;
   display: flex;
@@ -442,6 +522,7 @@ body.dark-theme .register-selectors .selector-item select option {
   max-width: 10rem;
   user-select: none;
 }
+
 .register-info .info-item {
   flex: 1;
   display: flex;
@@ -452,9 +533,11 @@ body.dark-theme .register-selectors .selector-item select option {
   border-radius: 0.04rem;
   transition: all 0.3s ease;
 }
+
 .register-info .info-item:hover {
   background: #eeeeee;
 }
+
 .register-info .info-item .info-label {
   font-size: 0.14rem;
   color: #399bff;
@@ -462,6 +545,7 @@ body.dark-theme .register-selectors .selector-item select option {
   user-select: none;
   text-align: left;
 }
+
 .register-info .info-item .info-value {
   font-family: "Consolas", monospace;
   color: #666666;
@@ -474,31 +558,38 @@ body.dark-theme .register-selectors .selector-item select option {
   border: 1px solid #e0e0e0;
   width: 100%;
 }
+
 .register-info .info-item .info-value:hover {
   border-color: #399bff;
   background: #f5f5f5;
 }
+
 .register-info .info-item .info-value.register-value-display {
   cursor: text;
   border: 1px solid #e0e0e0;
   outline: none;
 }
+
 .register-info .info-item .info-value.register-value-display:hover {
   border-color: #399bff;
   background: #f5f5f5;
 }
+
 .register-info .info-item .info-value.register-value-display:focus {
   border-color: #399bff;
   background: #ffffff;
   box-shadow: 0 0 0 1px rgba(57, 155, 255, 0.2);
 }
+
 .register-info .info-item .info-value.register-value-display.updating {
   animation: valueUpdate 0.3s ease;
 }
+
 .register-info .info-item .info-value.register-value-display.error {
   border-color: #ff4444;
   background: #fff5f5;
 }
+
 .register-info .modify-btn {
   margin-top: 0.06rem;
   padding: 0.08rem;
@@ -514,14 +605,17 @@ body.dark-theme .register-selectors .selector-item select option {
   justify-content: center;
   gap: 0.06rem;
 }
+
 .register-info .modify-btn:hover {
   background: #eeeeee;
   border-color: #399bff;
   color: #2980ff;
 }
+
 .register-info .modify-btn:active {
   background: #e0e0e0;
 }
+
 .register-info .modify-btn.disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -530,62 +624,77 @@ body.dark-theme .register-selectors .selector-item select option {
   border-color: #e0e0e0;
   color: #666666;
 }
+
 .register-info .modify-btn .modify-icon {
   font-size: 0.16rem;
 }
+
 body.dark-theme .register-info {
   background: #1a1a1a;
   border-color: #333333;
 }
+
 body.dark-theme .register-info .info-item {
   background: #262626;
 }
+
 body.dark-theme .register-info .info-item:hover {
   background: #333333;
 }
+
 body.dark-theme .register-info .info-item .info-label {
   color: #66b3ff;
 }
+
 body.dark-theme .register-info .info-item .info-value {
   color: #999999;
   background: #1a1a1a;
   border-color: #333333;
 }
+
 body.dark-theme .register-info .info-item .info-value:hover {
   border-color: #66b3ff;
   background: #262626;
 }
+
 body.dark-theme .register-info .info-item .info-value.register-value-display:hover {
   border-color: #66b3ff;
   background: #262626;
 }
+
 body.dark-theme .register-info .info-item .info-value.register-value-display:focus {
   border-color: #66b3ff;
   background: #1a1a1a;
   box-shadow: 0 0 0 1px rgba(102, 179, 255, 0.2);
 }
+
 body.dark-theme .register-info .info-item .info-value.register-value-display.error {
   border-color: #ff8080;
   background: #331a1a;
 }
+
 body.dark-theme .register-info .modify-btn {
   background: #262626;
   border-color: #333333;
   color: #66b3ff;
 }
+
 body.dark-theme .register-info .modify-btn:hover {
   background: #333333;
   border-color: #66b3ff;
   color: #99ccff;
 }
+
 body.dark-theme .register-info .modify-btn:active {
   background: #404040;
 }
+
 body.dark-theme .register-info .modify-btn.disabled {
   background: #262626;
   border-color: #333333;
   color: #999999;
 }
+
 .down-box {
   width: 100%;
   padding: 0.2rem;
@@ -596,11 +705,13 @@ body.dark-theme .register-info .modify-btn.disabled {
   user-select: none;
   margin-top: 0.15rem;
 }
+
 body.dark-theme .down-box {
   background: #1a1a1a;
   border-color: #333333;
   box-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.2);
 }
+
 .down-box-title {
   font-size: 0.16rem;
   font-weight: bold;
@@ -608,15 +719,18 @@ body.dark-theme .down-box {
   margin-bottom: 0.2rem;
   user-select: none;
 }
+
 body.dark-theme .down-box-title {
   color: #66b3ff;
 }
+
 .bit-description-list {
   display: flex;
   flex-direction: column;
   gap: 0.08rem;
   padding: 0.1rem;
 }
+
 .bit-description-header,
 .bit-description-item {
   display: grid;
@@ -628,12 +742,14 @@ body.dark-theme .down-box-title {
   font-size: 0.16rem;
   border: 1px solid #e0e0e0;
 }
+
 .bit-description-header {
   margin-bottom: 0.1rem;
   font-weight: bold;
   color: #399bff;
   background: #f5f5f5;
 }
+
 .bit-description-header .bit-range,
 .bit-description-header .bit-field,
 .bit-description-header .bit-value,
@@ -641,27 +757,34 @@ body.dark-theme .down-box-title {
 .bit-description-header .bit-attributes {
   color: #399bff;
 }
+
 .bit-description-header .bit-range {
   text-align: right;
 }
+
 .bit-description-header .bit-field {
   text-align: left;
 }
+
 .bit-description-header .bit-value,
 .bit-description-header .bit-default {
   text-align: center;
 }
+
 .bit-description-header .bit-description {
   padding: 0 0.1rem;
 }
+
 .bit-description-header .bit-attributes {
   text-align: left;
 }
+
 body.dark-theme .bit-description-header {
   background: #262626;
   border-color: #333333;
   color: #66b3ff;
 }
+
 body.dark-theme .bit-description-header .bit-range,
 body.dark-theme .bit-description-header .bit-field,
 body.dark-theme .bit-description-header .bit-value,
@@ -669,18 +792,22 @@ body.dark-theme .bit-description-header .bit-default,
 body.dark-theme .bit-description-header .bit-attributes {
   color: #66b3ff;
 }
+
 .bit-description-item {
   background: #f5f5f5;
   transition: all 0.3s ease;
   line-height: 1.5;
 }
+
 .bit-description-item:hover {
   background: #eeeeee;
 }
+
 .bit-description-item.highlight-description {
   background: #e3f2fd;
   border-color: #399bff;
 }
+
 .bit-description-item .bit-range,
 .bit-description-item .bit-field,
 .bit-description-item .bit-value {
@@ -692,19 +819,23 @@ body.dark-theme .bit-description-header .bit-attributes {
   border-radius: 0;
   transition: none;
 }
+
 .bit-description-item .bit-range:hover,
 .bit-description-item .bit-field:hover,
 .bit-description-item .bit-value:hover {
   border: none;
   background: none;
 }
+
 .bit-description-item .bit-range {
   text-align: right;
 }
+
 .bit-description-item .bit-value {
   text-align: center;
   font-family: "Consolas", monospace;
 }
+
 .bit-description-item .bit-default {
   text-align: center;
   font-family: "Consolas", monospace;
@@ -716,67 +847,84 @@ body.dark-theme .bit-description-header .bit-attributes {
   border-radius: 0;
   transition: none;
 }
+
 .bit-description-item .bit-default:hover {
   border: none;
   background: none;
 }
+
 .bit-description-item .bit-description {
   color: #666666;
   padding: 0 0.1rem;
   font-weight: normal;
 }
+
 .bit-description-item .bit-attributes {
   color: #ff4444;
   font-size: 0.9em;
   white-space: nowrap;
 }
+
 body.dark-theme .bit-description-item {
   background: #262626;
   border-color: #333333;
 }
+
 body.dark-theme .bit-description-item:hover {
   background: #333333;
 }
+
 body.dark-theme .bit-description-item.highlight-description {
   background: #1a3a5f;
   border-color: #66b3ff;
 }
+
 body.dark-theme .bit-description-item .bit-range,
 body.dark-theme .bit-description-item .bit-field,
 body.dark-theme .bit-description-item .bit-value {
   color: #66b3ff;
 }
+
 body.dark-theme .bit-description-item .bit-default {
   color: #999999;
 }
+
 body.dark-theme .bit-description-item .bit-description {
   color: #999999;
 }
+
 body.dark-theme .bit-description-item .bit-attributes {
   color: #ff8080;
 }
+
 @keyframes valueUpdate {
   0% {
     background: rgba(57, 155, 255, 0.3);
   }
+
   100% {
     background: rgba(57, 155, 255, 0.1);
   }
 }
+
 @keyframes valueUpdateDark {
   0% {
     background: rgba(102, 179, 255, 0.3);
   }
+
   100% {
     background: rgba(102, 179, 255, 0.1);
   }
 }
+
 .register-tooltip .tooltip-content .tooltip-value {
   font-family: "Consolas", monospace;
 }
+
 .error-dialog-message {
   font-family: "Consolas", "Microsoft YaHei", "Segoe UI", monospace;
 }
+
 .error-dialog-button {
   font-family: "Consolas", "Microsoft YaHei", "Segoe UI", monospace;
 }
