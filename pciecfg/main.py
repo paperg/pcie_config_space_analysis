@@ -27,5 +27,6 @@ if __name__ == "__main__":
         for reg_struct in all_structures:
             print(reg_struct.name)
             for reg in reg_struct.registers:
-                print(reg.name)
+                for field in reg.fields:
+                    print(field.name, reg[field.name])
             

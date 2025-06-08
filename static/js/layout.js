@@ -45,7 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Current state
     let currentRegion = null;
-    let currentRegisterData = {};
+    let currentRegisterData = []; // Array for register blocks
+    let currentRawData = []; // Array for raw memory data
     let pcieDevices = [];
     let selectedDevice = null;
     let registerBlocks = [];
@@ -189,8 +190,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const memoryRegions = regionData.regions || [];
 
-            // Store register data for later use
-            if (regionData.registers_data) {
+            // Store register blocks data
+            if (regionData.registers_data && Array.isArray(regionData.registers_data)) {
                 currentRegisterData = regionData.registers_data;
                 console.log('Loaded register blocks data:', currentRegisterData.length, 'register blocks');
 
@@ -201,17 +202,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 generateRegisterMap(regionData.registers_data);
             }
 
-            // Store raw config space data
-            if (regionData.raw_data) {
-                console.log('Loaded raw config space data:', regionData.raw_data.length, 'bytes');
-                // Display the raw data immediately
-                displayMemoryData(regionData.raw_data);
+            // Store raw config space data for memory display
+            if (regionData.raw_data && regionData.raw_data.length > 0) {
+                currentRawData = regionData.raw_data;
+                console.log('Loaded raw config space data:', currentRawData.length, 'bytes');
+            } else {
+                // Generate fallback data if no raw data available
+                currentRawData = generateMockPCIeData();
+                console.log('Using fallback mock data');
             }
 
-            // Check if we have regions to display
+            // Always display memory data
+            displayMemoryData(currentRawData);
+
+            // Create memory regions display (even if no regions from API)
             if (memoryRegions.length === 0) {
-                console.warn('No memory regions found');
-                return;
+                // Create default PCIe config space region
+                memoryRegions.push({
+                    name: 'PCIe Config Space',
+                    startAddress: 0x0,
+                    size: 0x1000,
+                    type: 'pcie'
+                });
             }
 
             // Sort by start address (lowest first, will be reversed by CSS)
@@ -220,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Calculate total memory span
             const maxAddress = Math.max(...memoryRegions.map(r => r.startAddress + r.size));
             const minAddress = Math.min(...memoryRegions.map(r => r.startAddress));
-            const totalSpan = maxAddress - minAddress;
+            const totalSpan = maxAddress - minAddress || 0x1000; // Fallback size
 
             memoryRegions.forEach((region, index) => {
                 const regionDiv = document.createElement('div');
@@ -228,8 +240,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 regionDiv.dataset.region = region.type;
 
                 // Calculate relative height based on size
-                const relativeHeight = (region.size / totalSpan) * 100;
-                regionDiv.style.height = `${Math.max(relativeHeight, 8)}%`; // Minimum 8% height
+                const relativeHeight = totalSpan > 0 ? (region.size / totalSpan) * 100 : 100;
+                regionDiv.style.height = `${Math.max(relativeHeight, 10)}%`; // Minimum 10% height
 
                 regionDiv.innerHTML = `
                 <div class="region-label">${region.name}</div>
@@ -244,9 +256,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 container.appendChild(regionDiv);
             });
+
+            // Auto-select the first region (PCIe config space)
+            if (memoryRegions.length > 0) {
+                setTimeout(() => {
+                    const firstRegion = container.querySelector('.memory-region');
+                    if (firstRegion) {
+                        firstRegion.click();
+                    }
+                }, 100);
+            }
+
         } catch (error) {
             console.error('Error loading memory regions:', error);
-            // Fallback to default empty container
+            // Create fallback PCIe region and display mock data
+            const regionDiv = document.createElement('div');
+            regionDiv.className = 'memory-region region-0';
+            regionDiv.dataset.region = 'pcie';
+            regionDiv.innerHTML = `
+                <div class="region-label">PCIe Config Space</div>
+                <div class="region-address">0x00000000</div>
+                <div class="region-size">4KB</div>
+            `;
+            regionDiv.addEventListener('click', () => {
+                handleRegionClick('pcie');
+            });
+            container.appendChild(regionDiv);
+
+            // Display fallback data
+            displayMemoryData(generateMockPCIeData());
         }
     }
 
@@ -312,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     highlightRegisterBlock(blockId);
                     // Show register block details in right panel and remember it
                     lastHoveredRegisterBlock = blockInfo;
-                    generateRegisterMap(currentRegisterData[currentRegion] || [], blockInfo);
+                    generateRegisterMap(currentRegisterData, blockInfo);
                     registerCount.textContent = `${blockInfo.name} - ${blockInfo.registers.length} registers`;
                 }
             }
@@ -461,8 +499,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const regionData = await response.json();
                 console.log('Loaded config space data for device:', bdf, regionData);
 
-                // Store register data
-                if (regionData.registers_data) {
+                // Store register blocks data
+                if (regionData.registers_data && Array.isArray(regionData.registers_data)) {
                     currentRegisterData = regionData.registers_data;
                     console.log('Updated register blocks data:', currentRegisterData.length, 'register blocks');
 
@@ -471,10 +509,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // Store raw config space data
-                if (regionData.raw_data) {
-                    console.log('Updated raw config space data:', regionData.raw_data.length, 'bytes');
+                if (regionData.raw_data && regionData.raw_data.length > 0) {
+                    currentRawData = regionData.raw_data;
+                    console.log('Updated raw config space data:', currentRawData.length, 'bytes');
                     // Display the raw data in the memory data view
-                    displayMemoryData(regionData.raw_data);
+                    displayMemoryData(currentRawData);
                 }
 
                 // Update the register map
@@ -509,8 +548,8 @@ document.addEventListener('DOMContentLoaded', () => {
         registerMap.innerHTML = '';
 
         // If we have real register data, use it
-        if (currentData && currentData.length > 0) {
-            console.log('Generating register map with real data:', currentData.length, 'registers');
+        if (currentData && Array.isArray(currentData) && currentData.length > 0) {
+            console.log('Generating register map with real data:', currentData.length, 'register blocks');
             generateRegisterMapFromRealData(currentData);
             return;
         }
@@ -834,12 +873,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         console.log('Generating register map from blocks:', registerBlocks);
 
-        // Create header
-        const header = document.createElement('div');
-        header.className = 'register-map-header';
-        header.innerHTML = '<h4>Register Blocks Overview</h4>';
-        registerMap.appendChild(header);
-
         // Create blocks container
         const blocksContainer = document.createElement('div');
         blocksContainer.className = 'register-blocks-container';
@@ -868,12 +901,16 @@ document.addEventListener('DOMContentLoaded', () => {
             block.registers.forEach(reg => {
                 const regDiv = document.createElement('div');
                 regDiv.className = 'register-item';
+
+                // Ensure we have a valid register value
+                const regValue = reg.value || 0;
+
                 regDiv.innerHTML = `
                     <div class="reg-name">${reg.name}</div>
                     <div class="reg-details">
                         <span class="reg-offset">0x${reg.offset.toString(16).padStart(3, '0').toUpperCase()}</span>
                         <span class="reg-size">${reg.size}B</span>
-                        <span class="reg-value">0x${reg.value.toString(16).padStart(reg.size * 2, '0').toUpperCase()}</span>
+                        <span class="reg-value">0x${regValue.toString(16).padStart(reg.size * 2, '0').toUpperCase()}</span>
                     </div>
                 `;
 
@@ -882,12 +919,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     const fieldsDiv = document.createElement('div');
                     fieldsDiv.className = 'reg-fields';
                     reg.fields.forEach(field => {
+                        const fieldValue = field.value || 0;
                         const fieldDiv = document.createElement('div');
                         fieldDiv.className = 'field-item';
                         fieldDiv.innerHTML = `
                             <span class="field-name">${field.name}</span>
                             <span class="field-bits">[${field.bit_offset + field.bit_width - 1}:${field.bit_offset}]</span>
-                            <span class="field-value">0x${field.value.toString(16).toUpperCase()}</span>
+                            <span class="field-value">0x${fieldValue.toString(16).toUpperCase()}</span>
                         `;
                         fieldsDiv.appendChild(fieldDiv);
                     });
@@ -913,6 +951,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 hideRegisterBlockTooltip();
             });
 
+            // Add click event to show full register layout for this block
+            blockDiv.addEventListener('click', () => {
+                generateSelectedBlockLayout(currentRegisterData, block);
+                registerCount.textContent = `${block.name} - ${block.registers.length} registers`;
+            });
+
             blocksContainer.appendChild(blockDiv);
         });
 
@@ -925,7 +969,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const generateSelectedBlockLayout = (currentData, selectedBlock) => {
+    const generateSelectedBlockLayout = (allRegisterData, selectedBlock) => {
         // Clear previous content
         registerMap.innerHTML = '';
 
@@ -965,13 +1009,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const registerBits = register.size * 8;
                 fieldDiv.style.width = `${(registerBits / 32) * 100}%`;
 
-                // Get register value from data
-                let value = 0;
-                if (currentData && currentData.length > register.offset) {
+                // Use register value from backend data if available, otherwise calculate from raw data
+                let value = register.value || 0;
+                if (!register.value && currentRawData && Array.isArray(currentRawData) && currentRawData.length > register.offset) {
+                    value = 0;
                     const bytesToRead = register.size;
                     for (let i = 0; i < bytesToRead; i++) {
-                        if (register.offset + i < currentData.length) {
-                            value |= (currentData[register.offset + i] << (i * 8));
+                        if (register.offset + i < currentRawData.length) {
+                            value |= (currentRawData[register.offset + i] << (i * 8));
                         }
                     }
                 }
@@ -985,13 +1030,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="register-value">0x${formattedValue}</div>
                 `;
 
+                // Add fields info if available
+                if (register.fields && register.fields.length > 0) {
+                    const fieldsDiv = document.createElement('div');
+                    fieldsDiv.className = 'reg-fields-inline';
+                    register.fields.forEach(field => {
+                        const fieldValue = field.value || 0;
+                        const fieldSpan = document.createElement('span');
+                        fieldSpan.className = 'field-inline';
+                        fieldSpan.innerHTML = `${field.name}[${field.bit_offset + field.bit_width - 1}:${field.bit_offset}]=0x${fieldValue.toString(16).toUpperCase()}`;
+                        fieldsDiv.appendChild(fieldSpan);
+                    });
+                    fieldDiv.appendChild(fieldsDiv);
+                }
+
                 // Add click event to highlight in memory view
                 fieldDiv.addEventListener('click', () => {
                     const highlightOffsets = [];
                     for (let i = 0; i < register.size; i++) {
                         highlightOffsets.push(register.offset + i);
                     }
-                    displayMemoryData(currentData, highlightOffsets);
+
+                    // Use the raw data array for highlighting
+                    displayMemoryData(currentRawData, highlightOffsets);
 
                     // Scroll to register position in memory view
                     const targetRow = Math.floor(register.offset / 16);
@@ -1118,20 +1179,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // Store current data
-            currentRegisterData[region] = data;
+            // Store current data (for non-PCIe regions)
+            if (region !== 'pcie') {
+                currentRawData = data;
+            }
 
             // Display memory data
             displayMemoryData(data);
 
             // Initialize register map display
             if (region === 'pcie') {
-                // Show last hovered register block if exists, otherwise show default message
-                if (lastHoveredRegisterBlock) {
-                    generateRegisterMap(data, lastHoveredRegisterBlock);
-                    registerCount.textContent = `${lastHoveredRegisterBlock.name} - ${lastHoveredRegisterBlock.registers.length} registers`;
+                // Show register blocks if available
+                if (currentRegisterData && currentRegisterData.length > 0) {
+                    generateRegisterMap(currentRegisterData);
                 } else {
-                    registerMap.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">Hover over a register block in memory view to see details</div>';
+                    registerMap.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">Loading register data...</div>';
                     registerCount.textContent = 'PCIe Configuration Space';
                 }
             } else {
