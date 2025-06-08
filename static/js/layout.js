@@ -755,13 +755,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (register.fields && register.fields.length > 0) {
                     const fieldsDiv = document.createElement('div');
                     fieldsDiv.className = 'reg-fields-inline';
-                    register.fields.forEach(field => {
-                        const fieldValue = field.value || 0;
-                        const fieldSpan = document.createElement('span');
-                        fieldSpan.className = 'field-inline';
-                        fieldSpan.innerHTML = `${field.name}[${field.bit_offset + field.bit_width - 1}:${field.bit_offset}]=0x${fieldValue.toString(16).toUpperCase()}`;
-                        fieldsDiv.appendChild(fieldSpan);
-                    });
+
+                    const fieldSpan = document.createElement('span');
+                    fieldSpan.className = 'field-inline';
+                    fieldSpan.innerHTML = `${register.name}[${register.offset + register.size - 1}:${register.offset}]`;
+                    fieldsDiv.appendChild(fieldSpan);
+
                     fieldDiv.appendChild(fieldsDiv);
                 }
 
