@@ -128,16 +128,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const updateSelectedOption = (newIndex) => {
         // Remove previous selection
-        const prevSelected = deviceDropdown.querySelector('.device-option.keyboard-selected');
+        const prevSelected = deviceDropdown.querySelector('.device-option.selected');
         if (prevSelected) {
-            prevSelected.classList.remove('keyboard-selected');
+            prevSelected.classList.remove('selected');
         }
 
-        // Update index with bounds checking
-        if (newIndex >= 0 && newIndex < currentOptions.length) {
-            selectedOptionIndex = newIndex;
+        // Update index with cyclic bounds checking
+        if (currentOptions.length > 0) {
+            // Handle cyclic navigation
+            if (newIndex >= currentOptions.length) {
+                selectedOptionIndex = 0; // Wrap to first option
+            } else if (newIndex < 0) {
+                selectedOptionIndex = currentOptions.length - 1; // Wrap to last option
+            } else {
+                selectedOptionIndex = newIndex;
+            }
+
             const selectedOption = currentOptions[selectedOptionIndex];
-            selectedOption.classList.add('keyboard-selected');
+            selectedOption.classList.add('selected');
 
             // Scroll into view if needed
             selectedOption.scrollIntoView({
@@ -147,8 +155,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const refreshCurrentOptions = () => {
+        // Clear any previous keyboard selections
+        const prevSelected = deviceDropdown.querySelector('.device-option.selected');
+        if (prevSelected) {
+            prevSelected.classList.remove('selected');
+        }
+
         currentOptions = Array.from(deviceDropdown.querySelectorAll('.device-option'));
         selectedOptionIndex = -1;
+
+        console.log('Refreshed current options:', currentOptions.length, 'devices available');
     };
 
     deviceSearch.addEventListener('input', (e) => {
@@ -170,13 +186,17 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'ArrowDown':
                 e.preventDefault();
                 if (currentOptions.length > 0) {
-                    updateSelectedOption(selectedOptionIndex + 1);
+                    // If no option is selected, start from -1 so next will be 0
+                    const nextIndex = selectedOptionIndex === -1 ? 0 : selectedOptionIndex + 1;
+                    updateSelectedOption(nextIndex);
                 }
                 break;
             case 'ArrowUp':
                 e.preventDefault();
                 if (currentOptions.length > 0) {
-                    updateSelectedOption(selectedOptionIndex - 1);
+                    // If no option is selected, start from last option
+                    const nextIndex = selectedOptionIndex === -1 ? currentOptions.length - 1 : selectedOptionIndex - 1;
+                    updateSelectedOption(nextIndex);
                 }
                 break;
             case 'Enter':
