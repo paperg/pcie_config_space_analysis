@@ -414,9 +414,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="tooltip-register">
                             <div class="tooltip-reg-name">${reg.name}</div>
                             <div class="tooltip-reg-details">
-                                <span>@ 0x${reg.offset.toString(16).padStart(3, '0').toUpperCase()}</span>
-                                <span>${reg.size}B</span>
-                                <span>= 0x${reg.value.toString(16).padStart(reg.size * 2, '0').toUpperCase()}</span>
+                                <span>OFF: 0x${reg.offset.toString(16).padStart(3, '0').toUpperCase()}</span>
+                                <span>SIZE: ${reg.size}B</span>
+                                <span>VALUE: 0x${reg.value.toString(16).padStart(reg.size * 2, '0').toUpperCase()}</span>
                             </div>
                         </div>
                     `).join('')}
