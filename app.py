@@ -68,12 +68,13 @@ def get_memory_region():
         bdf = request.args.get('bdf', current_device_bdf)
         
         # 如果指定了新的BDF，更新当前设备数据
-        if bdf and bdf != current_device_bdf:
-            current_device_bdf = bdf
-            current_config_space = get_pcie_config_space_for_device(bdf)
-            current_register_blocks = build_all_structures(current_config_space)
-            print(f'Loaded config space for device {bdf}, found {len(current_register_blocks)} register blocks')
-        elif current_config_space is None:
+
+        current_device_bdf = bdf
+        current_config_space = get_pcie_config_space_for_device(bdf)
+        current_register_blocks = build_all_structures(current_config_space)
+        print(f'Loaded config space for device {bdf}, found {len(current_register_blocks)} register blocks')
+
+        if current_config_space is None:
             # 如果没有当前数据，使用默认配置空间
             current_config_space = get_pcie_config_space_for_device('00:00.0')  # 使用函数确保一致性
             current_register_blocks = build_all_structures(current_config_space)
@@ -146,12 +147,13 @@ def get_memory_region():
                     'startAddress': 0x0,
                     'size': 0x1000,
                     'type': 'pcie',
-                    'description': '4KB PCIe Configuration Space'
+                    'description': '4KB PCIe Configuration Space',
+                    'registers_data': registers_data,
+                    'raw_data': list(current_config_space) if current_config_space else []
                 }
             ],
-            'registers_data': registers_data,
+            
             'device_bdf': current_device_bdf,
-            'raw_data': list(current_config_space) if current_config_space else []
         }
         
         return jsonify(response_data)

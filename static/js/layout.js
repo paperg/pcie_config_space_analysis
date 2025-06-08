@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let registerBlocks = [];
     let selectedRegisterBlock = null;
     let memoryRegions = [];
+    let currentRegionData = null;
 
     // Load PCIe devices from lspci.txt
     async function loadPCIeDevices() {
@@ -69,18 +70,9 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error loading PCIe devices:', error);
             // Fallback to sample devices
             pcieDevices = [{
-                    bdf: '00:00.0',
-                    description: 'Host bridge: Intel Corporation Ice Lake Host Bridge'
-                },
-                {
-                    bdf: '01:00.0',
-                    description: 'Co-processor: Intel Corporation 4xxx Series QAT'
-                },
-                {
-                    bdf: '2a:00.0',
-                    description: 'Ethernet controller: Intel Corporation I210 Gigabit Network Connection'
-                }
-            ];
+                bdf: '00:00.0',
+                description: 'Host bridge: Intel Corporation Ice Lake Host Bridge'
+            }];
         }
         populateDeviceDropdown();
     }
@@ -176,54 +168,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastHoveredRegisterBlock = null;
 
     // Generate memory layout
-    async function generateMemoryLayout() {
+    async function generateMemoryLayout(regionData) {
         const container = document.getElementById('memory-regions-container');
         if (!container) return;
 
         container.innerHTML = '';
 
         try {
-            // get memory region from /api/memory/region
-            const response = await fetch('/api/memory/region');
-            const regionData = await response.json();
             console.log('Memory region data:', regionData);
-
             const memoryRegions = regionData.regions || [];
-
-            // Store register blocks data
-            if (regionData.registers_data && Array.isArray(regionData.registers_data)) {
-                currentRegisterData = regionData.registers_data;
-                console.log('Loaded register blocks data:', currentRegisterData.length, 'register blocks');
-
-                // Update register blocks for highlighting
-                setupRegisterBlocksFromData(regionData.registers_data);
-
-                // Generate register map with real data
-                generateRegisterMap(regionData.registers_data);
-            }
-
-            // Store raw config space data for memory display
-            if (regionData.raw_data && regionData.raw_data.length > 0) {
-                currentRawData = regionData.raw_data;
-                console.log('Loaded raw config space data:', currentRawData.length, 'bytes');
-            } else {
-                // Generate fallback data if no raw data available
-                currentRawData = generateMockPCIeData();
-                console.log('Using fallback mock data');
-            }
-
-            // Always display memory data
-            displayMemoryData(currentRawData);
 
             // Create memory regions display (even if no regions from API)
             if (memoryRegions.length === 0) {
-                // Create default PCIe config space region
-                memoryRegions.push({
-                    name: 'PCIe Config Space',
-                    startAddress: 0x0,
-                    size: 0x1000,
-                    type: 'pcie'
-                });
+                return;
             }
 
             // Sort by start address (lowest first, will be reversed by CSS)
@@ -233,7 +190,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const maxAddress = Math.max(...memoryRegions.map(r => r.startAddress + r.size));
             const minAddress = Math.min(...memoryRegions.map(r => r.startAddress));
             const totalSpan = maxAddress - minAddress || 0x1000; // Fallback size
-
+            console.log('Total span:', totalSpan);
+            console.log('Memory regions:', memoryRegions);
             memoryRegions.forEach((region, index) => {
                 const regionDiv = document.createElement('div');
                 regionDiv.className = `memory-region ${region.type === 'reserved' ? 'reserved' : `region-${index % 8}`}`;
@@ -245,13 +203,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 regionDiv.innerHTML = `
                 <div class="region-label">${region.name}</div>
-                <div class="region-address">0x${region.startAddress.toString(16).padStart(8, '0').toUpperCase()}</div>
+                <div class="region-address">0x${region.startAddress.toString(16).padStart(8, '0').toUpperCase()} - 0x${(region.startAddress + region.size).toString(16).padStart(8, '0').toUpperCase()}</div>
                 <div class="region-size">${formatSize(region.size)}</div>
             `;
 
                 // Add click event
                 regionDiv.addEventListener('click', () => {
-                    handleRegionClick(region.type);
+                    handleRegionClick(index);
                 });
 
                 container.appendChild(regionDiv);
@@ -339,6 +297,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Add byte-level hover events for register blocks
+        let currentHoveredBlockId = null;
+
         bytesDiv.addEventListener('mouseover', (e) => {
             // Find which register block is being hovered
             const target = e.target;
@@ -346,19 +306,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 const blockId = parseInt(target.dataset.blockId);
                 const blockInfo = registerBlocks[blockId];
 
-                if (blockInfo) {
+                if (blockInfo && currentHoveredBlockId !== blockId) {
+                    currentHoveredBlockId = blockId;
                     highlightRegisterBlock(blockId);
                     // Show register block details in right panel and remember it
                     lastHoveredRegisterBlock = blockInfo;
                     generateRegisterMap(currentRegisterData, blockInfo);
                     registerCount.textContent = `${blockInfo.name} - ${blockInfo.registers.length} registers`;
+
+                    // Show tooltip at mouse position
+                    showRegisterBlockTooltip(blockInfo, e);
+                }
+            }
+        });
+
+        bytesDiv.addEventListener('mousemove', (e) => {
+            // Update tooltip position if it exists
+            if (currentTooltip && e.target.classList.contains('byte') && e.target.dataset.blockId) {
+                const left = e.pageX + 10;
+                const top = e.pageY + 10;
+
+                const tooltipRect = currentTooltip.getBoundingClientRect();
+
+                if (left + tooltipRect.width <= window.innerWidth && top + tooltipRect.height <= window.innerHeight) {
+                    currentTooltip.style.left = `${left}px`;
+                    currentTooltip.style.top = `${top}px`;
                 }
             }
         });
 
         bytesDiv.addEventListener('mouseleave', () => {
+            currentHoveredBlockId = null;
             clearRegisterBlockHighlight();
-            // Don't clear the register layout - keep the last hovered block
+            hideRegisterBlockTooltip();
         });
 
         row.appendChild(addressSpan);
@@ -414,7 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Tooltip functions for register blocks
     let currentTooltip = null;
 
-    const showRegisterBlockTooltip = (block, targetElement) => {
+    const showRegisterBlockTooltip = (block, mouseEvent) => {
         hideRegisterBlockTooltip(); // Remove existing tooltip
 
         const tooltip = document.createElement('div');
@@ -458,19 +438,18 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(tooltip);
         currentTooltip = tooltip;
 
-        // Position tooltip
-        const rect = targetElement.getBoundingClientRect();
+        // Position tooltip at mouse position
         const tooltipRect = tooltip.getBoundingClientRect();
 
-        let left = rect.right + 10;
-        let top = rect.top;
+        let left = mouseEvent.pageX + 10;
+        let top = mouseEvent.pageY + 10;
 
         // Adjust if tooltip goes off screen
         if (left + tooltipRect.width > window.innerWidth) {
-            left = rect.left - tooltipRect.width - 10;
+            left = mouseEvent.pageX - tooltipRect.width - 10;
         }
         if (top + tooltipRect.height > window.innerHeight) {
-            top = window.innerHeight - tooltipRect.height - 10;
+            top = mouseEvent.pageY - tooltipRect.height - 10;
         }
 
         tooltip.style.left = `${left}px`;
@@ -485,9 +464,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
 
-
-
-
     // Load device config space
     const loadDeviceConfigSpace = async (bdf) => {
         console.log('Loading config space for device:', bdf);
@@ -497,27 +473,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`/api/memory/region?bdf=${encodeURIComponent(bdf)}`);
             if (response.ok) {
                 const regionData = await response.json();
+                currentRegionData = regionData;
                 console.log('Loaded config space data for device:', bdf, regionData);
 
-                // Store register blocks data
-                if (regionData.registers_data && Array.isArray(regionData.registers_data)) {
-                    currentRegisterData = regionData.registers_data;
-                    console.log('Updated register blocks data:', currentRegisterData.length, 'register blocks');
-
-                    // Update register blocks for highlighting
-                    setupRegisterBlocksFromData(regionData.registers_data);
-                }
-
-                // Store raw config space data
-                if (regionData.raw_data && regionData.raw_data.length > 0) {
-                    currentRawData = regionData.raw_data;
-                    console.log('Updated raw config space data:', currentRawData.length, 'bytes');
-                    // Display the raw data in the memory data view
-                    displayMemoryData(currentRawData);
-                }
-
-                // Update the register map
-                generateRegisterMap(currentRegisterData);
+                // Generate memory layout
+                generateMemoryLayout(regionData);
 
                 // Update register count display
                 const registerCountElement = document.getElementById('register-count');
@@ -530,22 +490,25 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error loading device config space:', error);
         }
 
-        // Also simulate PCIe config space region click for UI consistency
-        const pcieRegion = document.querySelector('[data-region="pcie"]');
-        if (pcieRegion) {
-            pcieRegion.click();
-        }
+        // Auto-select the first memory region
+        setTimeout(() => {
+            const firstRegion = document.querySelector('.memory-region');
+            if (firstRegion) {
+                const regionType = firstRegion.dataset.region;
+                console.log('Auto-selecting first region:', regionType);
+                firstRegion.click();
+            }
+        }, 100);
     };
 
     // 生成 PCIe 规范样式的寄存器分布图
     const generateRegisterMap = (currentData = [], selectedBlock = null) => {
         // If a specific block is selected, only show that block's registers
+        console.log('generateRegisterMap', currentData, selectedBlock)
         if (selectedBlock && selectedBlock.registers) {
             generateSelectedBlockLayout(currentData, selectedBlock);
             return;
         }
-
-        registerMap.innerHTML = '';
 
         // If we have real register data, use it
         if (currentData && Array.isArray(currentData) && currentData.length > 0) {
@@ -554,315 +517,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Fallback to predefined PCIe register layout (first 64 bytes - standard header)
-        console.log('Using fallback PCIe register layout');
-        const pcieLayout = [
-            // Row 1: 0x00-0x03
-            {
-                offset: 0x00,
-                fields: [{
-                        name: 'Vendor ID',
-                        bits: 16,
-                        type: 'header'
-                    },
-                    {
-                        name: 'Device ID',
-                        bits: 16,
-                        type: 'header'
-                    }
-                ]
-            },
-            // Row 2: 0x04-0x07
-            {
-                offset: 0x04,
-                fields: [{
-                        name: 'Command',
-                        bits: 16,
-                        type: 'control'
-                    },
-                    {
-                        name: 'Status',
-                        bits: 16,
-                        type: 'control'
-                    }
-                ]
-            },
-            // Row 3: 0x08-0x0B
-            {
-                offset: 0x08,
-                fields: [{
-                        name: 'Revision ID',
-                        bits: 8,
-                        type: 'header'
-                    },
-                    {
-                        name: 'Class Code',
-                        bits: 24,
-                        type: 'header'
-                    }
-                ]
-            },
-            // Row 4: 0x0C-0x0F
-            {
-                offset: 0x0C,
-                fields: [{
-                        name: 'Cache Line Size',
-                        bits: 8,
-                        type: 'control'
-                    },
-                    {
-                        name: 'Latency Timer',
-                        bits: 8,
-                        type: 'control'
-                    },
-                    {
-                        name: 'Header Type',
-                        bits: 8,
-                        type: 'header'
-                    },
-                    {
-                        name: 'BIST',
-                        bits: 8,
-                        type: 'control'
-                    }
-                ]
-            },
-            // Row 5: 0x10-0x13 (BAR0)
-            {
-                offset: 0x10,
-                fields: [{
-                    name: 'Base Address Register 0',
-                    bits: 32,
-                    type: 'bar'
-                }]
-            },
-            // Row 6: 0x14-0x17 (BAR1)
-            {
-                offset: 0x14,
-                fields: [{
-                    name: 'Base Address Register 1',
-                    bits: 32,
-                    type: 'bar'
-                }]
-            },
-            // Row 7: 0x18-0x1B (BAR2)
-            {
-                offset: 0x18,
-                fields: [{
-                    name: 'Base Address Register 2',
-                    bits: 32,
-                    type: 'bar'
-                }]
-            },
-            // Row 8: 0x1C-0x1F (BAR3)
-            {
-                offset: 0x1C,
-                fields: [{
-                    name: 'Base Address Register 3',
-                    bits: 32,
-                    type: 'bar'
-                }]
-            },
-            // Row 9: 0x20-0x23 (BAR4)
-            {
-                offset: 0x20,
-                fields: [{
-                    name: 'Base Address Register 4',
-                    bits: 32,
-                    type: 'bar'
-                }]
-            },
-            // Row 10: 0x24-0x27 (BAR5)
-            {
-                offset: 0x24,
-                fields: [{
-                    name: 'Base Address Register 5',
-                    bits: 32,
-                    type: 'bar'
-                }]
-            },
-            // Row 11: 0x28-0x2B
-            {
-                offset: 0x28,
-                fields: [{
-                    name: 'Cardbus CIS Pointer',
-                    bits: 32,
-                    type: 'header'
-                }]
-            },
-            // Row 12: 0x2C-0x2F
-            {
-                offset: 0x2C,
-                fields: [{
-                        name: 'Subsystem Vendor ID',
-                        bits: 16,
-                        type: 'header'
-                    },
-                    {
-                        name: 'Subsystem Device ID',
-                        bits: 16,
-                        type: 'header'
-                    }
-                ]
-            },
-            // Row 13: 0x30-0x33
-            {
-                offset: 0x30,
-                fields: [{
-                    name: 'Expansion ROM Base Address',
-                    bits: 32,
-                    type: 'bar'
-                }]
-            },
-            // Row 14: 0x34-0x37
-            {
-                offset: 0x34,
-                fields: [{
-                        name: 'Capabilities Pointer',
-                        bits: 8,
-                        type: 'capability'
-                    },
-                    {
-                        name: 'Reserved',
-                        bits: 24,
-                        type: 'reserved'
-                    }
-                ]
-            },
-            // Row 15: 0x38-0x3B
-            {
-                offset: 0x38,
-                fields: [{
-                    name: 'Reserved',
-                    bits: 32,
-                    type: 'reserved'
-                }]
-            },
-            // Row 16: 0x3C-0x3F
-            {
-                offset: 0x3C,
-                fields: [{
-                        name: 'Interrupt Line',
-                        bits: 8,
-                        type: 'control'
-                    },
-                    {
-                        name: 'Interrupt Pin',
-                        bits: 8,
-                        type: 'control'
-                    },
-                    {
-                        name: 'Min_Gnt',
-                        bits: 8,
-                        type: 'control'
-                    },
-                    {
-                        name: 'Max_Lat',
-                        bits: 8,
-                        type: 'control'
-                    }
-                ]
-            }
-        ];
-
-        // Generate capability space rows (0x40-0xFF)
-        for (let offset = 0x40; offset < 0x100; offset += 4) {
-            pcieLayout.push({
-                offset: offset,
-                fields: [{
-                    name: `Config Space +${offset.toString(16).toUpperCase()}h`,
-                    bits: 32,
-                    type: 'capability'
-                }]
-            });
-        }
-
-        // Generate extended config space rows (0x100-0xFFF)
-        for (let offset = 0x100; offset < 0x1000; offset += 16) {
-            for (let i = 0; i < 4; i++) {
-                const rowOffset = offset + (i * 4);
-                pcieLayout.push({
-                    offset: rowOffset,
-                    fields: [{
-                        name: `Extended Config +${rowOffset.toString(16).toUpperCase()}h`,
-                        bits: 32,
-                        type: 'capability'
-                    }]
-                });
-            }
-        }
-
-        // Generate rows
-        pcieLayout.forEach(row => {
-            const rowElement = document.createElement('div');
-            rowElement.className = 'register-row';
-
-            // Offset column
-            const offsetDiv = document.createElement('div');
-            offsetDiv.className = 'register-offset';
-            offsetDiv.textContent = `${row.offset.toString(16).padStart(4, '0').toUpperCase()}h`;
-
-            // Fields container
-            const fieldsDiv = document.createElement('div');
-            fieldsDiv.className = 'register-fields';
-
-            // Calculate field widths based on bits
-            const totalBits = row.fields.reduce((sum, field) => sum + field.bits, 0);
-
-            row.fields.forEach(field => {
-                const fieldDiv = document.createElement('div');
-                fieldDiv.className = `register-field ${field.type}`;
-                fieldDiv.style.width = `${(field.bits / 32) * 100}%`;
-
-                // Get field value from data
-                let value = 0;
-                if (currentData && currentData.length > row.offset) {
-                    const bytesToRead = Math.min(4, field.bits / 8);
-                    for (let i = 0; i < bytesToRead; i++) {
-                        if (row.offset + i < currentData.length) {
-                            value |= (currentData[row.offset + i] << (i * 8));
-                        }
-                    }
-                }
-
-                fieldDiv.innerHTML = `
-                    <div style="font-weight: bold; margin-bottom: 0.02rem;">${field.name}</div>
-                    <div style="font-family: 'Courier New', monospace; font-size: 0.08rem;">
-                        0x${value.toString(16).padStart(Math.ceil(field.bits / 4), '0').toUpperCase()}
-                    </div>
-                `;
-
-                // Add click event to highlight in memory view
-                fieldDiv.addEventListener('click', () => {
-                    const highlightOffsets = [];
-                    const bytesToHighlight = Math.ceil(field.bits / 8);
-                    for (let i = 0; i < bytesToHighlight; i++) {
-                        highlightOffsets.push(row.offset + i);
-                    }
-                    displayMemoryData(currentData, highlightOffsets);
-
-                    // Scroll to register position in memory view
-                    const targetRow = Math.floor(row.offset / 16);
-                    const rows = dataContainer.querySelectorAll('.data-row');
-                    if (rows[targetRow]) {
-                        rows[targetRow].scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
-                    }
-                });
-
-                fieldsDiv.appendChild(fieldDiv);
-            });
-
-            rowElement.appendChild(offsetDiv);
-            rowElement.appendChild(fieldsDiv);
-            registerMap.appendChild(rowElement);
-        });
+        console.log('Register map No data');
     };
 
     // Generate layout for selected register block only
-    // Generate register map from real backend data
+    // Generate register map from real backend data - show full 4K layout
     const generateRegisterMapFromRealData = (registerBlocks) => {
         registerMap.innerHTML = '';
 
@@ -871,101 +530,173 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        console.log('Generating register map from blocks:', registerBlocks);
+        console.log('Generating full 4K register map from blocks:', registerBlocks);
 
-        // Create blocks container
-        const blocksContainer = document.createElement('div');
-        blocksContainer.className = 'register-blocks-container';
-
-        registerBlocks.forEach((block, blockIndex) => {
-            const blockDiv = document.createElement('div');
-            blockDiv.className = `register-block block-${blockIndex % 8}`;
-            blockDiv.dataset.blockIndex = blockIndex;
-
-            const blockHeader = document.createElement('div');
-            blockHeader.className = 'block-header';
-            blockHeader.innerHTML = `
-                <div class="block-name">${block.name}</div>
-                <div class="block-info">
-                    <span class="block-offset">@ 0x${block.offset.toString(16).padStart(3, '0').toUpperCase()}</span>
-                    <span class="block-size">${block.size} bytes</span>
-                    <span class="block-reg-count">${block.registers.length} regs</span>
-                </div>
-            `;
-
-            const registersContainer = document.createElement('div');
-            registersContainer.className = 'block-registers';
-            registersContainer.style.display = 'none'; // Initially hidden
-
-            // Add registers in this block
-            block.registers.forEach(reg => {
-                const regDiv = document.createElement('div');
-                regDiv.className = 'register-item';
-
-                // Ensure we have a valid register value
-                const regValue = reg.value || 0;
-
-                regDiv.innerHTML = `
-                    <div class="reg-name">${reg.name}</div>
-                    <div class="reg-details">
-                        <span class="reg-offset">0x${reg.offset.toString(16).padStart(3, '0').toUpperCase()}</span>
-                        <span class="reg-size">${reg.size}B</span>
-                        <span class="reg-value">0x${regValue.toString(16).padStart(reg.size * 2, '0').toUpperCase()}</span>
-                    </div>
-                `;
-
-                // Add fields info if available
-                if (reg.fields && reg.fields.length > 0) {
-                    const fieldsDiv = document.createElement('div');
-                    fieldsDiv.className = 'reg-fields';
-                    reg.fields.forEach(field => {
-                        const fieldValue = field.value || 0;
-                        const fieldDiv = document.createElement('div');
-                        fieldDiv.className = 'field-item';
-                        fieldDiv.innerHTML = `
-                            <span class="field-name">${field.name}</span>
-                            <span class="field-bits">[${field.bit_offset + field.bit_width - 1}:${field.bit_offset}]</span>
-                            <span class="field-value">0x${fieldValue.toString(16).toUpperCase()}</span>
-                        `;
-                        fieldsDiv.appendChild(fieldDiv);
-                    });
-                    regDiv.appendChild(fieldsDiv);
-                }
-
-                registersContainer.appendChild(regDiv);
-            });
-
-            blockDiv.appendChild(blockHeader);
-            blockDiv.appendChild(registersContainer);
-
-            // Add hover events for block
-            blockDiv.addEventListener('mouseenter', () => {
-                highlightRegisterBlock(blockIndex);
-                registersContainer.style.display = 'block';
-                showRegisterBlockTooltip(block, blockDiv);
-            });
-
-            blockDiv.addEventListener('mouseleave', () => {
-                clearRegisterBlockHighlight();
-                registersContainer.style.display = 'none';
-                hideRegisterBlockTooltip();
-            });
-
-            // Add click event to show full register layout for this block
-            blockDiv.addEventListener('click', () => {
-                generateSelectedBlockLayout(currentRegisterData, block);
-                registerCount.textContent = `${block.name} - ${block.registers.length} registers`;
-            });
-
-            blocksContainer.appendChild(blockDiv);
-        });
-
-        registerMap.appendChild(blocksContainer);
+        // Create a complete 4K register layout
+        generateFull4KLayout(registerBlocks);
 
         // Update register count
         if (registerCount) {
             const totalRegisters = registerBlocks.reduce((sum, block) => sum + block.registers.length, 0);
-            registerCount.textContent = `${registerBlocks.length} Blocks, ${totalRegisters} Registers`;
+            registerCount.textContent = `4KB Config Space - ${registerBlocks.length} Blocks, ${totalRegisters} Registers`;
+        }
+    };
+
+    // Generate full 4KB layout with all registers
+    const generateFull4KLayout = (registerBlocks) => {
+        // Create a map of all registers by offset
+        const registerMap4K = new Map();
+
+        registerBlocks.forEach((block, blockIndex) => {
+            block.registers.forEach(register => {
+                registerMap4K.set(register.offset, {
+                    ...register,
+                    blockIndex: blockIndex,
+                    blockName: block.name,
+                    blockColor: `block-${blockIndex % 8}`
+                });
+            });
+        });
+
+        // Generate 4KB layout showing only rows with registers and some empty space context
+        const processedOffsets = new Set();
+
+        // Sort all register offsets
+        const sortedOffsets = Array.from(registerMap4K.keys()).sort((a, b) => a - b);
+
+        // Generate rows for registers and some context around them
+        for (const offset of sortedOffsets) {
+            const register = registerMap4K.get(offset);
+
+            // Skip if we already processed this offset (for multi-byte registers)
+            if (processedOffsets.has(offset)) continue;
+
+            // Calculate row offset (4-byte aligned)
+            const rowOffset = Math.floor(offset / 4) * 4;
+
+            // Skip if we already processed this row
+            if (processedOffsets.has(rowOffset)) continue;
+
+            const rowElement = document.createElement('div');
+            rowElement.className = 'register-row';
+
+            // Offset column
+            const offsetDiv = document.createElement('div');
+            offsetDiv.className = 'register-offset';
+            offsetDiv.textContent = `${rowOffset.toString(16).padStart(4, '0').toUpperCase()}h`;
+
+            // Register fields
+            const fieldsDiv = document.createElement('div');
+            fieldsDiv.className = 'register-fields';
+
+            // Check for registers in this 4-byte row
+            const rowRegisters = [];
+            for (let byteOffset = 0; byteOffset < 4; byteOffset++) {
+                const absoluteOffset = rowOffset + byteOffset;
+                if (registerMap4K.has(absoluteOffset)) {
+                    rowRegisters.push(registerMap4K.get(absoluteOffset));
+                    processedOffsets.add(absoluteOffset);
+
+                    // Mark next bytes as processed if this is a multi-byte register
+                    const reg = registerMap4K.get(absoluteOffset);
+                    for (let i = 1; i < reg.size; i++) {
+                        processedOffsets.add(absoluteOffset + i);
+                    }
+                }
+            }
+
+            // Mark this row as processed
+            processedOffsets.add(rowOffset);
+
+            if (rowRegisters.length > 0) {
+                // Sort registers by offset
+                rowRegisters.sort((a, b) => a.offset - b.offset);
+
+                let currentPosition = 0; // Track position within the 4-byte row
+
+                rowRegisters.forEach(register => {
+                    // Add reserved space if there's a gap
+                    const relativeOffset = register.offset - rowOffset;
+                    if (relativeOffset > currentPosition) {
+                        const gapSize = relativeOffset - currentPosition;
+                        const gapDiv = document.createElement('div');
+                        gapDiv.className = 'register-field reserved';
+                        gapDiv.style.width = `${(gapSize / 4) * 100}%`;
+                        gapDiv.innerHTML = `
+                            <div class="register-name">Reserved</div>
+                            <div class="register-value">--</div>
+                        `;
+                        fieldsDiv.appendChild(gapDiv);
+                        currentPosition = relativeOffset;
+                    }
+
+                    const fieldDiv = document.createElement('div');
+                    fieldDiv.className = `register-field ${getRegisterType(register)} ${register.blockColor}`;
+
+                    // Calculate width based on register size
+                    fieldDiv.style.width = `${(register.size / 4) * 100}%`;
+
+                    // Get register value
+                    let value = register.value || 0;
+                    if (!register.value && currentRawData && Array.isArray(currentRawData) && currentRawData.length > register.offset) {
+                        value = 0;
+                        const bytesToRead = register.size;
+                        for (let i = 0; i < bytesToRead; i++) {
+                            if (register.offset + i < currentRawData.length) {
+                                value |= (currentRawData[register.offset + i] << (i * 8));
+                            }
+                        }
+                    }
+
+                    const hexWidth = register.size * 2;
+                    const formattedValue = value.toString(16).padStart(hexWidth, '0').toUpperCase();
+
+                    fieldDiv.innerHTML = `
+                        <div class="register-name" title="${register.blockName}">${register.name}</div>
+                        <div class="register-value">0x${formattedValue}</div>
+                        <div class="register-size">${register.size}B</div>
+                    `;
+
+                    // Add click event to highlight in memory view
+                    fieldDiv.addEventListener('click', () => {
+                        const highlightOffsets = [];
+                        for (let i = 0; i < register.size; i++) {
+                            highlightOffsets.push(register.offset + i);
+                        }
+                        displayMemoryData(currentRawData, highlightOffsets);
+
+                        // Scroll to register position in memory view
+                        const targetRow = Math.floor(register.offset / 16);
+                        const rows = dataContainer.querySelectorAll('.data-row');
+                        if (rows[targetRow]) {
+                            rows[targetRow].scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'center'
+                            });
+                        }
+                    });
+
+                    fieldsDiv.appendChild(fieldDiv);
+                    currentPosition += register.size;
+                });
+
+                // Fill remaining space if needed
+                if (currentPosition < 4) {
+                    const remainingSize = 4 - currentPosition;
+                    const remainingDiv = document.createElement('div');
+                    remainingDiv.className = 'register-field reserved';
+                    remainingDiv.style.width = `${(remainingSize / 4) * 100}%`;
+                    remainingDiv.innerHTML = `
+                        <div class="register-name">Reserved</div>
+                        <div class="register-value">--</div>
+                    `;
+                    fieldsDiv.appendChild(remainingDiv);
+                }
+            }
+
+            rowElement.appendChild(offsetDiv);
+            rowElement.appendChild(fieldsDiv);
+            registerMap.appendChild(rowElement);
         }
     };
 
@@ -986,7 +717,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Group registers by 4-byte (32-bit) aligned rows
         const registerRows = groupRegistersByRows(selectedBlock.registers);
-
+        console.log('registerRows', registerRows)
         // Generate rows for this block's registers
         registerRows.forEach(row => {
             const rowElement = document.createElement('div');
@@ -1129,6 +860,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // 处理区域点击事件
     const handleRegionClick = async (region) => {
         try {
+
+            if (region === currentRegion) {
+                return;
+            }
+
             loadingIndicator.style.display = 'flex';
             dataContainer.innerHTML = '';
 
@@ -1142,63 +878,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
             currentRegion = region;
 
-            let response;
-            let data;
-
-            if (region === 'pcie') {
-                // For PCIe config space, try to fetch config_space.bin
-                try {
-                    response = await fetch('/config_space.bin');
-                    if (response.ok) {
-                        const arrayBuffer = await response.arrayBuffer();
-                        data = Array.from(new Uint8Array(arrayBuffer));
-                    } else {
-                        // Fallback to mock data if file not found
-                        data = generateMockPCIeData();
-                    }
-                } catch (error) {
-                    console.log('config_space.bin not found, using mock data');
-                    data = generateMockPCIeData();
-                }
-
-                // Set up register blocks for PCIe config space
-                setupRegisterBlocks();
-
-            } else {
-                // For other regions, use API or mock data
-                try {
-                    response = await fetch(`/api/memory/${region}`);
-                    if (response.ok) {
-                        data = await response.json();
-                    } else {
-                        data = generateMockMemoryData(region);
-                    }
-                } catch (error) {
-                    console.error('Error fetching memory data:', error);
-                    data = generateMockMemoryData(region);
-                }
+            // Store raw config space data
+            console.log('currentRegionData', currentRegionData)
+            if (currentRegionData['regions'][currentRegion]['raw_data'] && currentRegionData['regions'][currentRegion]['raw_data'].length > 0) {
+                currentRawData = currentRegionData['regions'][currentRegion].raw_data;
+                console.log('Updated raw config space data:', currentRawData.length, 'bytes');
             }
 
-            // Store current data (for non-PCIe regions)
-            if (region !== 'pcie') {
-                currentRawData = data;
+            // Store register blocks data
+            if (currentRegionData['regions'][currentRegion]['registers_data'] && Array.isArray(currentRegionData['regions'][currentRegion]['registers_data'])) {
+                currentRegisterData = currentRegionData['regions'][currentRegion]['registers_data'];
+                console.log('Updated register blocks data:', currentRegisterData.length, 'register blocks');
+
+                // Update register blocks for highlighting
+                setupRegisterBlocksFromData(currentRegisterData);
             }
 
-            // Display memory data
-            displayMemoryData(data);
+            // Display the raw data with register block highlighting
+            if (currentRawData && currentRawData.length > 0) {
+                displayMemoryData(currentRawData);
+            }
 
-            // Initialize register map display
-            if (region === 'pcie') {
-                // Show register blocks if available
-                if (currentRegisterData && currentRegisterData.length > 0) {
-                    generateRegisterMap(currentRegisterData);
-                } else {
-                    registerMap.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">Loading register data...</div>';
-                    registerCount.textContent = 'PCIe Configuration Space';
-                }
+            // Show register blocks if available
+            if (currentRegisterData && currentRegisterData.length > 0) {
+                generateRegisterMap(currentRegisterData);
             } else {
-                registerMap.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">No register map available for this region</div>';
-                registerCount.textContent = 'Not PCIe Config Space';
+                registerMap.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">Loading register data...</div>';
+                registerCount.textContent = 'PCIe Configuration Space';
             }
 
         } catch (error) {
@@ -1207,52 +913,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } finally {
             loadingIndicator.style.display = 'none';
         }
-    };
-
-    // 生成模拟 PCIe 配置空间数据
-    const generateMockPCIeData = () => {
-        const data = new Array(4096).fill(0); // 4KB for PCIe config space
-
-        // Vendor ID (0x8086 = Intel)
-        data[0] = 0x86;
-        data[1] = 0x80;
-
-        // Device ID (0x1234)
-        data[2] = 0x34;
-        data[3] = 0x12;
-
-        // Command Register (0x0006)
-        data[4] = 0x06;
-        data[5] = 0x00;
-
-        // Status Register (0x0010)
-        data[6] = 0x10;
-        data[7] = 0x00;
-
-        // Revision ID
-        data[8] = 0x01;
-
-        // Class Code (0x060000 = PCI Bridge)
-        data[9] = 0x00;
-        data[10] = 0x00;
-        data[11] = 0x06;
-
-        // Fill some more realistic values
-        for (let i = 12; i < 256; i++) {
-            data[i] = Math.floor(Math.random() * 256);
-        }
-
-        return data;
-    };
-
-    // 生成模拟内存数据
-    const generateMockMemoryData = (region) => {
-        const size = region === 'membar0' ? 1024 : 4096;
-        const data = [];
-        for (let i = 0; i < size; i++) {
-            data.push(Math.floor(Math.random() * 256));
-        }
-        return data;
     };
 
     // Setup register blocks for PCIe config space
@@ -1278,394 +938,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Setup register blocks for highlighting:', registerBlocks.length, 'blocks');
     };
 
-    const setupRegisterBlocks = () => {
-        registerBlocks = [{
-                offset: 0x00,
-                size: 0x40,
-                name: 'PCIe Configuration Header',
-                description: 'Standard PCIe configuration space header containing device identification and control registers',
-                registers: [{
-                        offset: 0x00,
-                        name: 'Vendor ID',
-                        size: 2,
-                        description: 'Identifies the manufacturer of the device'
-                    },
-                    {
-                        offset: 0x02,
-                        name: 'Device ID',
-                        size: 2,
-                        description: 'Identifies the specific device'
-                    },
-                    {
-                        offset: 0x04,
-                        name: 'Command',
-                        size: 2,
-                        description: 'Controls device operation'
-                    },
-                    {
-                        offset: 0x06,
-                        name: 'Status',
-                        size: 2,
-                        description: 'Reports device status'
-                    },
-                    {
-                        offset: 0x08,
-                        name: 'Revision ID',
-                        size: 1,
-                        description: 'Device revision number'
-                    },
-                    {
-                        offset: 0x09,
-                        name: 'Class Code',
-                        size: 3,
-                        description: 'Device class, subclass and interface'
-                    },
-                    {
-                        offset: 0x0C,
-                        name: 'Cache Line Size',
-                        size: 1,
-                        description: 'Cache line size in 32-bit words'
-                    },
-                    {
-                        offset: 0x0D,
-                        name: 'Latency Timer',
-                        size: 1,
-                        description: 'Master latency timer'
-                    },
-                    {
-                        offset: 0x0E,
-                        name: 'Header Type',
-                        size: 1,
-                        description: 'Configuration space layout type'
-                    },
-                    {
-                        offset: 0x0F,
-                        name: 'BIST',
-                        size: 1,
-                        description: 'Built-in self test control/status'
-                    },
-                    {
-                        offset: 0x10,
-                        name: 'Base Address Register 0',
-                        size: 4,
-                        description: 'Memory or I/O base address'
-                    },
-                    {
-                        offset: 0x14,
-                        name: 'Base Address Register 1',
-                        size: 4,
-                        description: 'Memory or I/O base address'
-                    },
-                    {
-                        offset: 0x18,
-                        name: 'Base Address Register 2',
-                        size: 4,
-                        description: 'Memory or I/O base address'
-                    },
-                    {
-                        offset: 0x1C,
-                        name: 'Base Address Register 3',
-                        size: 4,
-                        description: 'Memory or I/O base address'
-                    },
-                    {
-                        offset: 0x20,
-                        name: 'Base Address Register 4',
-                        size: 4,
-                        description: 'Memory or I/O base address'
-                    },
-                    {
-                        offset: 0x24,
-                        name: 'Base Address Register 5',
-                        size: 4,
-                        description: 'Memory or I/O base address'
-                    },
-                    {
-                        offset: 0x28,
-                        name: 'Cardbus CIS Pointer',
-                        size: 4,
-                        description: 'Pointer to Card Information Structure'
-                    },
-                    {
-                        offset: 0x2C,
-                        name: 'Subsystem Vendor ID',
-                        size: 2,
-                        description: 'Subsystem vendor identifier'
-                    },
-                    {
-                        offset: 0x2E,
-                        name: 'Subsystem ID',
-                        size: 2,
-                        description: 'Subsystem device identifier'
-                    },
-                    {
-                        offset: 0x30,
-                        name: 'Expansion ROM Base',
-                        size: 4,
-                        description: 'Expansion ROM base address'
-                    },
-                    {
-                        offset: 0x34,
-                        name: 'Cap Pointer',
-                        size: 1,
-                        description: 'Capabilities list pointer'
-                    },
-                    {
-                        offset: 0x35,
-                        name: 'Reserved',
-                        size: 3,
-                        description: 'Reserved for future use'
-                    },
-                    {
-                        offset: 0x38,
-                        name: 'Reserved',
-                        size: 4,
-                        description: 'Reserved for future use'
-                    },
-                    {
-                        offset: 0x3C,
-                        name: 'Interrupt Line',
-                        size: 1,
-                        description: 'Interrupt line routing information'
-                    },
-                    {
-                        offset: 0x3D,
-                        name: 'Interrupt Pin',
-                        size: 1,
-                        description: 'Interrupt pin (INTA#-INTD#)'
-                    },
-                    {
-                        offset: 0x3E,
-                        name: 'Min Grant',
-                        size: 1,
-                        description: 'Minimum bus grant time'
-                    },
-                    {
-                        offset: 0x3F,
-                        name: 'Max Latency',
-                        size: 1,
-                        description: 'Maximum latency'
-                    }
-                ]
-            },
-            {
-                offset: 0x40,
-                size: 0x40,
-                name: 'Power Management Capability',
-                description: 'Power management capability structure for controlling device power states',
-                registers: [{
-                        offset: 0x40,
-                        name: 'Cap ID',
-                        size: 1,
-                        description: 'Power Management capability ID (0x01)'
-                    },
-                    {
-                        offset: 0x41,
-                        name: 'Next Cap',
-                        size: 1,
-                        description: 'Pointer to next capability'
-                    },
-                    {
-                        offset: 0x42,
-                        name: 'PM Capabilities',
-                        size: 2,
-                        description: 'Power management capabilities register'
-                    },
-                    {
-                        offset: 0x44,
-                        name: 'PM Control/Status',
-                        size: 2,
-                        description: 'Power state control and status'
-                    },
-                    {
-                        offset: 0x46,
-                        name: 'PMCSR BSE',
-                        size: 1,
-                        description: 'Bridge support extensions'
-                    },
-                    {
-                        offset: 0x47,
-                        name: 'Data',
-                        size: 1,
-                        description: 'Power management data register'
-                    }
-                ]
-            },
-            {
-                offset: 0x80,
-                size: 0x20,
-                name: 'MSI Capability',
-                description: 'Message Signaled Interrupts capability for efficient interrupt handling',
-                registers: [{
-                        offset: 0x80,
-                        name: 'Cap ID',
-                        size: 1,
-                        description: 'MSI capability ID (0x05)'
-                    },
-                    {
-                        offset: 0x81,
-                        name: 'Next Cap',
-                        size: 1,
-                        description: 'Pointer to next capability'
-                    },
-                    {
-                        offset: 0x82,
-                        name: 'Message Control',
-                        size: 2,
-                        description: 'MSI enable and configuration'
-                    },
-                    {
-                        offset: 0x84,
-                        name: 'Message Address',
-                        size: 4,
-                        description: 'MSI message target address'
-                    },
-                    {
-                        offset: 0x88,
-                        name: 'Message Upper Address',
-                        size: 4,
-                        description: 'Upper 32 bits (64-bit capable)'
-                    },
-                    {
-                        offset: 0x8C,
-                        name: 'Message Data',
-                        size: 2,
-                        description: 'MSI data payload'
-                    },
-                    {
-                        offset: 0x8E,
-                        name: 'Reserved',
-                        size: 2,
-                        description: 'Reserved for alignment'
-                    },
-                    {
-                        offset: 0x90,
-                        name: 'Mask Bits',
-                        size: 4,
-                        description: 'MSI per-vector mask'
-                    },
-                    {
-                        offset: 0x94,
-                        name: 'Pending Bits',
-                        size: 4,
-                        description: 'MSI pending interrupts'
-                    }
-                ]
-            },
-            {
-                offset: 0xA0,
-                size: 0x3C,
-                name: 'PCIe Capability',
-                description: 'PCI Express capability structure containing PCIe-specific control and status',
-                registers: [{
-                        offset: 0xA0,
-                        name: 'Cap ID',
-                        size: 1,
-                        description: 'PCIe capability ID (0x10)'
-                    },
-                    {
-                        offset: 0xA1,
-                        name: 'Next Cap',
-                        size: 1,
-                        description: 'Pointer to next capability'
-                    },
-                    {
-                        offset: 0xA2,
-                        name: 'PCIe Cap',
-                        size: 2,
-                        description: 'PCIe capability register'
-                    },
-                    {
-                        offset: 0xA4,
-                        name: 'Device Capabilities',
-                        size: 4,
-                        description: 'PCIe device capabilities'
-                    },
-                    {
-                        offset: 0xA8,
-                        name: 'Device Control',
-                        size: 2,
-                        description: 'Device control register'
-                    },
-                    {
-                        offset: 0xAA,
-                        name: 'Device Status',
-                        size: 2,
-                        description: 'Device status register'
-                    },
-                    {
-                        offset: 0xAC,
-                        name: 'Link Capabilities',
-                        size: 4,
-                        description: 'PCIe link capabilities'
-                    },
-                    {
-                        offset: 0xB0,
-                        name: 'Link Control',
-                        size: 2,
-                        description: 'Link control register'
-                    },
-                    {
-                        offset: 0xB2,
-                        name: 'Link Status',
-                        size: 2,
-                        description: 'Link status register'
-                    },
-                    {
-                        offset: 0xB4,
-                        name: 'Slot Capabilities',
-                        size: 4,
-                        description: 'PCIe slot capabilities'
-                    },
-                    {
-                        offset: 0xB8,
-                        name: 'Slot Control',
-                        size: 2,
-                        description: 'Slot control register'
-                    },
-                    {
-                        offset: 0xBA,
-                        name: 'Slot Status',
-                        size: 2,
-                        description: 'Slot status register'
-                    },
-                    {
-                        offset: 0xBC,
-                        name: 'Root Control',
-                        size: 2,
-                        description: 'Root port control'
-                    },
-                    {
-                        offset: 0xBE,
-                        name: 'Root Capabilities',
-                        size: 2,
-                        description: 'Root port capabilities'
-                    }
-                ]
-            }
-        ];
-    };
-
-
 
     // Initialize
-    loadPCIeDevices().then(() => {
-        if (selectedDevice == null) {
-            return;
-        }
-        console.log(selectedDevice)
-        // Leave device search empty by default
-        deviceSearch.value = '';
-
-        // Generate memory layout
-        generateMemoryLayout();
-
-        // Auto-click PCIe config space on load
-        setTimeout(() => {
-            const pcieRegion = document.querySelector('[data-region="pcie"]');
-            if (pcieRegion) {
-                pcieRegion.click();
-            }
-        }, 100);
-    });
+    loadPCIeDevices()
 });

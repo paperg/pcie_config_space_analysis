@@ -53,8 +53,6 @@ body.dark-theme .sticky-controls {
   background: white;
   box-shadow: 0 0.02rem 0.04rem rgba(0, 0, 0, 0.1);
   font-size: 0.16rem;
-  position: sticky;
-  top: 1.8rem;
 }
 
 body.dark-theme .memory-layout {
@@ -428,8 +426,6 @@ body.dark-theme .memory-data .loading {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  position: sticky;
-  top: 1.8rem;
 }
 
 body.dark-theme .register-layout {
@@ -690,6 +686,53 @@ body.dark-theme .register-layout .pcie-register-map .register-row .register-fiel
   color: #66b3ff;
 }
 
+/* Register size styling */
+.register-layout .pcie-register-map .register-row .register-fields .register-field .register-size {
+  font-size: 0.12rem;
+  color: #888;
+  font-family: 'Courier New', monospace;
+  margin-top: 0.02rem;
+  font-style: italic;
+  text-align: center;
+}
+
+body.dark-theme .register-layout .pcie-register-map .register-row .register-fields .register-field .register-size {
+  color: #999;
+}
+
+/* Block color styling for register fields */
+.register-layout .pcie-register-map .register-row .register-fields .register-field.block-0 {
+  border-left: 3px solid #FF6B6B;
+}
+
+.register-layout .pcie-register-map .register-row .register-fields .register-field.block-1 {
+  border-left: 3px solid #4ECDC4;
+}
+
+.register-layout .pcie-register-map .register-row .register-fields .register-field.block-2 {
+  border-left: 3px solid #45B7D1;
+}
+
+.register-layout .pcie-register-map .register-row .register-fields .register-field.block-3 {
+  border-left: 3px solid #96CEB4;
+}
+
+.register-layout .pcie-register-map .register-row .register-fields .register-field.block-4 {
+  border-left: 3px solid #FFEAA7;
+}
+
+.register-layout .pcie-register-map .register-row .register-fields .register-field.block-5 {
+  border-left: 3px solid #DDA0DD;
+}
+
+.register-layout .pcie-register-map .register-row .register-fields .register-field.block-6 {
+  border-left: 3px solid #98D8C8;
+}
+
+.register-layout .pcie-register-map .register-row .register-fields .register-field.block-7 {
+  border-left: 3px solid #F7DC6F;
+}
+
 .register-layout .selected-block-header {
   background: #f8f9fa;
   padding: 0.15rem;
@@ -729,188 +772,6 @@ body.dark-theme .register-layout .selected-block-header p {
   color: #999999;
 }
 
-/* Register blocks container styles */
-.register-blocks-container {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-  padding: 0.05rem;
-}
-
-.register-block {
-  border: 1px solid #ddd;
-  border-radius: 0.04rem;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.register-block:hover {
-  box-shadow: 0 0.02rem 0.08rem rgba(0, 0, 0, 0.15);
-  transform: translateY(-0.01rem);
-}
-
-body.dark-theme .register-block {
-  border-color: #333333;
-}
-
-.register-block .block-header {
-  padding: 0.08rem 0.1rem;
-  background: #f8f9fa;
-  border-bottom: 1px solid #ddd;
-  transition: all 0.3s ease;
-}
-
-body.dark-theme .register-block .block-header {
-  background: #262626;
-  border-bottom-color: #333333;
-}
-
-.register-block:hover .block-header {
-  background: #e9ecef;
-}
-
-body.dark-theme .register-block:hover .block-header {
-  background: #333333;
-}
-
-.register-block .block-name {
-  font-weight: bold;
-  font-size: 0.14rem;
-  color: #399bff;
-  margin-bottom: 0.02rem;
-}
-
-body.dark-theme .register-block .block-name {
-  color: #66b3ff;
-}
-
-.register-block .block-info {
-  display: flex;
-  gap: 0.1rem;
-  font-size: 0.12rem;
-  color: #666666;
-}
-
-body.dark-theme .register-block .block-info {
-  color: #999999;
-}
-
-.register-block .block-info span {
-  padding: 0.01rem 0.04rem;
-  background: #e9ecef;
-  border-radius: 0.02rem;
-  font-family: 'Courier New', monospace;
-}
-
-body.dark-theme .register-block .block-info span {
-  background: #333333;
-}
-
-.register-block .block-registers {
-  padding: 0.05rem;
-  background: white;
-  max-height: 3rem;
-  overflow-y: auto;
-}
-
-body.dark-theme .register-block .block-registers {
-  background: #1a1a1a;
-}
-
-.register-block .register-item {
-  padding: 0.04rem;
-  border-bottom: 1px solid #f0f0f0;
-  font-size: 0.11rem;
-}
-
-body.dark-theme .register-block .register-item {
-  border-bottom-color: #333333;
-}
-
-.register-block .register-item:last-child {
-  border-bottom: none;
-}
-
-.register-block .reg-name {
-  font-weight: bold;
-  color: #333333;
-  margin-bottom: 0.01rem;
-}
-
-body.dark-theme .register-block .reg-name {
-  color: #ffffff;
-}
-
-.register-block .reg-details {
-  display: flex;
-  gap: 0.05rem;
-  font-family: 'Courier New', monospace;
-  font-size: 0.1rem;
-}
-
-.register-block .reg-details span {
-  color: #666666;
-}
-
-body.dark-theme .register-block .reg-details span {
-  color: #999999;
-}
-
-.register-block .reg-fields {
-  margin-top: 0.02rem;
-  padding-left: 0.1rem;
-}
-
-.register-block .field-item {
-  font-size: 0.09rem;
-  color: #777777;
-  margin-bottom: 0.01rem;
-  display: flex;
-  gap: 0.05rem;
-}
-
-body.dark-theme .register-block .field-item {
-  color: #aaaaaa;
-}
-
-.register-block .field-name {
-  min-width: 1rem;
-}
-
-.register-block .field-bits,
-.register-block .field-value {
-  font-family: 'Courier New', monospace;
-  color: #399bff;
-}
-
-body.dark-theme .register-block .field-bits,
-body.dark-theme .register-block .field-value {
-  color: #66b3ff;
-}
-
-/* Inline fields for selected block layout */
-.reg-fields-inline {
-  margin-top: 0.02rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.02rem;
-}
-
-.field-inline {
-  font-size: 0.08rem;
-  color: #666666;
-  background: #f8f9fa;
-  padding: 0.01rem 0.03rem;
-  border-radius: 0.02rem;
-  font-family: 'Courier New', monospace;
-}
-
-body.dark-theme .field-inline {
-  color: #999999;
-  background: #333333;
-}
-
 .device-selector {
   flex: 2 !important;
   max-width: 4rem;
@@ -929,8 +790,8 @@ body.dark-theme .field-inline {
   background: #ffffff;
   border-radius: 0.08rem;
   border: 1px solid #e0e0e0;
-  min-width: 5rem;
-  max-width: 10rem;
+  min-width: 8rem;
+  max-width: 12rem;
   user-select: none;
 }
 

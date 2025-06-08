@@ -113,6 +113,29 @@
     padding: 8px;
 }
 
+/* Register Blocks Overview Styles */
+.register-blocks-overview {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px;
+}
+
+.register-block-summary {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    background: var(--bg-secondary);
+}
+
+.register-block-summary:hover {
+    border-color: var(--accent-color);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
 .register-block {
     border: 1px solid var(--border-color);
     border-radius: 6px;
@@ -237,35 +260,43 @@
 }
 
 /* Color blocks for different register types */
-.register-block.block-0 {
+.register-block.block-0,
+.register-block-summary.block-0 {
     border-left-color: #FF6B6B;
 }
 
-.register-block.block-1 {
+.register-block.block-1,
+.register-block-summary.block-1 {
     border-left-color: #4ECDC4;
 }
 
-.register-block.block-2 {
+.register-block.block-2,
+.register-block-summary.block-2 {
     border-left-color: #45B7D1;
 }
 
-.register-block.block-3 {
+.register-block.block-3,
+.register-block-summary.block-3 {
     border-left-color: #96CEB4;
 }
 
-.register-block.block-4 {
+.register-block.block-4,
+.register-block-summary.block-4 {
     border-left-color: #FFEAA7;
 }
 
-.register-block.block-5 {
+.register-block.block-5,
+.register-block-summary.block-5 {
     border-left-color: #DDA0DD;
 }
 
-.register-block.block-6 {
+.register-block.block-6,
+.register-block-summary.block-6 {
     border-left-color: #98D8C8;
 }
 
-.register-block.block-7 {
+.register-block.block-7,
+.register-block-summary.block-7 {
     border-left-color: #F7DC6F;
 }
 
