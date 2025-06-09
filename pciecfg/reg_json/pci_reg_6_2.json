@@ -8,7 +8,29 @@
             "registers": [
                 "vendor_id",
                 "device_id",
-                "command"
+                "command",
+                "status",
+                "revision_id_register",
+                "class_code_register",
+                "cache_line_size_register",
+                "latency_timer_register",
+                "header_type_register",
+                "bist_register",
+                "base_address_registers_0",
+                "base_address_registers_1",
+                "base_address_registers_2",
+                "base_address_registers_3",
+                "base_address_registers_4",
+                "base_address_registers_5",
+                "cardbus_cis_pointer_register",
+                "subsystem_vendor_id_register",
+                "subsystem_id_register",
+                "expansion_rom_base_address_register",
+                "capabilities_pointer_register",
+                "interrupt_line_register",
+                "interrupt_pin_register",
+                "min_gnt_register",
+                "max_lat_register"
             ]
         }
     },
@@ -152,6 +174,773 @@
                     "attributes": "RW\nVF ROZ"
                 }
             ]
+        },
+
+        "status": {
+            "offset": 6,
+            "size": 2,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 1,
+                    "name": "immediate_readiness",
+                    "description": "Immediate Readiness - This optional bit, when Set, indicates the Function is guaranteed to be ready to\nsuccessfully complete valid Configuration Requests at any time. It is permitted for this indication to be\nbased on implementation specific knowledge of how long it takes the host to become ready to issue\nConfiguration Requests.\nWhen this bit is Set, for accesses to this Function, software is exempt from all requirements to delay\nconfiguration accesses following any type of reset, including but not limited to the timing requirements\ndefined in § Section 6.6 .\nHow this guarantee is established is beyond the scope of this document.\nIt is permitted that system software/firmware provide mechanisms that supersede the indication\nprovided by this bit, however such software/firmware mechanisms are outside the scope of this\nspecification.",
+                    "attributes": "RO",
+                    "default": 0,
+                    "value_parse": {
+                        "0": "Function is not guaranteed ready",
+                        "1": "Function is guaranteed ready"
+                    }
+                },
+                {
+                    "bit": 3,
+                    "bit_width": 1,
+                    "name": "interrupt_status",
+                    "description": "Interrupt Status - When Set, indicates that an INTx emulation interrupt is pending internally in the Function.\nNote that INTx emulation interrupts forwarded by Functions with a Type 1 Configuration Space Header\nfrom the secondary side are not reflected in this bit.\nSetting the Interrupt Disable bit has no effect on the state of this bit.\nFunctions that do not generate INTx interrupts are permitted to hardwire this bit to 0b.\nDefault value of this bit is 0b.\nThis bit does not apply to VFs and must be hardwired to Zero.",
+                    "attributes": "RO",
+                    "default": 0,
+                    "value_parse": {
+                        "0": "No INTx interrupt pending",
+                        "1": "INTx interrupt pending"
+                    }
+                },
+                {
+                    "bit": 4,
+                    "bit_width": 1,
+                    "name": "capabilities_list",
+                    "description": "Capabilities List - Indicates the presence of an Extended Capability list item. Since all PCI Express device\nFunctions are required to implement the PCI Express Capability structure, this bit must be hardwired to\n1b.",
+                    "attributes": "RO",
+                    "default": 1,
+                    "value_parse": {
+                        "0": "No Extended Capability list present",
+                        "1": "Extended Capability list present"
+                    }
+                },
+                {
+                    "bit": 5,
+                    "bit_width": 1,
+                    "name": "capable_66mhz",
+                    "description": "66 MHz Capable - This bit was originally described in the [PCI]. Its functionality does not apply to PCI\nExpress and the bit must be hardwired to 0b.",
+                    "attributes": "RO",
+                    "default": 0,
+                    "value_parse": {
+                        "0": "Not capable",
+                        "1": "Capable (not used in PCIe)"
+                    }
+                },
+                {
+                    "bit": 7,
+                    "bit_width": 1,
+                    "name": "fast_back_to_back_capable",
+                    "description": "Fast Back-to-Back Transactions Capable - This bit was originally described in the [PCI]. Its functionality\ndoes not apply to PCI Express and the bit must be hardwired to 0b.",
+                    "attributes": "RO",
+                    "default": 0,
+                    "value_parse": {
+                        "0": "Not capable",
+                        "1": "Capable (not used in PCIe)"
+                    }
+                },
+                {
+                    "bit": 8,
+                    "bit_width": 1,
+                    "name": "master_data_parity_error",
+                    "description": "Master Data Parity Error - See § Section 7.5.1.1.14\nThis bit is Set by a Function with a Type 0 Configuration Space Header if the Parity Error Response bit in\nthe Command Register is 1b and either of the following two conditions occurs:\n• Function receives a Poisoned Completion\n• Function transmits a Poisoned Request\nThis bit is Set by a Function with a Type 1 Configuration Space Header if the Parity Error Response bit in\nthe Command Register is 1b and either of the following two conditions occurs:\n• Port receives a Poisoned Completion going Downstream\n• Port transmits a Poisoned Request Upstream\nIf the Parity Error Response bit is 0b, this bit is never Set.\nDefault value of this bit is 0b.",
+                    "attributes": "RW1C",
+                    "default": 0,
+                    "value_parse": {
+                        "0": "No parity error",
+                        "1": "Parity error detected"
+                    }
+                },
+                {
+                    "bit": 9,
+                    "bit_width": 2,
+                    "name": "devsel_timing",
+                    "description": "DEVSEL Timing - This field was originally described in the [PCI]. Its functionality does not apply to PCI Express and the field must be hardwired to 00b.",
+                    "attributes": "RO",
+                    "default": 0,
+                    "value_parse": {
+                        "0": "Hardwired to 00b (not used)"
+                    }
+                },
+                {
+                    "bit": 11,
+                    "bit_width": 1,
+                    "name": "signaled_target_abort",
+                    "description": "Signaled Target Abort - See § Section 7.5.1.1.14.\nThis bit is Set when a Function completes a Posted or Non-Posted Request as a Completer Abort error.\nThis applies to a Function with a Type 1 Configuration Space Header when the Completer Abort was generated by its Primary Side.\nDefault value of this bit is 0b.",
+                    "attributes": "RW1C",
+                    "default": 0,
+                    "value_parse": {
+                        "0": "No completer abort error",
+                        "1": "Completer abort error occurred"
+                    }
+                },
+                {
+                    "bit": 12,
+                    "bit_width": 1,
+                    "name": "received_target_abort",
+                    "description": "Received Target Abort - See § Section 7.5.1.1.14.\nOn a Function with a Type 0 Configuration Space Header, this bit is Set when a Requester receives a Completion with Completer Abort Completion Status.\nOn a Function with a Type 1 Configuration Space Header, this bit is Set when its Primary Side receives a Completion with Completer Abort Completion Status.\nFunctions with a Type 0 Configuration Space Header that do not make Non-Posted Requests on their own behalf are permitted to hardwire this bit to 0b.",
+                    "attributes": "RW1C",
+                    "default": 0,
+                    "value_parse": {
+                        "0": "No completer abort received",
+                        "1": "Completer abort received"
+                    }
+                },
+                {
+                    "bit": 13,
+                    "bit_width": 1,
+                    "name": "received_master_abort",
+                    "description": "Received Master Abort - See § Section 7.5.1.1.14.\nOn a Function with a Type 0 Configuration Space Header, this bit is Set when a Requester receives a Completion with Unsupported Request Completion Status.\nOn a Function with a Type 1 Configuration Space Header, the bit is Set when its Primary Side receives a Completion with Unsupported Request Completion Status.\nFunctions with a Type 0 Configuration Space Header that do not make Non-Posted Requests on their own behalf are permitted to hardwire this bit to 0b.\nDefault value of this bit is 0b.",
+                    "attributes": "RW1C",
+                    "default": 0,
+                    "value_parse": {
+                        "0": "No master abort received",
+                        "1": "Master abort received"
+                    }
+                },
+                {
+                    "bit": 14,
+                    "bit_width": 1,
+                    "name": "signaled_system_error",
+                    "description": "Signaled System Error - See § Section 7.5.1.1.14.\nThis bit is Set when a Function sends an ERR_FATAL or ERR_NONFATAL Message, and the SERR# Enable bit in the Command Register is 1b.\nFunctions with a Type 0 Configuration Space Header that do not send ERR_FATAL or ERR_NONFATAL Messages are permitted to hardwire this bit to 0b.\nDefault value of this bit is 0b.",
+                    "attributes": "RW1C",
+                    "default": 0,
+                    "value_parse": {
+                        "0": "No system error signaled",
+                        "1": "System error signaled"
+                    }
+                },
+                {
+                    "bit": 15,
+                    "bit_width": 1,
+                    "name": "detected_parity_error",
+                    "description": "Detected Parity Error - See § Section 7.5.1.1.14.\nThis bit is Set by a Function whenever it receives a Poisoned TLP, regardless of the state of the Parity Error Response bit in the Command Register.\nOn a Function with a Type 1 Configuration Space Header, the bit is Set when the Poisoned TLP is received by its Primary Side.\nFunctions with a Type 0 Configuration Space Header that do not signal Completer Abort are permitted to hardwire this bit to 0b.\nDefault value of this bit is 0b.",
+                    "attributes": "RW1C",
+                    "default": 0,
+                    "value_parse": {
+                        "0": "No parity error detected",
+                        "1": "Parity error detected"
+                    }
+                }
+            ]
+        },
+
+        "revision_id_register": {
+            "offset": 8,
+            "size": 1,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 8,
+                "name": "revision_id",
+                "description": "The Revision ID Register is HwInit and the value in this register specifies a Function specific revision identifier. The value is chosen by the vendor. Zero is an acceptable value. The Device ID, in conjunction with the Vendor ID and Revision ID, are used as one mechanism for software to determine which driver should be loaded. The vendor must ensure that the chosen values do not result in the use of an incompatible device driver. The value reported in the VF may be different than the value reported in the PF.",
+                "attributes": "RO"
+            }]
+        },
+
+        "class_code_register": {
+            "offset": 9,
+            "size": 3,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 8,
+                    "name": "programming_interface",
+                    "description": "This field identifies a specific register-level programming interface (if any) so that device independent software can interact with the Function. Encodings for this field are provided in the [PCI-Code-and-ID]. All unspecified encodings are Reserved.",
+                    "attributes": "RO",
+                    "default": 0,
+                    "value_parse": {
+                        "note": "Refer to PCI-Code-and-ID specification for encoding details."
+                    }
+                },
+                {
+                    "bit": 8,
+                    "bit_width": 8,
+                    "name": "sub_class_code",
+                    "description": "Specifies a base class sub-class, which identifies more specifically the operation of the Function. Encodings for sub-class are provided in the [PCI-Code-and-ID]. All unspecified encodings are Reserved.",
+                    "attributes": "RO",
+                    "default": 0,
+                    "value_parse": {
+                        "note": "Refer to PCI-Code-and-ID specification for encoding details."
+                    }
+                },
+                {
+                    "bit": 16,
+                    "bit_width": 8,
+                    "name": "base_class_code",
+                    "description": "A code that broadly classifies the type of operation the Function performs. Encodings for base class, are provided in the [PCI-Code-and-ID]. All unspecified encodings are Reserved.",
+                    "attributes": "RO",
+                    "default": 0,
+                    "value_parse": {
+                        "note": "Refer to PCI-Code-and-ID specification for encoding details."
+                    }
+                }
+            ]
+        },
+
+        "cache_line_size_register": {
+            "offset": 12,
+            "size": 1,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 8,
+                "name": "cache_line_size",
+                "description": "The Cache Line Size register is programmed by the system firmware or the operating system to system cache line size. However, note that legacy PCI-compatible software may not always be able to program this register correctly especially in the case of Hot-Plug devices. This read-write register is implemented for legacy compatibility purposes but has no effect on any PCI Express device behavior. For PCI Express to PCI/PCI-X Bridges, refer to the PCIe-to-PCI-PCI-X-Bridge for requirements for this register. This bit does not apply to VFs and must be hardwired to Zero.",
+                "attributes": "RW",
+                "default": 0
+            }]
+        },
+
+        "latency_timer_register": {
+            "offset": 13,
+            "size": 1,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 8,
+                "name": "latency_timer",
+                "description": "This register is also referred to as Primary Latency Timer for Type 1 Configuration Space Header Functions. The Latency Timer was originally described in the [PCI] and the [PCI-to-PCI-Bridge]. Its functionality does not apply to PCI Express. This register must be hardwired to 00h.",
+                "attributes": "RO",
+                "default": 0
+            }]
+        },
+
+        "header_type_register": {
+            "offset": 14,
+            "size": 1,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 7,
+                    "name": "header_layout",
+                    "value_parse": {
+                        "0000000": "Type 0 Configuration Space Header",
+                        "0000001": "Type 1 Configuration Space Header",
+                        "0000010": "Reserved",
+                        "other": "Reserved"
+                    },
+                    "description": "This field identifies the layout of the second part of the predefined header. For Functions that implement a Type 0 Configuration Space Header the encoding 000 0000b must be used. For Functions that implement a Type 1 Configuration Space Header the encoding 000 0001b must be used. The encoding 000 0010b is Reserved. All other encodings are Reserved.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 7,
+                    "bit_width": 1,
+                    "name": "multi_function_device",
+                    "value_parse": {
+                        "0": "Device contains only one Function, probing for other Functions is not permitted unless explicitly indicated.",
+                        "1": "Device may contain multiple Functions, software is permitted to probe for Functions other than Function 0."
+                    },
+                    "description": "When Set, indicates that the Device may contain multiple Functions, but not necessarily. Software is permitted to probe for Functions other than Function 0. When Clear, software must not probe for Functions other than Function 0 unless explicitly indicated by another mechanism, such as an ARI or SR-IOV Extended Capability structure.",
+                    "attributes": "RO",
+                    "default": 0
+                }
+            ]
+        },
+
+        "bist_register": {
+            "offset": 15,
+            "size": 1,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 4,
+                    "name": "completion_code",
+                    "value_parse": {
+                        "0000": "Test Passed",
+                        "non-zero": "Test Failed (Function-specific failure codes)"
+                    },
+                    "description": "This field encodes the status of the most recent test. A value of 0000b means that the Function has passed its test. Non-zero values mean the Function failed. Function-specific failure codes can be encoded in the non-zero values. This field’s value is only meaningful when BIST Capable is Set and Start BIST is Clear. This field must be hardwired to 0000b if BIST Capable is Clear.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 6,
+                    "bit_width": 1,
+                    "name": "start_bist",
+                    "value_parse": {
+                        "0": "BIST Not Started or Completed",
+                        "1": "BIST Started"
+                    },
+                    "description": "If BIST Capable is Set, Set this bit to invoke BIST. The Function resets the bit when BIST is complete. Software is permitted to fail the device if this bit is not Clear (BIST is not complete) 2 seconds after it had been Set. Writing this bit to 0b has no effect. This bit must be hardwired to 0b if BIST Capable is Clear.",
+                    "attributes": "RW/RO",
+                    "default": 0
+                },
+                {
+                    "bit": 7,
+                    "bit_width": 1,
+                    "name": "bist_capable",
+                    "value_parse": {
+                        "0": "Function does not support BIST",
+                        "1": "Function supports BIST"
+                    },
+                    "description": "When Set, this bit indicates that the Function supports BIST. When Clear, the Function does not support BIST.",
+                    "attributes": "HwInit",
+                    "default": 0
+                }
+            ]
+        },
+
+        "base_address_registers_0": {
+            "offset": 16,
+            "size": 4,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 1,
+                    "name": "io_or_memory_space",
+                    "description": "This bit is read-only and used to determine whether the register maps into Memory or I/O Space. For Memory Space, this bit must return 0b. For I/O Space, this bit must return 1b.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 1,
+                    "bit_width": 1,
+                    "name": "reserved",
+                    "description": "This bit is reserved and must return 0b when read.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 2,
+                    "bit_width": 1,
+                    "name": "memory_space_addressing",
+                    "description": "For Memory Space, bit 2 and bit 1 have encoded meanings, determining the address size and characteristics of the mapping.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 3,
+                    "bit_width": 1,
+                    "name": "prefetchable",
+                    "description": "If this bit is set to 1b, the data is prefetchable. If set to 0b, the data is not prefetchable.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 4,
+                    "bit_width": 28,
+                    "name": "address_mapping",
+                    "description": "This field is used to specify the actual address mapping for the Memory or I/O Space. It is used for mapping the Function into the corresponding address space.",
+                    "attributes": "RW",
+                    "default": 0
+                }
+            ]
+        },
+
+        "base_address_registers_1": {
+            "offset": 20,
+            "size": 4,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 1,
+                    "name": "io_or_memory_space",
+                    "description": "This bit is read-only and used to determine whether the register maps into Memory or I/O Space. For Memory Space, this bit must return 0b. For I/O Space, this bit must return 1b.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 1,
+                    "bit_width": 1,
+                    "name": "reserved",
+                    "description": "This bit is reserved and must return 0b when read.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 2,
+                    "bit_width": 1,
+                    "name": "memory_space_addressing",
+                    "description": "For Memory Space, bit 2 and bit 1 have encoded meanings, determining the address size and characteristics of the mapping.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 3,
+                    "bit_width": 1,
+                    "name": "prefetchable",
+                    "description": "If this bit is set to 1b, the data is prefetchable. If set to 0b, the data is not prefetchable.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 4,
+                    "bit_width": 28,
+                    "name": "address_mapping",
+                    "description": "This field is used to specify the actual address mapping for the Memory or I/O Space. It is used for mapping the Function into the corresponding address space.",
+                    "attributes": "RW",
+                    "default": 0
+                }
+            ]
+        },
+
+        "base_address_registers_2": {
+            "offset": 24,
+            "size": 4,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 1,
+                    "name": "io_or_memory_space",
+                    "description": "This bit is read-only and used to determine whether the register maps into Memory or I/O Space. For Memory Space, this bit must return 0b. For I/O Space, this bit must return 1b.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 1,
+                    "bit_width": 1,
+                    "name": "reserved",
+                    "description": "This bit is reserved and must return 0b when read.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 2,
+                    "bit_width": 1,
+                    "name": "memory_space_addressing",
+                    "description": "For Memory Space, bit 2 and bit 1 have encoded meanings, determining the address size and characteristics of the mapping.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 3,
+                    "bit_width": 1,
+                    "name": "prefetchable",
+                    "description": "If this bit is set to 1b, the data is prefetchable. If set to 0b, the data is not prefetchable.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 4,
+                    "bit_width": 28,
+                    "name": "address_mapping",
+                    "description": "This field is used to specify the actual address mapping for the Memory or I/O Space. It is used for mapping the Function into the corresponding address space.",
+                    "attributes": "RW",
+                    "default": 0
+                }
+            ]
+        },
+
+        "base_address_registers_3": {
+            "offset": 28,
+            "size": 4,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 1,
+                    "name": "io_or_memory_space",
+                    "description": "This bit is read-only and used to determine whether the register maps into Memory or I/O Space. For Memory Space, this bit must return 0b. For I/O Space, this bit must return 1b.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 1,
+                    "bit_width": 1,
+                    "name": "reserved",
+                    "description": "This bit is reserved and must return 0b when read.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 2,
+                    "bit_width": 1,
+                    "name": "memory_space_addressing",
+                    "description": "For Memory Space, bit 2 and bit 1 have encoded meanings, determining the address size and characteristics of the mapping.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 3,
+                    "bit_width": 1,
+                    "name": "prefetchable",
+                    "description": "If this bit is set to 1b, the data is prefetchable. If set to 0b, the data is not prefetchable.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 4,
+                    "bit_width": 28,
+                    "name": "address_mapping",
+                    "description": "This field is used to specify the actual address mapping for the Memory or I/O Space. It is used for mapping the Function into the corresponding address space.",
+                    "attributes": "RW",
+                    "default": 0
+                }
+            ]
+        },
+
+        "base_address_registers_4": {
+            "offset": 32,
+            "size": 4,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 1,
+                    "name": "io_or_memory_space",
+                    "description": "This bit is read-only and used to determine whether the register maps into Memory or I/O Space. For Memory Space, this bit must return 0b. For I/O Space, this bit must return 1b.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 1,
+                    "bit_width": 1,
+                    "name": "reserved",
+                    "description": "This bit is reserved and must return 0b when read.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 2,
+                    "bit_width": 1,
+                    "name": "memory_space_addressing",
+                    "description": "For Memory Space, bit 2 and bit 1 have encoded meanings, determining the address size and characteristics of the mapping.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 3,
+                    "bit_width": 1,
+                    "name": "prefetchable",
+                    "description": "If this bit is set to 1b, the data is prefetchable. If set to 0b, the data is not prefetchable.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 4,
+                    "bit_width": 28,
+                    "name": "address_mapping",
+                    "description": "This field is used to specify the actual address mapping for the Memory or I/O Space. It is used for mapping the Function into the corresponding address space.",
+                    "attributes": "RW",
+                    "default": 0
+                }
+            ]
+        },
+
+        "base_address_registers_5": {
+            "offset": 36,
+            "size": 4,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 1,
+                    "name": "io_or_memory_space",
+                    "description": "This bit is read-only and used to determine whether the register maps into Memory or I/O Space. For Memory Space, this bit must return 0b. For I/O Space, this bit must return 1b.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 1,
+                    "bit_width": 1,
+                    "name": "reserved",
+                    "description": "This bit is reserved and must return 0b when read.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 2,
+                    "bit_width": 1,
+                    "name": "memory_space_addressing",
+                    "description": "For Memory Space, bit 2 and bit 1 have encoded meanings, determining the address size and characteristics of the mapping.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 3,
+                    "bit_width": 1,
+                    "name": "prefetchable",
+                    "description": "If this bit is set to 1b, the data is prefetchable. If set to 0b, the data is not prefetchable.",
+                    "attributes": "RO",
+                    "default": 0
+                },
+                {
+                    "bit": 4,
+                    "bit_width": 28,
+                    "name": "address_mapping",
+                    "description": "This field is used to specify the actual address mapping for the Memory or I/O Space. It is used for mapping the Function into the corresponding address space.",
+                    "attributes": "RW",
+                    "default": 0
+                }
+            ]
+        },
+
+        "cardbus_cis_pointer_register": {
+            "offset": 40,
+            "size": 1,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 32,
+                "name": "reserved",
+                "description": "This register was originally described in the [PC-Card] specification. It does not apply to PCI Express and must be hardwired to zero.",
+                "attributes": "HwInit",
+                "default": 0
+            }]
+        },
+
+        "subsystem_vendor_id_register": {
+            "offset": 44,
+            "size": 2,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 16,
+                "name": "subsystem_vendor_id",
+                "description": "The Subsystem Vendor ID register uniquely identifies the vendor of the subsystem where the PCI Express component resides. This value must be obtained from the PCI-SIG to ensure uniqueness and identify the vendor of the adapter, motherboard, or subsystem.",
+                "attributes": "RW",
+                "default": 0
+            }]
+        },
+
+        "subsystem_id_register": {
+            "offset": 46,
+            "size": 2,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 16,
+                "name": "subsystem_id",
+                "description": "The Subsystem ID register provides a unique identifier for the PCI product, assigned by the vendor. The value is vendor-specific and, in conjunction with the Subsystem Vendor ID, forms a unique identifier for the adapter or subsystem.",
+                "attributes": "RW",
+                "default": 0
+            }]
+        },
+
+        "expansion_rom_base_address_register": {
+            "offset": 48,
+            "size": 4,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 1,
+                    "name": "expansion_rom_enable",
+                    "default": 0,
+                    "value_parse": {
+                        "0": "Expansion ROM address space is disabled.",
+                        "1": "Address decoding is enabled using the Expansion ROM Base Address field."
+                    },
+                    "description": "This bit controls whether or not the Function accepts accesses to its Expansion ROM via the Expansion ROM Base Address Register. When set to 0, the Function’s Expansion ROM address space is disabled. When set to 1, address decoding is enabled using the Expansion ROM Base Address field in this register. Functions that do not support an Expansion ROM are permitted to hardwire this bit to 0. Default value of this bit is 0b.",
+                    "attributes": "RO/RW"
+                },
+                {
+                    "bit": 1,
+                    "bit_width": 3,
+                    "name": "expansion_rom_validation_status",
+                    "default": "001",
+                    "value_parse": {
+                        "000": "Validation not supported.",
+                        "001": "Validation in progress.",
+                        "010": "Validation pass, valid contents, trust test was not performed.",
+                        "011": "Validation pass, valid and trusted contents.",
+                        "100": "Validation fail, invalid contents.",
+                        "101": "Validation fail, valid but untrusted contents (e.g., out of date, expired or revoked certificate).",
+                        "110": "Warning pass, validation passed with implementation specific warning. Valid contents, trust test was not performed.",
+                        "111": "Warning pass, validation passed with implementation specific warning. Valid and trusted contents."
+                    },
+                    "description": "This field indicates the status of hardware validation of the Expansion ROM contents. \nIf the Function does not support validation, this field must be hardwired to 000b. \nIf validation is supported, this field must contain a value between 010b and 111b upon validation completion. \nThe default value is 001b, indicating that validation is in progress. \nIf the validation passes without a trust test, the status is '010b'. If trusted, the status is '011b'. \nIf validation fails or contains untrusted content, the status is '100b' or '101b'. \nWarning statuses can indicate specific issues with the ROM contents.",
+                    "attributes": "HwInit/ROS"
+                },
+                {
+                    "bit": 4,
+                    "bit_width": 4,
+                    "name": "expansion_rom_validation_details",
+                    "default": "0000",
+                    "value_parse": {
+                        "0000": "No validation progress information provided.",
+                        "non-zero": "Implementation specific indication of validation progress (e.g., 50% complete) or additional information if validation is complete."
+                    },
+                    "description": "This field contains optional, implementation-specific details associated with Expansion ROM Validation. \nIf the Function does not support validation, this field is reserved (RsvdP). \nWhen validation is supported and this field is not implemented, it must be hardwired to 0000b. Any unused bits in this field may be hardwired to 0b. \nIf validation is in progress (Expansion ROM Validation Status is 001b), non-zero values represent the progress phase (e.g., 50% complete). A value of 0000b indicates no progress information is provided. \nIf validation is completed (Expansion ROM Validation Status is between 010b and 111b), non-zero values represent additional information. A value of 0000b indicates no additional information is provided. \nIf the Function has an Enhanced Allocation Capability with an EA entry for an Expansion ROM, this field is HwInit. \nOtherwise, the field is Read Only Sticky and is not affected by other resets, only reset by Fundamental Reset. \nIt is recommended that system software include the value of this field when reporting validation status (e.g., error log).",
+                    "attributes": "HwInit/ROS/RsvdP"
+                },
+                {
+                    "bit": 11,
+                    "bit_width": 21,
+                    "name": "expansion_rom_base_address",
+                    "default": "000000",
+                    "value_parse": {
+                        "000000": "Function does not support an Expansion ROM.",
+                        "non-zero": "Upper 21 bits of the starting memory address of the Expansion ROM."
+                    },
+                    "description": "This field contains the upper 21 bits of the starting memory address of the Expansion ROM. \nThe lower 11 bits of the Expansion ROM Base Address Register are masked off (set to zero) by software to form a 32-bit address. \nThis field functions like the address portion of a 32-bit Base Address register. \nThe number of bits that a Function implements in this field depends on how much Expansion ROM address space it requires. For example, a Function that requires a 64 KB Expansion ROM area would implement the top 16 bits, leaving the bottom 5 bits hardwired to 0b. \nThe requested address space must not exceed 16 MB. \nFunctions that support an Expansion ROM accessible through this register must implement this field. \nIf the Function has an Enhanced Allocation Capability with an EA entry for an Expansion ROM, this field must be hardwired to 0. \nDevice-independent software can determine how much address space the Function needs by writing all 1's to this field and reading it back. The low-order bits must return 0's in the don't-care bits, effectively specifying size and alignment requirements.",
+                    "attributes": "RW/RO"
+                }
+            ]
+        },
+
+        "capabilities_pointer_register": {
+            "offset": 52,
+            "size": 2,
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 8,
+                    "name": "capability_id",
+                    "default": "10h",
+                    "value_parse": {
+                        "10h": "PCI Express Capability structure"
+                    },
+                    "description": "This field must return a Capability ID of 10h indicating that this is a PCI Express Capability structure.",
+                    "attributes": "RO"
+                },
+                {
+                    "bit": 8,
+                    "bit_width": 8,
+                    "name": "next_capability_pointer",
+                    "default": "00h",
+                    "value_parse": {
+                        "00h": "No further capabilities exist"
+                    },
+                    "description": "This field contains the offset to the next PCI Capability structure or 00h if no other items exist in the linked list of Capabilities.",
+                    "attributes": "RO"
+                }
+            ]
+        },
+        "interrupt_line_register": {
+            "offset": 60,
+            "size": 1,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 8,
+                "name": "interrupt_line",
+                "default": "implementation specific",
+                "description": "The Interrupt Line register communicates interrupt line routing information. The register is read/write and must be implemented by any Function that uses an interrupt pin. Values are programmed by system software and are system architecture specific. If the Interrupt Pin Register is 00h, this register may be hardwired to 0b. Otherwise, the default value is implementation specific.",
+                "attributes": "RW"
+            }]
+        },
+
+        "interrupt_pin_register": {
+            "offset": 61,
+            "size": 1,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 8,
+                "name": "interrupt_pin",
+                "default": "00h",
+                "value_parse": {
+                    "00h": "No legacy interrupt Message used",
+                    "01h": "INTA (Legacy Interrupt Message 1)",
+                    "02h": "INTB (Legacy Interrupt Message 2)",
+                    "03h": "INTC (Legacy Interrupt Message 3)",
+                    "04h": "INTD (Legacy Interrupt Message 4)"
+                },
+                "description": "The Interrupt Pin register is read-only and identifies the legacy interrupt Message(s) the Function uses. Valid values are 01h, 02h, 03h, and 04h, mapping to legacy interrupt Messages for INTA, INTB, INTC, and INTD respectively. A value of 00h indicates no legacy interrupt Message(s) are used. Values 05h through FFh are Reserved. For Multi-Function Devices, each Function can use any of the INTx Messages, but a single Function can never generate an interrupt request on more than one INTx Message.",
+                "attributes": "RO"
+            }]
+        },
+
+        "min_gnt_register": {
+            "offset": 62,
+            "size": 1,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 8,
+                "name": "min_gnt",
+                "default": "0000",
+                "value_parse": {
+                    "0000": "Register does not apply to PCI Express and must be hardwired to Zero."
+                },
+                "description": "This register does not apply to PCI Express and must be hardwired to Zero.",
+                "attributes": "RO"
+            }]
+        },
+
+        "max_lat_register": {
+            "offset": 63,
+            "size": 1,
+            "fields": [{
+                "bit": 0,
+                "bit_width": 8,
+                "name": "max_lat",
+                "default": "0000",
+                "value_parse": {
+                    "0000": "Register does not apply to PCI Express and must be hardwired to Zero."
+                },
+                "description": "This register does not apply to PCI Express and must be hardwired to Zero.",
+                "attributes": "RO"
+            }]
         }
     }
 }
