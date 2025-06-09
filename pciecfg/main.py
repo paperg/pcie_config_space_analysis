@@ -1,3 +1,4 @@
+
 import sys
 import os
 from thefuzz import fuzz
@@ -9,10 +10,63 @@ from pci import build_pci_structures_from_json
 from pcie import build_pcie_structures_from_json
 from extend import build_pcie_extended_structures_from_json
 
-class PCIeRegisterParser:
-    def __init__(self, config_space):
 
+
+class DataGenerator:
+    def get_pcie_config_space(self):
+        pass
+    
+    def get_bar_space(self, size: int):
+        pass
+    
+    def set_pcie_register_value(self, offset: int, value: int):
+        pass
+    
+    def set_bar_space(self, addr: int, offset: int, value: int):
+        pass
+
+
+class PCIeDataGenerator(DataGenerator):
+    def __init__(self, bdf):
+        self.bdf = bdf
+        
+    def get_pcie_config_space(self):
+        with open("pciecfg/mock_data/config_space.bin", "rb") as f:
+            config_space = bytearray(f.read())
+        return config_space
+    
+    def get_bar_space(self, size: int):
+        with open("pciecfg/mock_data/cxl_bar.bin", "rb") as f:
+            bar_space = bytearray(f.read())
+        return bar_space[:size]
+    
+    def set_pcie_register_value(self, offset: int, value: int):
+        with open("pciecfg/mock_data/config_space.bin", "rb") as f:
+            config_space = bytearray(f.read())
+            
+        config_space[offset] = value.to_bytes(4, 'little')
+        with open("pciecfg/mock_data/config_space.bin", "wb") as f:
+            f.write(config_space)
+            
+        return value
+    
+    def set_bar_space(self, addr: int, offset: int, value: int):
+        with open("pciecfg/mock_data/cxl_bar.bin", "rb") as f:
+            bar_space = bytearray(f.read())
+        bar_space[offset] = value.to_bytes(4, 'little')
+        with open("pciecfg/mock_data/cxl_bar.bin", "wb") as f:
+            f.write(bar_space)
+            
+        return value
+
+
+
+class PCIeRegisterParser:
+    def __init__(self, data_generator: DataGenerator):
+        self.data_generator = data_generator
         self.all_structures_map = {}
+        
+        config_space = data_generator.get_pcie_config_space()
         self.all_structures = self.build_all_structures(config_space)
 
         for reg_struct in self.all_structures:
@@ -48,13 +102,12 @@ class PCIeRegisterParser:
 
 
 if __name__ == "__main__":
-    with open("pciecfg/mock_data/config_space.bin", "rb") as f:
-        config_space = bytearray(f.read())
-        all_structures = PCIeRegisterParser(config_space)
-        print(all_structures['vendor_id Register'])
-        # for reg_struct in all_structures:
-        #     print(reg_struct.name)
-        #     for reg in reg_struct.registers:
-        #         for field in reg.fields:
-        #             print(field.name, reg[field.name])
-            
+    data_generator = PCIeDataGenerator("00:00.0")
+    parser = PCIeRegisterParser(data_generator)
+    print(parser['vendor_id Register'])
+    # for reg_struct in all_structures:
+    #     print(reg_struct.name)
+    #     for reg in reg_struct.registers:
+    #         for field in reg.fields:
+    #             print(field.name, reg[field.name])
+        

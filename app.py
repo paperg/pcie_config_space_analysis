@@ -125,10 +125,8 @@ def get_memory_region():
 
         current_device_bdf = bdf
         try:
-            current_config_space = get_pcie_config_space_for_device(bdf)
-            if current_config_space is None:
-                raise Exception('No config space found')
-            current_config_space_parser = PCIeRegisterParser(current_config_space)
+            data_generator = PCIeDataGenerator(bdf)
+            current_config_space_parser = PCIeRegisterParser(data_generator)
             print(f'Loaded config space for device {bdf}')
         except Exception as e:
             print(f'Error loading config space for device {bdf}: {e}')
