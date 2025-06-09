@@ -1,0 +1,230 @@
+{
+    "structure": {
+        "cxl_ras_capability": {
+            "info": {
+                "cap_id": 2,
+                "cap_version": 3,
+                "size": 28,
+                "description": "CXL RAS Capability Structure"
+            },
+            "registers": [
+                "uncorrectable_error_status",
+                "uncorrectable_error_mask",
+                "uncorrectable_error_severity",
+                "correctable_error_status",
+                "correctable_error_mask",
+                "error_capability_control",
+                "header_log_registers"
+            ]
+        }
+    },
+    "register": {
+
+        "uncorrectable_error_status": {
+            "offset": 0,
+            "size": 4,
+            "description": "Uncorrectable Error Status Register",
+            "fields": [{
+                    "bit": 0,
+                    "bit_width": 1,
+                    "name": "Cache_Data_Parity",
+                    "description": "Cache_Data_Parity: Internal Uncorrectable Data error such as Data Parity error or Uncorrectable Data ECC error on CXL.cache that are not signaled by using poison on the CXL interface. The Header Log register contains the H2D Data Header if detected by either a host or a DSP. The Header Log register contains the D2H Data Header if detected by either a device or a USP. For CXL RAS Capability Version >=3, DWORD 0 of the Header Log register is reserved and the Data Header shall start at Byte Offset 4 of the Header Log register. For CXL RAS Capability Version <3, the position of the Data Header in the Header Log register is not defined by this specification.",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 1,
+                    "bit_width": 1,
+                    "name": "Cache_Address_Parity",
+                    "description": "Cache_Address_Parity: Internal Uncorrectable Address Parity error or other uncorrectable errors associated with the Address field on CXL.cache. The Header Log register contains the H2D Request Header if detected by either a host or a DSP. The Header Log register contains D2H Request Header if detected by either a device or a USP. For CXL RAS Capability Version >=3, DWORD 0 of the Header Log register is reserved and the Request Header shall start at Byte Offset 4 of the Header Log register. For CXL RAS Capability Version <3, the position of the Request Header in the Header Log register is not defined by this specification.",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 2,
+                    "bit_width": 1,
+                    "name": "Cache_BE_Parity",
+                    "description": "Cache_BE_Parity: Internal Uncorrectable Byte Enable Parity error or other Byte Enable uncorrectable errors on CXL.cache. The Header Log register contains the D2H Data Header if detected by either a device or a USP. For CXL RAS Capability Version >=3, DWORD 0 of the Header Log register is reserved and the Data Header shall start at Byte Offset 4 of the Header Log register. For CXL RAS Capability Version <3, the position of the Data Header in the Header Log register is not defined by this specification.",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 3,
+                    "bit_width": 1,
+                    "name": "Cache_Data_ECC",
+                    "description": "Cache_Data_ECC: Internal Uncorrectable Data ECC error on CXL.cache that are not signaled using poison on the CXL interface. The Header Log register contains the H2D Data Header if detected by either a host or a DSP. The Header Log register contains the D2H Data Header if detected by either a device or a USP. Note: For CXL RAS Capability Version <3, it is permissible to log any Uncorrectable Data error on CXL.cache in Bit 0 and not in this bit. For CXL RAS Capability Version >=3, this bit is deprecated and all Uncorrectable Data errors on CXL.cache that are not signaled by using CXL poison are logged in bit 0. For CXL RAS Capability Version <3, the position of the Data Header in the Header Log register is not defined by this specification.",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 4,
+                    "bit_width": 1,
+                    "name": "Mem_Data_Parity",
+                    "description": "Mem_Data_Parity: Internal Uncorrectable Data error such as Data Parity error or Uncorrectable Data ECC error on CXL.mem that are not signaled by using poison on the CXL interface. The Header Log register contains the M2S RwD Data Header if detected by either a host or a DSP. The Header Log register contains the S2M DRS Data header if detected by either a device or a USP. For CXL RAS Capability Version >=3, DWORD 0 of the Header Log register is reserved and the Data Header shall start at Byte Offset 4 of the Header Log register. For CXL RAS Capability Version <3, the position of the Data Header in the Header Log register is not defined by this specification.",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 5,
+                    "bit_width": 1,
+                    "name": "Mem_Address_Parity",
+                    "description": "Mem_Address_Parity: Internal Uncorrectable Address Parity error or other uncorrectable errors associated with the Address field on CXL.mem. For CXL RAS Capability Version <3, the position of the M2S Req message or M2S RwD Data Header or a BISnp Req message in the Header Log register is not defined by this specification. • Logging by a Host or a DSP: If bit 0 of the Header Log register is 0, the remainder of the Header Log contains the M2S Req message. If Bit 0 of the Header Log register is 1, the remainder of the Header Log contains the M2S RwD Data Header. • Logging by a Device or a USP: The remainder of the Header Log contains the BISnp message. For CXL RAS Capability Version >=3: • Logging by a Host or a DSP: If DWORD 0 bit 0 of the Header Log register is 0, the Header Log register contains the M2S Req message, starting at Byte offset 4. If DWORD 0 bit 0 of the Header Log register is 1, the remainder of the Header Log contains the M2S RwD Data Header. The Data Header shall start at Byte Offset 4 of the Header Log register. Bits 31:1 of DWORD 0 of the Header Log register are reserved. • Logging by a Device or a USP: Header Log register contains the BISnp Req message, starting at Byte offset 4.",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 6,
+                    "bit_width": 1,
+                    "name": "Mem_BE_Parity",
+                    "description": "Mem_BE_Parity: Internal Uncorrectable Byte Enable Parity error or other Byte Enable uncorrectable errors on CXL.mem. The Header Log register contains the M2S RwD Data Header if detected by either a host or a DSP. For CXL RAS Capability Version >=3, DWORD 0 of the Header Log register is reserved and the Data Header shall start at Byte Offset 4 of the Header Log register. For CXL RAS Capability Version <3, the position of the M2S RwD or S2M DRS Data Header in the Header Log register is not defined by this specification.",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 7,
+                    "bit_width": 1,
+                    "name": "Mem_Data_ECC",
+                    "description": "Internal Uncorrectable Data ECC error on CXL.mem...",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 8,
+                    "bit_width": 1,
+                    "name": "REINIT_Threshold",
+                    "description": "REINIT Threshold Hit (NUM_PHY_REINIT >= MAX_NUM_PHY_REINIT). Reserved in 256B Flit mode.",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 9,
+                    "bit_width": 1,
+                    "name": "Rsvd_Encoding_Violation",
+                    "description": "Received unrecognized encoding. Header Log contains the entire flit received when operating in 68B Flit mode...",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 10,
+                    "bit_width": 1,
+                    "name": "Poison_Received",
+                    "description": "Received Poison from the peer. No data is logged in the Header Log.",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 11,
+                    "bit_width": 1,
+                    "name": "Receiver_Overflow",
+                    "description": "A buffer overflowed and the receiver of messages is unable to sink a message. Details logged in Header Log DWORD 0.",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 12,
+                    "bit_width": 2,
+                    "name": "Reserved_12_13",
+                    "description": "Reserved (Do not use).",
+                    "attributes": "RsvdZ"
+                },
+                {
+                    "bit": 14,
+                    "bit_width": 1,
+                    "name": "Internal_Error",
+                    "description": "Component-specific error. The format of the Header Log is component-specific.",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 15,
+                    "bit_width": 1,
+                    "name": "CXL_IDE_Tx_Error",
+                    "description": "CXL IDE Tx Error. No data is logged in the Header Log.",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 16,
+                    "bit_width": 1,
+                    "name": "CXL_IDE_Rx_Error",
+                    "description": "CXL IDE Rx Error. Header Log DWORD 0 defines what is logged in the rest of the log.",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 17,
+                    "bit_width": 1,
+                    "name": "Extended_Metadata_Error",
+                    "description": "An error associated with the Extended Metadata field. DWORD 0-2 of the Header Log register capture error type and details.",
+                    "attributes": "RW1CS"
+                },
+                {
+                    "bit": 18,
+                    "bit_width": 14,
+                    "name": "Reserved_18_31",
+                    "description": "Reserved",
+                    "attributes": "RsvdZ"
+                }
+            ]
+        },
+
+
+        "uncorrectable_error_mask": {
+            "offset": 4,
+            "size": 4,
+            "description": "Uncorrectable Error Mask Register",
+            "fields": [{
+                "bit": 0,
+                "bit_width": 32,
+                "name": "Reserved",
+                "description": "Reserve",
+                "attributes": "RW1CS"
+            }]
+        },
+        "uncorrectable_error_severity": {
+            "offset": 8,
+            "size": 4,
+            "description": "Uncorrectable Error Severity Register",
+            "fields": [{
+                "bit": 0,
+                "bit_width": 32,
+                "name": "Reserved",
+                "description": "Reserve",
+                "attributes": "RW1CS"
+            }]
+        },
+        "correctable_error_status": {
+            "offset": 12,
+            "size": 4,
+            "description": "Correctable Error Status Register",
+            "fields": [{
+                "bit": 0,
+                "bit_width": 32,
+                "name": "Reserved",
+                "description": "Reserve",
+                "attributes": "RW1CS"
+            }]
+        },
+        "correctable_error_mask": {
+            "offset": 16,
+            "size": 4,
+            "description": "Correctable Error Mask Register",
+            "fields": [{
+                "bit": 0,
+                "bit_width": 32,
+                "name": "Reserved",
+                "description": "Reserve",
+                "attributes": "RW1CS"
+            }]
+        },
+        "error_capability_control": {
+            "offset": 20,
+            "size": 4,
+            "description": "Error Capability and Control Register",
+            "fields": [{
+                "bit": 0,
+                "bit_width": 32,
+                "name": "Reserved",
+                "description": "Reserve",
+                "attributes": "RW1CS"
+            }]
+        },
+        "header_log_registers": {
+            "offset": 24,
+            "size": 4,
+            "description": "Header Log Registers (starting)",
+            "fields": [{
+                "bit": 0,
+                "bit_width": 32,
+                "name": "Reserved",
+                "description": "Reserve",
+                "attributes": "RW1CS"
+            }]
+        }
+    }
+}
