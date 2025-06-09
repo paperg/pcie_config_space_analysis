@@ -1,13 +1,5 @@
-'''
-Author: Peng Guo & <peng.guo@montage-tech.com>
-Date: 2025-06-03 13:05:42
-LastEditors: pguo peng.guo@montage-tech.com
-LastEditTime: 2025-06-06 17:04:51
-FilePath: \pcie_config_space_analysis\pciecfg\pcie.py
-Description: 
 
-Copyright (c) 2025 by Montage Technology Corporation/pguo, All Rights Reserved. 
-'''
+
 
 from typing import List
 import json
