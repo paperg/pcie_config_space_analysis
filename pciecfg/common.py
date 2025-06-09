@@ -157,8 +157,9 @@ class CapabilityStructure:
 
     def finalize_raw_data(self):
         if not self.registers:
-            return
-        last = max(r.offset + r.size for r in self.registers)
+            last = 16
+        else:
+            last = max(r.offset + r.size for r in self.registers)
         self.raw = self.raw[:last]
         self.size = len(self.raw)
 
