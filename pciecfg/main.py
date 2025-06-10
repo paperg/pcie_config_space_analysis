@@ -1,6 +1,8 @@
 
 import sys
 import os
+import subprocess
+import struct
 from thefuzz import fuzz
 from thefuzz import process
 
@@ -26,7 +28,7 @@ class DataGenerator:
         pass
 
 
-class PCIeDataGenerator(DataGenerator):
+class PCIeDataFromFileGenerator(DataGenerator):
     def __init__(self, bdf):
         self.bdf = bdf
         
@@ -59,7 +61,67 @@ class PCIeDataGenerator(DataGenerator):
             
         return value
 
+class PCIeDataFromOSGenerator(DataGenerator):
+    def __init__(self, bdf):
+        self.bdf = bdf
+    
+    def get_pcie_config_space(self):
+        cmd = ['sudo', 'lspci', '-xxxx', '-s', self.bdf]
+        try:
+            result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            config_space = self.parse_lspci_output(result.stdout.decode())
+            print(f'cmd: {" ".join(cmd)} return data len: {len(config_space)}')
+            return config_space
+        except subprocess.CalledProcessError as e:
+            print(f'Command failed: {e.stderr.decode()}')
+            return None
+    
+    def get_bar_space(self, phys_addr: int, size: int):
+        print(f'get_bar_space: 0x{phys_addr:x}, 0x{size:x}')
+        cmd = ["mem_driver/mmio_tool", "r", hex(phys_addr), hex(size)]
+        try:
+            print(f'cmd: {cmd}')
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        except subprocess.CalledProcessError as e:
+            print("Error running mmio_tool:", e.stderr)
+            sys.exit(1)
 
+        bin_data = bytearray()
+        for line in result.stdout.splitlines():
+            if line.startswith("Read"):
+                # Parse: Read [0x12345678]: 0x89ABCDEF
+                try:
+                    parts = line.split()
+                    val_hex = parts[-1]
+                    val = int(val_hex, 16)
+                    bin_data += struct.pack("<I", val)  # Little endian 4 bytes
+                except Exception as e:
+                    print("Parse error:", e)
+                    continue
+
+        return bytes(bin_data)
+    
+    def set_pcie_register_value(self, offset: int, value: int):
+        pass
+    
+    def set_bar_space(self, addr: int, offset: int, value: int):
+        pass
+
+    def parse_lspci_output(self, output: str) -> bytes:
+        lines = output.strip().splitlines()
+        data = bytearray()
+
+        # 跳过第一行（设备信息）
+        for line in lines[1:]:
+            # 形如 '00: 00 1b 02 c0 46 05 10 00 02 10 02 05 00 00 00 00'
+            parts = line.split(':', 1)
+            if len(parts) != 2:
+                continue
+            # parts[1] 是 ' 00 1b 02 c0 46 05 10 00 02 10 02 05 00 00 00 00'
+            hex_bytes = parts[1].strip().split()
+            for hb in hex_bytes:
+                data.append(int(hb, 16))
+        return bytes(data)
 
 class PCIeRegisterParser:
     def __init__(self, data_generator: DataGenerator):
@@ -67,6 +129,9 @@ class PCIeRegisterParser:
         self.all_structures_map = {}
         
         config_space = data_generator.get_pcie_config_space()
+        if len(config_space) == 0:
+            raise Exception('config_space is empty')
+        
         self.pcie_structures = self.build_all_structures(config_space)
         self.generate_all_map(self.pcie_structures)
         self.cxl_structures = self.build_cxl_structures()
@@ -105,7 +170,7 @@ class PCIeRegisterParser:
                             self.all_structures_map[field.name] = [tmp, field]
                     
     def build_cxl_structures(self):
-        dvsec_cxl_device = self.all_structures_map['dvsec_register_locator']
+        dvsec_cxl_device = self.all_structures_map.get('dvsec_register_locator')
         if dvsec_cxl_device is None:
             print('dvsec_cxl_device is None')
             return None
@@ -126,7 +191,8 @@ class PCIeRegisterParser:
                         bar_base = (high_addr << 32) | (bar_base << 4)
                     print(f'BAR{bar_num} bar_base: 0x{bar_base:x}')
                     if bar_base != 0:
-                        bar_space = self.data_generator.get_bar_space(bar_base, 0x1000, 0x1000)
+                        # 4K offset is cxl cache and mem register
+                        bar_space = self.data_generator.get_bar_space(bar_base + 0x1000, 0x1000)
                         return build_cxl_cache_mem_capability_from_json(bar_space)
                     
         return None
@@ -145,14 +211,23 @@ class PCIeRegisterParser:
 
 
 if __name__ == "__main__":
-    data_generator = PCIeDataGenerator("00:00.0")
-    parser = PCIeRegisterParser(data_generator)
-    print(parser[
-        'uncorrectable_error_status'
-    ])
+    
+    ## Data From File Test
+    # data_generator = PCIeDataGenerator("00:00.0")
+    # parser = PCIeRegisterParser(data_generator)
+    # print(parser[
+    #     'uncorrectable_error_status'
+    # ])
     # for reg_struct in all_structures:
     #     print(reg_struct.name)
     #     for reg in reg_struct.registers:
     #         for field in reg.fields:
     #             print(field.name, reg[field.name])
-        
+    
+    ## Data From OS CMD Test
+    data_generator = PCIeDataFromOSGenerator("15:00.0")
+    parser = PCIeRegisterParser(data_generator)
+    for reg_struct in parser.cxl_structures:
+        print(reg_struct.name)
+        for reg in reg_struct.registers:
+            print(reg)
