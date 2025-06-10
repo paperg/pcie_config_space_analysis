@@ -482,34 +482,40 @@
             "fields": [{
                     "bit": 0,
                     "bit_width": 1,
-                    "name": "io_or_memory_space",
-                    "description": "This bit is read-only and used to determine whether the register maps into Memory or I/O Space. For Memory Space, this bit must return 0b. For I/O Space, this bit must return 1b.",
+                    "name": "memory_space_indicator",
+                    "default": 0,
+                    "description": "This bit indicates whether the BAR (Base Address Register) is for memory space or I/O space.\n0 = Memory space\n1 = I/O space",
                     "attributes": "RO",
-                    "default": 0
+                    "value_parse": {
+                        "0": "Memory space",
+                        "1": "I/O space"
+                    }
                 },
                 {
                     "bit": 1,
-                    "bit_width": 1,
-                    "name": "reserved",
-                    "description": "This bit is reserved and must return 0b when read.",
+                    "bit_width": 2,
+                    "name": "memory_type",
+                    "default": 0,
+                    "description": "Bits 2:1 indicate the memory type and size.\n00b: Base register is 32 bits wide and can be mapped anywhere in the 32-bit memory address space.\n01b: Reserved\n10b: Base register is 64 bits wide and can be mapped anywhere in the 64-bit memory address space.\n11b: Reserved",
                     "attributes": "RO",
-                    "default": 0
-                },
-                {
-                    "bit": 2,
-                    "bit_width": 1,
-                    "name": "memory_space_addressing",
-                    "description": "For Memory Space, bit 2 and bit 1 have encoded meanings, determining the address size and characteristics of the mapping.",
-                    "attributes": "RO",
-                    "default": 0
+                    "value_parse": {
+                        "0": "32-bit memory space",
+                        "1": "Reserved",
+                        "2": "64-bit memory space",
+                        "3": "Reserved"
+                    }
                 },
                 {
                     "bit": 3,
                     "bit_width": 1,
                     "name": "prefetchable",
-                    "description": "If this bit is set to 1b, the data is prefetchable. If set to 0b, the data is not prefetchable.",
+                    "default": 0,
+                    "description": "This bit indicates whether the memory region is prefetchable.\n0 = Non-prefetchable\n1 = Prefetchable",
                     "attributes": "RO",
-                    "default": 0
+                    "value_parse": {
+                        "0": "Non-prefetchable",
+                        "1": "Prefetchable"
+                    }
                 },
                 {
                     "bit": 4,
@@ -528,34 +534,40 @@
             "fields": [{
                     "bit": 0,
                     "bit_width": 1,
-                    "name": "io_or_memory_space",
-                    "description": "This bit is read-only and used to determine whether the register maps into Memory or I/O Space. For Memory Space, this bit must return 0b. For I/O Space, this bit must return 1b.",
+                    "name": "memory_space_indicator",
+                    "default": 0,
+                    "description": "This bit indicates whether the BAR (Base Address Register) is for memory space or I/O space.\n0 = Memory space\n1 = I/O space",
                     "attributes": "RO",
-                    "default": 0
+                    "value_parse": {
+                        "0": "Memory space",
+                        "1": "I/O space"
+                    }
                 },
                 {
                     "bit": 1,
-                    "bit_width": 1,
-                    "name": "reserved",
-                    "description": "This bit is reserved and must return 0b when read.",
+                    "bit_width": 2,
+                    "name": "memory_type",
+                    "default": 0,
+                    "description": "Bits 2:1 indicate the memory type and size.\n00b: Base register is 32 bits wide and can be mapped anywhere in the 32-bit memory address space.\n01b: Reserved\n10b: Base register is 64 bits wide and can be mapped anywhere in the 64-bit memory address space.\n11b: Reserved",
                     "attributes": "RO",
-                    "default": 0
-                },
-                {
-                    "bit": 2,
-                    "bit_width": 1,
-                    "name": "memory_space_addressing",
-                    "description": "For Memory Space, bit 2 and bit 1 have encoded meanings, determining the address size and characteristics of the mapping.",
-                    "attributes": "RO",
-                    "default": 0
+                    "value_parse": {
+                        "0": "32-bit memory space",
+                        "1": "Reserved",
+                        "2": "64-bit memory space",
+                        "3": "Reserved"
+                    }
                 },
                 {
                     "bit": 3,
                     "bit_width": 1,
                     "name": "prefetchable",
-                    "description": "If this bit is set to 1b, the data is prefetchable. If set to 0b, the data is not prefetchable.",
+                    "default": 0,
+                    "description": "This bit indicates whether the memory region is prefetchable.\n0 = Non-prefetchable\n1 = Prefetchable",
                     "attributes": "RO",
-                    "default": 0
+                    "value_parse": {
+                        "0": "Non-prefetchable",
+                        "1": "Prefetchable"
+                    }
                 },
                 {
                     "bit": 4,
@@ -574,34 +586,40 @@
             "fields": [{
                     "bit": 0,
                     "bit_width": 1,
-                    "name": "io_or_memory_space",
-                    "description": "This bit is read-only and used to determine whether the register maps into Memory or I/O Space. For Memory Space, this bit must return 0b. For I/O Space, this bit must return 1b.",
+                    "name": "memory_space_indicator",
+                    "default": 0,
+                    "description": "This bit indicates whether the BAR (Base Address Register) is for memory space or I/O space.\n0 = Memory space\n1 = I/O space",
                     "attributes": "RO",
-                    "default": 0
+                    "value_parse": {
+                        "0": "Memory space",
+                        "1": "I/O space"
+                    }
                 },
                 {
                     "bit": 1,
-                    "bit_width": 1,
-                    "name": "reserved",
-                    "description": "This bit is reserved and must return 0b when read.",
+                    "bit_width": 2,
+                    "name": "memory_type",
+                    "default": 0,
+                    "description": "Bits 2:1 indicate the memory type and size.\n00b: Base register is 32 bits wide and can be mapped anywhere in the 32-bit memory address space.\n01b: Reserved\n10b: Base register is 64 bits wide and can be mapped anywhere in the 64-bit memory address space.\n11b: Reserved",
                     "attributes": "RO",
-                    "default": 0
-                },
-                {
-                    "bit": 2,
-                    "bit_width": 1,
-                    "name": "memory_space_addressing",
-                    "description": "For Memory Space, bit 2 and bit 1 have encoded meanings, determining the address size and characteristics of the mapping.",
-                    "attributes": "RO",
-                    "default": 0
+                    "value_parse": {
+                        "0": "32-bit memory space",
+                        "1": "Reserved",
+                        "2": "64-bit memory space",
+                        "3": "Reserved"
+                    }
                 },
                 {
                     "bit": 3,
                     "bit_width": 1,
                     "name": "prefetchable",
-                    "description": "If this bit is set to 1b, the data is prefetchable. If set to 0b, the data is not prefetchable.",
+                    "default": 0,
+                    "description": "This bit indicates whether the memory region is prefetchable.\n0 = Non-prefetchable\n1 = Prefetchable",
                     "attributes": "RO",
-                    "default": 0
+                    "value_parse": {
+                        "0": "Non-prefetchable",
+                        "1": "Prefetchable"
+                    }
                 },
                 {
                     "bit": 4,
@@ -620,34 +638,40 @@
             "fields": [{
                     "bit": 0,
                     "bit_width": 1,
-                    "name": "io_or_memory_space",
-                    "description": "This bit is read-only and used to determine whether the register maps into Memory or I/O Space. For Memory Space, this bit must return 0b. For I/O Space, this bit must return 1b.",
+                    "name": "memory_space_indicator",
+                    "default": 0,
+                    "description": "This bit indicates whether the BAR (Base Address Register) is for memory space or I/O space.\n0 = Memory space\n1 = I/O space",
                     "attributes": "RO",
-                    "default": 0
+                    "value_parse": {
+                        "0": "Memory space",
+                        "1": "I/O space"
+                    }
                 },
                 {
                     "bit": 1,
-                    "bit_width": 1,
-                    "name": "reserved",
-                    "description": "This bit is reserved and must return 0b when read.",
+                    "bit_width": 2,
+                    "name": "memory_type",
+                    "default": 0,
+                    "description": "Bits 2:1 indicate the memory type and size.\n00b: Base register is 32 bits wide and can be mapped anywhere in the 32-bit memory address space.\n01b: Reserved\n10b: Base register is 64 bits wide and can be mapped anywhere in the 64-bit memory address space.\n11b: Reserved",
                     "attributes": "RO",
-                    "default": 0
-                },
-                {
-                    "bit": 2,
-                    "bit_width": 1,
-                    "name": "memory_space_addressing",
-                    "description": "For Memory Space, bit 2 and bit 1 have encoded meanings, determining the address size and characteristics of the mapping.",
-                    "attributes": "RO",
-                    "default": 0
+                    "value_parse": {
+                        "0": "32-bit memory space",
+                        "1": "Reserved",
+                        "2": "64-bit memory space",
+                        "3": "Reserved"
+                    }
                 },
                 {
                     "bit": 3,
                     "bit_width": 1,
                     "name": "prefetchable",
-                    "description": "If this bit is set to 1b, the data is prefetchable. If set to 0b, the data is not prefetchable.",
+                    "default": 0,
+                    "description": "This bit indicates whether the memory region is prefetchable.\n0 = Non-prefetchable\n1 = Prefetchable",
                     "attributes": "RO",
-                    "default": 0
+                    "value_parse": {
+                        "0": "Non-prefetchable",
+                        "1": "Prefetchable"
+                    }
                 },
                 {
                     "bit": 4,
@@ -666,34 +690,40 @@
             "fields": [{
                     "bit": 0,
                     "bit_width": 1,
-                    "name": "io_or_memory_space",
-                    "description": "This bit is read-only and used to determine whether the register maps into Memory or I/O Space. For Memory Space, this bit must return 0b. For I/O Space, this bit must return 1b.",
+                    "name": "memory_space_indicator",
+                    "default": 0,
+                    "description": "This bit indicates whether the BAR (Base Address Register) is for memory space or I/O space.\n0 = Memory space\n1 = I/O space",
                     "attributes": "RO",
-                    "default": 0
+                    "value_parse": {
+                        "0": "Memory space",
+                        "1": "I/O space"
+                    }
                 },
                 {
                     "bit": 1,
-                    "bit_width": 1,
-                    "name": "reserved",
-                    "description": "This bit is reserved and must return 0b when read.",
+                    "bit_width": 2,
+                    "name": "memory_type",
+                    "default": 0,
+                    "description": "Bits 2:1 indicate the memory type and size.\n00b: Base register is 32 bits wide and can be mapped anywhere in the 32-bit memory address space.\n01b: Reserved\n10b: Base register is 64 bits wide and can be mapped anywhere in the 64-bit memory address space.\n11b: Reserved",
                     "attributes": "RO",
-                    "default": 0
-                },
-                {
-                    "bit": 2,
-                    "bit_width": 1,
-                    "name": "memory_space_addressing",
-                    "description": "For Memory Space, bit 2 and bit 1 have encoded meanings, determining the address size and characteristics of the mapping.",
-                    "attributes": "RO",
-                    "default": 0
+                    "value_parse": {
+                        "0": "32-bit memory space",
+                        "1": "Reserved",
+                        "2": "64-bit memory space",
+                        "3": "Reserved"
+                    }
                 },
                 {
                     "bit": 3,
                     "bit_width": 1,
                     "name": "prefetchable",
-                    "description": "If this bit is set to 1b, the data is prefetchable. If set to 0b, the data is not prefetchable.",
+                    "default": 0,
+                    "description": "This bit indicates whether the memory region is prefetchable.\n0 = Non-prefetchable\n1 = Prefetchable",
                     "attributes": "RO",
-                    "default": 0
+                    "value_parse": {
+                        "0": "Non-prefetchable",
+                        "1": "Prefetchable"
+                    }
                 },
                 {
                     "bit": 4,
@@ -712,34 +742,40 @@
             "fields": [{
                     "bit": 0,
                     "bit_width": 1,
-                    "name": "io_or_memory_space",
-                    "description": "This bit is read-only and used to determine whether the register maps into Memory or I/O Space. For Memory Space, this bit must return 0b. For I/O Space, this bit must return 1b.",
+                    "name": "memory_space_indicator",
+                    "default": 0,
+                    "description": "This bit indicates whether the BAR (Base Address Register) is for memory space or I/O space.\n0 = Memory space\n1 = I/O space",
                     "attributes": "RO",
-                    "default": 0
+                    "value_parse": {
+                        "0": "Memory space",
+                        "1": "I/O space"
+                    }
                 },
                 {
                     "bit": 1,
-                    "bit_width": 1,
-                    "name": "reserved",
-                    "description": "This bit is reserved and must return 0b when read.",
+                    "bit_width": 2,
+                    "name": "memory_type",
+                    "default": 0,
+                    "description": "Bits 2:1 indicate the memory type and size.\n00b: Base register is 32 bits wide and can be mapped anywhere in the 32-bit memory address space.\n01b: Reserved\n10b: Base register is 64 bits wide and can be mapped anywhere in the 64-bit memory address space.\n11b: Reserved",
                     "attributes": "RO",
-                    "default": 0
-                },
-                {
-                    "bit": 2,
-                    "bit_width": 1,
-                    "name": "memory_space_addressing",
-                    "description": "For Memory Space, bit 2 and bit 1 have encoded meanings, determining the address size and characteristics of the mapping.",
-                    "attributes": "RO",
-                    "default": 0
+                    "value_parse": {
+                        "0": "32-bit memory space",
+                        "1": "Reserved",
+                        "2": "64-bit memory space",
+                        "3": "Reserved"
+                    }
                 },
                 {
                     "bit": 3,
                     "bit_width": 1,
                     "name": "prefetchable",
-                    "description": "If this bit is set to 1b, the data is prefetchable. If set to 0b, the data is not prefetchable.",
+                    "default": 0,
+                    "description": "This bit indicates whether the memory region is prefetchable.\n0 = Non-prefetchable\n1 = Prefetchable",
                     "attributes": "RO",
-                    "default": 0
+                    "value_parse": {
+                        "0": "Non-prefetchable",
+                        "1": "Prefetchable"
+                    }
                 },
                 {
                     "bit": 4,
