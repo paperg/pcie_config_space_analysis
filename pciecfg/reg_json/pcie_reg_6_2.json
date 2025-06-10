@@ -835,7 +835,7 @@
             "offset": 18,
             "size": 4,
             "fields": [{
-                    "bit": 3,
+                    "bit": 0,
                     "bit_width": 4,
                     "name": "current_link_speed",
                     "default": 0,

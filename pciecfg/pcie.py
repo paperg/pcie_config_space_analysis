@@ -39,7 +39,7 @@ def build_pcie_structures_from_json(config_space: bytes, filename: str = 'pciecf
                 break
 
         if struct_name is None:
-            # 找不到结构定义，做个默认处理，读16字节
+            # connot find structure definition, read 16 bytes as default
             size = 16
             raw = config_space[offset:offset+size]
             cap_struct = CapabilityStructure(
@@ -74,7 +74,7 @@ def build_pcie_structures_from_json(config_space: bytes, filename: str = 'pciecf
                     reg_type='pcie',
                     reg_name=reg_name,
                     reg_json=reg_json,
-                    config_space=config_space,
+                    config_space=raw,
                 )
                 cap_struct.add_register(reg)
 
