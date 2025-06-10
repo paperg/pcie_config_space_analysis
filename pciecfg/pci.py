@@ -1,8 +1,8 @@
 
 import json
 from typing import List
-from common import Register
-from common import CapabilityStructure
+from pciecfg.common import Register
+from pciecfg.common import CapabilityStructure
 
 def build_pci_structures_from_json(config_space: bytes, filename: str = 'pciecfg/reg_json/pci_reg_6_2.json') -> List[CapabilityStructure]:
     with open(filename, 'r', encoding='utf-8') as f:

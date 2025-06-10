@@ -3,8 +3,8 @@
 
 from typing import List
 import json
-from common import CapabilityStructure
-from common import Register
+from pciecfg.common import CapabilityStructure
+from pciecfg.common import Register
 
 
 from typing import List

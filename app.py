@@ -1,7 +1,9 @@
-from flask import Flask, render_template, jsonify, request
 import os
+
+from flask import Flask, render_template, jsonify, request
 from pciecfg.main import PCIeRegisterParser
 from pciecfg.main import PCIeDataFromOSGenerator
+from pciecfg import common
 
 app = Flask(__name__)
 
@@ -79,21 +81,28 @@ def index():
 
 @app.route('/index.html')
 def register_detail():
-    """
-    寄存器详情页面
-    可以通过URL参数传递寄存器信息
-    """
-    # 获取URL参数
+    global current_config_space_parser
+    
     register_name = request.args.get('name')
     print(f"Requested register: {register_name}")
     
-    # 如果有寄存器数据参数，则传递给模板
     context = {}
     if register_name and current_config_space_parser:
         try:
-            # 从parser中获取寄存器对象
-            register_obj = current_config_space_parser[register_name]
-            print(f"Found register: {register_obj.name}")
+            register_obj = None
+            obj_lists = current_config_space_parser[register_name]
+            if isinstance(obj_lists, list):
+                for obj in obj_lists:
+                    # if it is Register
+                    if isinstance(obj, common.Register):
+                        register_obj = obj
+                        break
+            else:
+                if isinstance(obj_lists, common.Register):
+                    register_obj = obj_lists
+
+            if register_obj is None:
+                return jsonify({'error': 'Register not found'}), 404
             
             # 将寄存器对象转换为JSON可序列化的字典
             register_data = {
@@ -223,16 +232,9 @@ def get_memory_region():
 
 @app.route('/api/register', methods=['GET'])
 def get_register():
-    """
-    获取特定寄存器的详细信息
-    参数：
-    - bdf: 设备BDF
-    - offset: 寄存器偏移地址
-    - name: 寄存器名称 (可选)
-    """
     try:
-        global current_device_bdf, current_config_space, current_register_blocks
-        
+        global current_device_bdf, current_config_space, current_register_blocks, current_config_space_parser
+        print('Call get_register')
         bdf = request.args.get('bdf')
         offset = request.args.get('offset')
         name = request.args.get('name')
@@ -241,39 +243,17 @@ def get_register():
             return jsonify({'error': 'Missing bdf parameter'}), 400
             
         # 确保我们有该设备的数据
-        if current_device_bdf != bdf or current_config_space is None:
+        if current_device_bdf != bdf or current_config_space_parser is None:
             current_device_bdf = bdf
             data_generator = PCIeDataFromOSGenerator(bdf)
             current_config_space_parser = PCIeRegisterParser(data_generator)
-            current_register_blocks = current_config_space_parser.all_structures
         
         # 查找指定的寄存器
         target_register = None
-        target_block = None
-        
-        if offset is not None:
-            offset = int(offset, 16) if isinstance(offset, str) and offset.startswith('0x') else int(offset)
-            
-            # 按偏移地址查找
-            for block in current_register_blocks:
-                for reg in block.registers:
-                    if reg.offset == offset:
-                        target_register = reg
-                        target_block = block
-                        break
-                if target_register:
-                    break
-        elif name:
-            # 按名称查找
-            for block in current_register_blocks:
-                for reg in block.registers:
-                    if reg.name == name:
-                        target_register = reg
-                        target_block = block
-                        break
-                if target_register:
-                    break
-        
+
+        if name is not None:
+            target_register = current_config_space_parser[name]
+
         if not target_register:
             return jsonify({'error': 'Register not found'}), 404
         

@@ -1,7 +1,7 @@
 import json
 from typing import List
-from common import CapabilityStructure
-from common import Register
+from pciecfg.common import CapabilityStructure
+from pciecfg.common import Register
 from dvsec import parse_dvsec_structure
 
 

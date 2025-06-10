@@ -1,7 +1,8 @@
 
 import json
 from typing import List
-from common import CapabilityStructure, Register
+from pciecfg.common import CapabilityStructure
+from pciecfg.common import Register
 
 def build_cxl_cache_mem_capability_from_json(
     bar_space: bytes,
