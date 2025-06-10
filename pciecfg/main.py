@@ -131,21 +131,35 @@ class PCIeDataFromOSGenerator(DataGenerator):
         cmd = ['lspci']
         try:
             result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-            return result.stdout.decode()
+            output = result.stdout.decode()
+            return output.splitlines()
         except subprocess.CalledProcessError as e:
             print(f'Command failed: {e.stderr.decode()}')
             
+
+class Region:
+    def __init__(self, name: str, start_address: int, size: int, type: str, description: str, raw_data: list, reg_structure: list):
+        self.name = name
+        self.start_address = start_address
+        self.size = size
+        self.type = type
+        self.description = description
+        self.raw_data = raw_data
+        self.reg_structure = reg_structure
+
 class PCIeRegisterParser:
     def __init__(self, data_generator: DataGenerator):
         self.data_generator = data_generator
         self.all_structures_map = {}
-        
+        self.region = []
         config_space = data_generator.get_pcie_config_space()
         if len(config_space) == 0:
             raise Exception('config_space is empty')
         
         self.pcie_structures = self.build_all_structures(config_space)
-        self.generate_all_map(self.pcie_structures)
+        if self.pcie_structures is not None:
+            self.region.append(Region('PCIe Config Space', self.pci_addr_to_int(data_generator.bdf), 0x1000, 'pcie', '4KB PCIe Configuration Space', config_space, self.pcie_structures))
+            self.generate_all_map(self.pcie_structures)
         self.cxl_structures = self.build_cxl_structures()
         if self.cxl_structures is not None:
             self.generate_all_map(self.cxl_structures)
@@ -205,7 +219,9 @@ class PCIeRegisterParser:
                     if bar_base != 0:
                         # 4K offset is cxl cache and mem register
                         bar_space = self.data_generator.get_bar_space(bar_base + 0x1000, 0x1000)
-                        return build_cxl_cache_mem_capability_from_json(bar_space)
+                        cxl_structures = build_cxl_cache_mem_capability_from_json(bar_space)
+                        self.region.append(Region('CXL Cache and Mem', bar_base + 0x1000, 0x1000, 'cxl', 'CXL Cache and Mem', bar_space, cxl_structures))
+                        return cxl_structures
                     
         return None
         
@@ -220,11 +236,53 @@ class PCIeRegisterParser:
 
         return all_structures
 
+    def pci_addr_to_int(self, pci_addr: str) -> int:
+        bus_dev, func = pci_addr.split('.')
+        bus, dev = bus_dev.split(':')
 
+        bus = int(bus, 16)
+        dev = int(dev, 16)
+        func = int(func, 16)
+
+        addr = (bus << 16) | (dev << 11) | (func << 8)
+        return addr
 
 if __name__ == "__main__":
     
-    ## Data From File Test
+    ##########################################################
+    # Test Get Device use cmd : lspci
+    ##########################################################
+    try:
+        data_generator = PCIeDataFromOSGenerator("00:00.0")
+        lines = data_generator.get_pcie_device_list()
+    except FileNotFoundError:
+        print('FileNotFoundError')
+
+    device_list = []
+
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        # format: "00:00.0 System peripheral: Intel Corporation..."
+        parts = line.split(' ', 1)
+        
+        if len(parts) < 2:
+            continue
+        
+        if len(parts) >= 2:
+            device_bdf = parts[0]
+            device_name = parts[1]
+            device_list.append({
+                'bdf': device_bdf,
+                'name': device_name,
+                'description': device_name 
+            })
+    print(device_list)
+    
+    ##########################################################
+    # Test Get Data From File 
+    ##########################################################
     # data_generator = PCIeDataGenerator("00:00.0")
     # parser = PCIeRegisterParser(data_generator)
     # print(parser[
@@ -237,9 +295,12 @@ if __name__ == "__main__":
     #             print(field.name, reg[field.name])
     
     ## Data From OS CMD Test
-    data_generator = PCIeDataFromOSGenerator("15:00.0")
-    parser = PCIeRegisterParser(data_generator)
-    for reg_struct in parser.cxl_structures:
-        print(reg_struct.name)
-        for reg in reg_struct.registers:
-            print(reg)
+    # data_generator = PCIeDataFromOSGenerator("15:00.0")
+    # parser = PCIeRegisterParser(data_generator)
+    # for reg_struct in parser.cxl_structures:
+    #     print(reg_struct.name)
+    #     for reg in reg_struct.registers:
+    #         print(reg)
+            
+            
+            
