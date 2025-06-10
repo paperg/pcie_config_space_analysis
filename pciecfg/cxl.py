@@ -41,7 +41,7 @@ def build_cxl_cache_mem_capability_from_json(
         cap_id = cap_value & 0xFFFF                         # 0-15 bits
         cap_version = (cap_value >> 16) & 0xF               # 16-19 bits (4 bits)
         cap_pointer = (cap_value >> 20) & 0xFFF         # 20-31 bits (12 bits)
-
+        print(f"cap_id: {cap_id}, cap_version: {cap_version}, cap_pointer: {cap_pointer}")
         matched_struct = None
         for struct_name, struct_info in structure_data.items(): 
             info = struct_info.get("info", {})
