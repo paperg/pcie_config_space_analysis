@@ -79,13 +79,13 @@ class Register:
             for field in self.fields:
                 if field.name == key:
                     value = field.extract(self.value)
-                    return f"0x{value:X}"  # 返回十六进制表示
+                    return value
 
         elif isinstance(key, int):
             for field in self.fields:
                 if field.bit_offset <= key < field.bit_offset + field.bit_width:
                     value = field.extract(self.value)
-                    return f"0x{value:X}"  # 返回十六进制表示
+                    return value
             raise KeyError(f"No field contains bit {key}")
         else:
             raise TypeError("Key must be a string (field name) or int (bit offset)")
@@ -153,7 +153,7 @@ class CapabilityStructure:
             raise KeyError(f"Field '{field_name}' not found in any register.")
         elif len(matches) > 1:
             raise KeyError(f"Field '{field_name}' found in multiple registers.")
-        return int(matches[0], 16)
+        return matches[0]
 
     def finalize_raw_data(self):
         if not self.registers:
