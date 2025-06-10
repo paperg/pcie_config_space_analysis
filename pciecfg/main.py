@@ -73,6 +73,14 @@ class PCIeRegisterParser:
         if self.cxl_structures is not None:
             self.generate_all_map(self.cxl_structures)
     
+    def __getitem__(self, key):
+        correct_key, score = process.extractOne(key, self.all_structures_map.keys())
+        if score > 80:
+            print(f'Use {key}, You mean {correct_key}')
+        else:
+            print(f'Use {key}, score: {score}, May be you mean {correct_key}')
+        return self.all_structures_map[correct_key]
+    
     def generate_all_map(self, structures):
         for reg_struct in structures:
             self.all_structures_map[reg_struct.name] = reg_struct
@@ -123,15 +131,6 @@ class PCIeRegisterParser:
                     
         return None
         
-    def __getitem__(self, key):
-        correct_key, score = process.extractOne(key, self.all_structures_map.keys())
-        if score > 80:
-            print(f'Use {key}, You mean {correct_key}')
-        else:
-            print(f'Use {key}, May be you mean {correct_key}')
-        return self.all_structures_map[correct_key]
-   
-
     def build_all_structures(self, config_space: bytes):
         all_structures = []
         structures = build_pci_structures_from_json(config_space)
