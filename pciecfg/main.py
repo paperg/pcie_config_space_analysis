@@ -61,6 +61,10 @@ class PCIeDataFromFileGenerator(DataGenerator):
             
         return value
 
+    def get_pcie_device_list(self):
+        with open("pciecfg/mock_data/lspci.txt", "r") as f:
+            return f.read()
+        
 class PCIeDataFromOSGenerator(DataGenerator):
     def __init__(self, bdf):
         self.bdf = bdf
@@ -123,6 +127,14 @@ class PCIeDataFromOSGenerator(DataGenerator):
                 data.append(int(hb, 16))
         return bytes(data)
 
+    def get_pcie_device_list(self):
+        cmd = ['lspci']
+        try:
+            result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            return result.stdout.decode()
+        except subprocess.CalledProcessError as e:
+            print(f'Command failed: {e.stderr.decode()}')
+            
 class PCIeRegisterParser:
     def __init__(self, data_generator: DataGenerator):
         self.data_generator = data_generator
