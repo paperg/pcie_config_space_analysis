@@ -5,7 +5,8 @@
 @text-color: #333;
 @border-color: #ddd;
 @hover-brightness: 1.1;
-
+@text-size: 0.2rem;
+@down-box-sticky-top: 2rem;
 // Theme Colors (consistent with index.less)
 @light-theme: {
     bg: #ffffff;
@@ -67,8 +68,8 @@ body {
 // Sticky Controls
 .sticky-controls {
     position: sticky;
-    top: 0.6rem; // Below nav bar
-    z-index: 900;
+    top: 0.4rem;
+    z-index: 100;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(5px);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
@@ -84,25 +85,26 @@ body {
 .container {
     display: flex;
     width: 100vw;
-    height: calc(100vh - 1.4rem); // Subtract nav and controls height
     padding: 0.2rem;
     box-sizing: border-box;
     gap: 0.2rem;
-    font-size: 0.14rem; // 调整基础字体大小
+    font-size: @text-size;
 }
 
 // Memory Layout (1/7 of viewport width)
 .memory-layout {
     width: calc(100vw / 7);
-    height: 100%;
+    height: calc(100vh - 2rem);
+    position: sticky;
+    top: @down-box-sticky-top;
     display: flex;
+    z-index: 10;
     flex-direction: column;
     border: 1px solid @border-color;
     border-radius: 0.08rem;
-    overflow: hidden;
     background: white;
     box-shadow: 0 0.02rem 0.04rem rgba(0, 0, 0, 0.1);
-    font-size: 0.16rem;
+    font-size: @text-size;
 
     body.dark-theme & {
         background: @dark-theme[bg];
@@ -127,7 +129,7 @@ body {
         h3 {
             margin: 0;
             color: @light-theme[primary];
-            font-size: 0.14rem;
+            font-size: @text-size;
 
             body.dark-theme & {
                 color: @dark-theme[primary];
@@ -135,7 +137,7 @@ body {
         }
 
         .memory-stats {
-            font-size: 0.1rem;
+            font-size: @text-size;
             color: @light-theme[secondary];
 
             body.dark-theme & {
@@ -182,21 +184,21 @@ body {
             }
 
             .region-label {
-                font-size: 0.2rem;
+                font-size: @text-size;
                 font-weight: bold;
                 margin-bottom: 0.02rem;
                 line-height: 1.2;
             }
 
             .region-address {
-                font-size: 0.15rem;
+                font-size: @text-size;
                 opacity: 0.9;
                 font-family: 'Courier New', monospace;
                 margin-bottom: 0.01rem;
             }
 
             .region-size {
-                font-size: 0.15rem;
+                font-size: @text-size;
                 opacity: 0.8;
             }
 
@@ -229,12 +231,13 @@ body {
 // Memory Data (3/7 of viewport width)
 .memory-data {
     width: calc(100vw * 3 / 7);
+    height: fit-content;
     background: white;
     border-radius: 0.08rem;
     box-shadow: 0 0.02rem 0.04rem rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
-    font-size: 0.25rem;
+    font-size: @text-size;
 
     body.dark-theme & {
         background: @dark-theme[bg];
@@ -247,7 +250,7 @@ body {
         background: #f8f9fa;
         border-bottom: 1px solid @border-color;
         font-weight: bold;
-        font-size: 0.2rem;
+        font-size: @text-size;
 
         body.dark-theme & {
             background: #262626;
@@ -265,12 +268,12 @@ body {
     }
 
     .data-container {
-        height: auto;
+        height: fit-content;
         max-height: none;
         overflow: visible;
         padding: 0.1rem 0.2rem;
         font-family: 'Courier New', monospace;
-        font-size: 0.2rem;
+        font-size: @text-size;
         line-height: 1.4;
 
         .data-row {
@@ -397,7 +400,7 @@ body {
     .loading {
         .flex-center();
         height: 100%;
-        font-size: 1.2em;
+        font-size: @text-size;
         color: #666;
 
         body.dark-theme & {
@@ -409,12 +412,15 @@ body {
 // Register Layout (Remaining 3/7 of viewport width)
 .register-layout {
     width: calc(100vw * 3 / 7);
+    height: 100vh;
     background: white;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    position: sticky;
+    top: @down-box-sticky-top;
 
     body.dark-theme & {
         background: @dark-theme[bg];
@@ -437,7 +443,7 @@ body {
         h3 {
             margin: 0;
             color: @light-theme[primary];
-            font-size: 1.1em;
+            font-size: @text-size;
 
             body.dark-theme & {
                 color: @dark-theme[primary];
@@ -445,7 +451,7 @@ body {
         }
 
         .register-stats {
-            font-size: 0.9em;
+            font-size: @text-size;
             color: @light-theme[secondary];
 
             body.dark-theme & {
@@ -467,9 +473,6 @@ body {
         background: #f8f9fa;
         border-bottom: 2px solid @light-theme[primary];
         padding: 0.05rem 0;
-        position: sticky;
-        top: 0;
-        z-index: 100;
 
         body.dark-theme & {
             background: #262626;
@@ -479,14 +482,14 @@ body {
         .bit-scale-row {
             display: flex;
             align-items: center;
-            font-size: 0.15rem;
+            font-size: @text-size;
             font-weight: bold;
 
             .offset-label {
                 width: 0.6rem;
                 text-align: center;
                 color: @light-theme[primary];
-                font-size: 0.2rem;
+                font-size: @text-size;
 
                 body.dark-theme & {
                     color: @dark-theme[primary];
@@ -502,7 +505,7 @@ body {
 
                 .bit-number {
                     color: @light-theme[secondary];
-                    font-size: 0.15rem;
+                    font-size: @text-size;
                     padding: 0.02rem 0;
 
                     body.dark-theme & {
@@ -548,12 +551,9 @@ body {
                 background: #f8f9fa;
                 border-right: 1px solid #e0e0e0;
                 font-family: 'Courier New', monospace;
-                font-size: 0.15rem;
+                font-size: @text-size;
                 font-weight: bold;
                 color: @light-theme[primary];
-                position: sticky;
-                left: 0;
-                z-index: 5;
 
                 body.dark-theme & {
                     background: #262626;
@@ -574,7 +574,7 @@ body {
                     flex-direction: column;
                     justify-content: center;
                     align-items: center;
-                    font-size: 0.15rem;
+                    font-size: @text-size;
                     text-align: center;
                     border-right: 1px solid #e0e0e0;
                     cursor: pointer;
@@ -626,7 +626,7 @@ body {
 
                     .register-name {
                         font-weight: bold;
-                        font-size: 0.15rem;
+                        font-size: @text-size;
                         margin-bottom: 0.04rem;
                         line-height: 1.1;
                         color: @light-theme[text];
@@ -642,7 +642,7 @@ body {
 
                     .register-value {
                         font-family: 'Courier New', monospace;
-                        font-size: 0.15rem;
+                        font-size: @text-size;
                         font-weight: bold;
                         color: @light-theme[primary];
                         text-align: center;
@@ -664,9 +664,6 @@ body {
         margin-bottom: 0.1rem;
         border-radius: 0.06rem;
         border-left: 4px solid @light-theme[primary];
-        position: sticky;
-        top: 0;
-        z-index: 10;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
         body.dark-theme & {
@@ -678,7 +675,7 @@ body {
         h4 {
             margin: 0 0 0.05rem 0;
             color: @light-theme[primary];
-            font-size: 0.14rem;
+            font-size: @text-size;
 
             body.dark-theme & {
                 color: @dark-theme[primary];
@@ -687,7 +684,7 @@ body {
 
         p {
             margin: 0.02rem 0;
-            font-size: 0.15rem;
+            font-size: @text-size;
             color: @light-theme[secondary];
             line-height: 1.3;
 
@@ -737,7 +734,7 @@ body {
         }
 
         .info-label {
-            font-size: 0.14rem;
+            font-size: @text-size;
             color: @light-theme[primary];
             font-weight: bold;
             user-select: none;
@@ -752,7 +749,7 @@ body {
             border-radius: 0.04rem;
             transition: all 0.3s ease;
             text-align: center;
-            font-size: 0.16rem;
+            font-size: @text-size;
             border: 1px solid #e0e0e0;
             width: 100%;
 
@@ -806,12 +803,14 @@ body {
     position: relative;
     width: 100%;
     height: 0.32rem;
-
+    z-index: 100;
+    
     #deviceSearch {
         position: absolute;
+        z-index: 100;
         width: 100%;
         height: 100%;
-        font-size: 0.12rem;
+        font-size: @text-size;
         padding: 0.06rem;
         border: 1px solid #e0e0e0;
         border-radius: 0.04rem;
@@ -839,18 +838,18 @@ body {
 
     .device-dropdown {
         position: absolute;
+        z-index: 100;
         top: 100%;
         left: 0;
         right: 0;
-        max-height: 2.5rem;
+        max-height: 3rem;
         overflow-y: auto;
         background: @light-theme[bg];
         border: 1px solid #e0e0e0;
         border-top: none;
         border-radius: 0 0 0.04rem 0.04rem;
         box-shadow: 0 0.02rem 0.08rem rgba(0, 0, 0, 0.15);
-        z-index: 1000;
-        display: none;
+        display: none;    
 
         body.dark-theme & {
             background: @dark-theme[bg];
@@ -863,13 +862,15 @@ body {
         }
 
         .device-option {
+            z-index: 100;
+            position: relative;
             padding: 0.06rem 0.08rem;
             cursor: pointer;
-            font-size: 0.1rem;
+            font-size: @text-size;
             color: @light-theme[text];
             border-bottom: 1px solid #f0f0f0;
             transition: all 0.2s ease;
-
+            
             &:hover {
                 background: @light-theme[hover];
             }
@@ -897,7 +898,6 @@ body {
                 color: @light-theme[primary];
                 margin-right: 0.08rem;
                 font-weight: bold;
-
                 body.dark-theme & {
                     color: @dark-theme[primary];
                 }
@@ -905,8 +905,7 @@ body {
 
             .device-desc {
                 color: @light-theme[secondary];
-                font-size: 0.09rem;
-
+                font-size: 0.15rem;
                 body.dark-theme & {
                     color: @dark-theme[secondary];
                 }
