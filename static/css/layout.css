@@ -69,13 +69,13 @@ body.dark-theme .memory-layout .memory-layout-header {
 .memory-layout .memory-layout-header h3 {
   margin: 0;
   color: #399bff;
-  font-size: 0.2rem;
+  font-size: 0.16rem;
 }
 body.dark-theme .memory-layout .memory-layout-header h3 {
   color: #66b3ff;
 }
 .memory-layout .memory-layout-header .memory-stats {
-  font-size: 0.2rem;
+  font-size: 0.16rem;
   color: #666666;
 }
 body.dark-theme .memory-layout .memory-layout-header .memory-stats {
@@ -116,13 +116,13 @@ body.dark-theme .memory-layout .memory-regions-container {
   border: 2px solid white;
 }
 .memory-layout .memory-regions-container .memory-region .region-label {
-  font-size: 0.2rem;
+  font-size: 0.16rem;
   font-weight: bold;
   margin-bottom: 0.02rem;
   line-height: 1.2;
 }
 .memory-layout .memory-regions-container .memory-region .region-address {
-  font-size: 0.2rem;
+  font-size: 0.16rem;
   opacity: 0.9;
   font-family: 'Courier New', monospace;
   margin-bottom: 0.01rem;
@@ -231,10 +231,11 @@ body.dark-theme .memory-data .data-container .data-row .address {
 }
 .memory-data .data-container .data-row .bytes {
   display: flex;
-  gap: 4px;
+  width: fit-content;
+  gap: 6px;
 }
 .memory-data .data-container .data-row .bytes .byte {
-  width: 0.35rem;
+  width: 0.4rem;
   text-align: center;
   font-family: 'Courier New', monospace;
   position: relative;
@@ -488,7 +489,7 @@ body.dark-theme .register-layout .pcie-register-map .register-row .register-offs
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  font-size: 0.2rem;
+  font-size: 0.16rem;
   text-align: center;
   border-right: 1px solid #e0e0e0;
   cursor: pointer;
@@ -545,7 +546,7 @@ body.dark-theme .register-layout .pcie-register-map .register-row .register-fiel
 }
 .register-layout .pcie-register-map .register-row .register-fields .register-field .register-name {
   font-weight: bold;
-  font-size: 0.2rem;
+  font-size: 0.16rem;
   margin-bottom: 0.04rem;
   line-height: 1.1;
   color: #000000;
@@ -559,7 +560,7 @@ body.dark-theme .register-layout .pcie-register-map .register-row .register-fiel
 }
 .register-layout .pcie-register-map .register-row .register-fields .register-field .register-value {
   font-family: 'Courier New', monospace;
-  font-size: 0.2rem;
+  font-size: 0.16rem;
   font-weight: bold;
   color: #399bff;
   text-align: center;
@@ -597,13 +598,6 @@ body.dark-theme .register-layout .selected-block-header h4 {
 }
 body.dark-theme .register-layout .selected-block-header p {
   color: #999999;
-}
-.device-selector {
-  flex: 2 !important;
-  max-width: 4rem;
-}
-.device-selector .selector-item {
-  gap: 0.04rem !important;
 }
 .device-info {
   flex: 1;
@@ -646,7 +640,7 @@ body.dark-theme .register-layout .selected-block-header p {
   border-radius: 0.04rem;
   transition: all 0.3s ease;
   text-align: center;
-  font-size: 0.2rem;
+  font-size: 0.16rem;
   border: 1px solid #e0e0e0;
   width: 100%;
 }
@@ -676,9 +670,12 @@ body.dark-theme .device-info .info-item .info-value:hover {
   border-color: #66b3ff;
   background: #262626;
 }
+.register-selectors .selector-item label {
+  font-size: 0.2rem;
+}
 .device-selector {
   flex: 2 !important;
-  max-width: 4rem;
+  max-width: 5rem;
 }
 .device-selector .selector-item {
   gap: 0.04rem !important;
@@ -686,7 +683,7 @@ body.dark-theme .device-info .info-item .info-value:hover {
 .device-search-container {
   position: relative;
   width: 100%;
-  height: 0.32rem;
+  height: 0.36rem;
   z-index: 100;
 }
 .device-search-container #deviceSearch {
@@ -694,7 +691,7 @@ body.dark-theme .device-info .info-item .info-value:hover {
   z-index: 100;
   width: 100%;
   height: 100%;
-  font-size: 0.2rem;
+  font-size: 0.16rem;
   padding: 0.06rem;
   border: 1px solid #e0e0e0;
   border-radius: 0.04rem;
@@ -744,7 +741,7 @@ body.dark-theme .device-search-container .device-dropdown {
   position: relative;
   padding: 0.06rem 0.08rem;
   cursor: pointer;
-  font-size: 0.2rem;
+  font-size: 0.16rem;
   color: #000000;
   border-bottom: 1px solid #f0f0f0;
   transition: all 0.2s ease;
@@ -777,7 +774,7 @@ body.dark-theme .device-search-container .device-dropdown .device-option .device
 }
 .device-search-container .device-dropdown .device-option .device-desc {
   color: #666666;
-  font-size: 0.15rem;
+  font-size: 0.16rem;
 }
 body.dark-theme .device-search-container .device-dropdown .device-option .device-desc {
   color: #999999;

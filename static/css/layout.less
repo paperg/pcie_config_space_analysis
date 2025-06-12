@@ -6,6 +6,7 @@
 @border-color: #ddd;
 @hover-brightness: 1.1;
 @text-size: 0.2rem;
+@text-size-2: 0.16rem;
 @down-box-sticky-top: 2rem;
 // Theme Colors (consistent with index.less)
 @light-theme: {
@@ -129,7 +130,7 @@ body {
         h3 {
             margin: 0;
             color: @light-theme[primary];
-            font-size: @text-size;
+            font-size: @text-size-2;
 
             body.dark-theme & {
                 color: @dark-theme[primary];
@@ -137,7 +138,7 @@ body {
         }
 
         .memory-stats {
-            font-size: @text-size;
+            font-size: @text-size-2;
             color: @light-theme[secondary];
 
             body.dark-theme & {
@@ -184,14 +185,14 @@ body {
             }
 
             .region-label {
-                font-size: @text-size;
+                font-size: @text-size-2;
                 font-weight: bold;
                 margin-bottom: 0.02rem;
                 line-height: 1.2;
             }
 
             .region-address {
-                font-size: @text-size;
+                font-size: @text-size-2;
                 opacity: 0.9;
                 font-family: 'Courier New', monospace;
                 margin-bottom: 0.01rem;
@@ -305,10 +306,11 @@ body {
 
             .bytes {
                 display: flex;
-                gap: 4px;
+                width: fit-content;
+                gap: 6px;
 
                 .byte {
-                    width: 0.35rem;
+                    width: 0.4rem;
                     text-align: center;
                     font-family: 'Courier New', monospace;
                     position: relative;
@@ -574,7 +576,7 @@ body {
                     flex-direction: column;
                     justify-content: center;
                     align-items: center;
-                    font-size: @text-size;
+                    font-size: @text-size-2;
                     text-align: center;
                     border-right: 1px solid #e0e0e0;
                     cursor: pointer;
@@ -626,7 +628,7 @@ body {
 
                     .register-name {
                         font-weight: bold;
-                        font-size: @text-size;
+                        font-size: @text-size-2;
                         margin-bottom: 0.04rem;
                         line-height: 1.1;
                         color: @light-theme[text];
@@ -642,7 +644,7 @@ body {
 
                     .register-value {
                         font-family: 'Courier New', monospace;
-                        font-size: @text-size;
+                        font-size: @text-size-2;
                         font-weight: bold;
                         color: @light-theme[primary];
                         text-align: center;
@@ -695,15 +697,6 @@ body {
     }
 }
 
-// Device Search Styles
-.device-selector {
-    flex: 2 !important;
-    max-width: 4rem;
-    
-    .selector-item {
-        gap: 0.04rem !important;
-    }
-}
 
 // Device Info (override register-info styles)
 .device-info {
@@ -749,7 +742,7 @@ body {
             border-radius: 0.04rem;
             transition: all 0.3s ease;
             text-align: center;
-            font-size: @text-size;
+            font-size: @text-size-2;
             border: 1px solid #e0e0e0;
             width: 100%;
 
@@ -789,11 +782,18 @@ body {
     }
 }
 
+.register-selectors {
+    .selector-item {
+        label {
+            font-size: @text-size;
+        }
+    }
+}
+
 // Device Selector Styles  
 .device-selector {
     flex: 2 !important;
-    max-width: 4rem;
-    
+    max-width: 5rem;
     .selector-item {
         gap: 0.04rem !important;
     }
@@ -802,7 +802,7 @@ body {
 .device-search-container {
     position: relative;
     width: 100%;
-    height: 0.32rem;
+    height: 0.36rem;
     z-index: 100;
     
     #deviceSearch {
@@ -810,7 +810,7 @@ body {
         z-index: 100;
         width: 100%;
         height: 100%;
-        font-size: @text-size;
+        font-size: @text-size-2;
         padding: 0.06rem;
         border: 1px solid #e0e0e0;
         border-radius: 0.04rem;
@@ -866,7 +866,7 @@ body {
             position: relative;
             padding: 0.06rem 0.08rem;
             cursor: pointer;
-            font-size: @text-size;
+            font-size: @text-size-2;
             color: @light-theme[text];
             border-bottom: 1px solid #f0f0f0;
             transition: all 0.2s ease;
@@ -905,7 +905,7 @@ body {
 
             .device-desc {
                 color: @light-theme[secondary];
-                font-size: 0.15rem;
+                font-size: @text-size-2;
                 body.dark-theme & {
                     color: @dark-theme[secondary];
                 }
