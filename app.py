@@ -1,4 +1,7 @@
 import traceback
+import uvicorn
+import argparse
+
 from typing import Optional, List
 
 from fastapi import FastAPI, Request, HTTPException, Query
@@ -303,16 +306,6 @@ async def set_register(request: RegisterUpdateRequest):
             except KeyError:
                 pass
 
-        if not target_register and offset is not None:
-            offset_int = int(offset, 16) if isinstance(offset, str) and offset.startswith('0x') else int(offset)
-            for reg_struct in current_config_space_parser.all_structures:
-                for reg in reg_struct.registers:
-                    if reg.offset == offset_int:
-                        target_register = reg
-                        break
-                if target_register:
-                    break
-
         if not target_register:
             raise HTTPException(status_code=404, detail="Register not found")
 
@@ -335,5 +328,61 @@ async def set_register(request: RegisterUpdateRequest):
 
 
 if __name__ == '__main__':
-    import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    
+    parser = argparse.ArgumentParser(description="PCIe Memory Layout Viewer & Register Tool")
+    parser.add_argument("-s", "--server", action="store_true", help="Start the web server")
+    parser.add_argument("-b", "--bdf", type=str, help="Specify PCIe BDF (e.g. 15:00.0)")
+    parser.add_argument("-r", "--register", type=str, help="Register name to query")
+    parser.add_argument("-f", "--field", type=str, help="Field name inside register")
+
+    args = parser.parse_args()
+
+    if args.server:
+        # 启动 FastAPI Web 服务器
+        uvicorn.run(app, host="127.0.0.1", port=8000)
+    elif args.bdf:
+        try:
+            current_data_generator = PCIeDataFromOSGenerator(args.bdf)
+            current_config_space_parser = PCIeRegisterParser(current_data_generator)
+
+            if args.register:
+                try:
+                    reg_name = str(args.register)
+                    reg = current_config_space_parser[reg_name]
+                    if isinstance(reg, list):
+                        for r in reg:
+                            if isinstance(r, common.Register):
+                                reg = r
+                                break
+                    print(reg)
+
+                except KeyError:
+                    print(f"Register '{args.register}' not found in BDF {args.bdf}")
+                    
+            elif args.field:
+                try:
+                    field_name = str(args.field)
+                    field = current_config_space_parser[field_name]
+                    if isinstance(field, list):
+                        for f in field:
+                            if isinstance(f, common.Field):
+                                field = f
+                                break
+                    print(field)
+                except KeyError:
+                    print(f"Field '{args.field}' not found in register '{args.register}'")
+            else:
+                print(f"Available registers in BDF {args.bdf}:")
+                for struct_key in current_config_space_parser.all_structures_map:
+                    struct = current_config_space_parser.all_structures_map[struct_key]
+                    print(struct.name)
+                    for reg in struct.registers:
+                        print(reg)
+                        for field in reg.fields:
+                            print(field)
+
+        except Exception as e:
+            print(f"Error initializing parser for BDF {args.bdf}: {e}")
+
+    else:
+        parser.print_help()
