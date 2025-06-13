@@ -1,5 +1,5 @@
 /****/
-$(document).ready(function () {
+$(document).ready(function() {
     // Global variable declarations
     let currentRegisterValue = 0;
     let initialRegisterValue = 0;
@@ -222,7 +222,7 @@ $(document).ready(function () {
             </div>
         `);
 
-        backButton.on('click', function () {
+        backButton.on('click', function() {
             // Use browser back navigation (like browser back button)
             window.history.back();
         });
@@ -302,7 +302,7 @@ $(document).ready(function () {
     }
 
     // Theme toggle button click event
-    themeToggle.on('click', function () {
+    themeToggle.on('click', function() {
         const body = $('body');
         if (body.hasClass('dark-theme')) {
             body.removeClass('dark-theme');
@@ -317,7 +317,7 @@ $(document).ready(function () {
     checkUrlParameters();
 
     // Initialize based on whether we have server data
-    $(document).ready(function () {
+    $(document).ready(function() {
         if (window.serverData && (window.serverData.name || window.serverData.registerName)) {
             // We have server data, hide the register selectors
             hideRegisterSelectors();
@@ -337,7 +337,7 @@ $(document).ready(function () {
     // Add debounce function
     function debounce(func, wait) {
         let timeout;
-        return function () {
+        return function() {
             const context = this;
             const args = arguments;
             clearTimeout(timeout);
@@ -364,7 +364,7 @@ $(document).ready(function () {
     // Use debounce for resize event
     const debouncedResize = debounce(handleResize, 100);
 
-    $(window).resize(function () {
+    $(window).resize(function() {
         debouncedResize();
     });
 
@@ -381,7 +381,7 @@ $(document).ready(function () {
 
         // Get all bit field ranges
         const fieldRanges = [];
-        fieldNames.each(function () {
+        fieldNames.each(function() {
             const start = parseInt($(this).attr('data-field-start'));
             const end = parseInt($(this).attr('data-field-end'));
             fieldRanges.push({
@@ -514,15 +514,15 @@ $(document).ready(function () {
                     hitArea.style.cursor = "pointer";
 
                     // Add event listeners to hit area
-                    $(hitArea).on('mouseenter', function () {
+                    $(hitArea).on('mouseenter', function() {
                         const start = parseInt($(this).closest('.field-lines').attr('data-field-start'));
                         const end = parseInt($(this).closest('.field-lines').attr('data-field-end'));
                         highlightField(start, end);
-                    }).on('mouseleave', function () {
+                    }).on('mouseleave', function() {
                         const start = parseInt($(this).closest('.field-lines').attr('data-field-start'));
                         const end = parseInt($(this).closest('.field-lines').attr('data-field-end'));
                         clearFieldHighlight(start, end);
-                    }).on('click', function (e) {
+                    }).on('click', function(e) {
                         if (e.ctrlKey) {
                             // Ctrl+click: scroll to description
                             const anchorId = `bit-field-${start}-${end}`;
@@ -534,7 +534,7 @@ $(document).ready(function () {
                                 });
                                 $(targetElement).addClass('highlight-description')
                                     .delay(1000)
-                                    .queue(function () {
+                                    .queue(function() {
                                         $(this).removeClass('highlight-description').dequeue();
                                     });
                             }
@@ -588,10 +588,10 @@ $(document).ready(function () {
                 .attr('id', `bit-field-${start}-${end}`)
                 .attr('data-field-start', start)
                 .attr('data-field-end', end)
-                .on('mouseenter', function () {
+                .on('mouseenter', function() {
                     highlightField(start, end);
                 })
-                .on('mouseleave', function () {
+                .on('mouseleave', function() {
                     clearFieldHighlight(start, end);
                 });
 
@@ -609,7 +609,7 @@ $(document).ready(function () {
                 .addClass('bit-value')
                 .css('cursor', 'pointer')
                 .html(valueHtml)
-                .on('click', function (e) {
+                .on('click', function(e) {
                     showFieldInputDialog(start, end, info.field || '', fieldValue);
                 });
 
@@ -689,7 +689,7 @@ $(document).ready(function () {
                 .addClass('bit-box')
                 .attr('data-bit', i)
                 .text('0')
-                .on('click', function (e) {
+                .on('click', function(e) {
                     // Check if Ctrl key is pressed
                     if (e.ctrlKey) {
                         // Find the bit field containing this bit
@@ -709,7 +709,7 @@ $(document).ready(function () {
                                     // Add temporary highlight effect
                                     $(targetElement).addClass('highlight-description')
                                         .delay(1000)
-                                        .queue(function () {
+                                        .queue(function() {
                                             $(this).removeClass('highlight-description').dequeue();
                                         });
                                 }
@@ -767,7 +767,7 @@ $(document).ready(function () {
                 });
 
             // Add mouse hover event
-            bitBox.on('mouseenter', function () {
+            bitBox.on('mouseenter', function() {
                 const bitIndex = $(this).data('bit');
 
                 // Find all bit fields containing the current bit
@@ -824,7 +824,7 @@ $(document).ready(function () {
                     // Highlight current bit field name
                     $(`.bit-name[data-field-start="${currentStart}"][data-field-end="${currentEnd}"]`).addClass('highlight');
                 }
-            }).on('mousemove', function (e) {
+            }).on('mousemove', function(e) {
                 // Update tooltip position on mouse move
                 if (tooltip.hasClass('show')) {
                     const boxRect = this.getBoundingClientRect();
@@ -836,7 +836,7 @@ $(document).ready(function () {
                         left: boxRect.left + scrollLeft - (tooltip.width() / 2) + (boxRect.width / 2)
                     });
                 }
-            }).on('mouseleave', function () {
+            }).on('mouseleave', function() {
                 // Hide tooltip
                 tooltip.removeClass('show');
                 // Remove all bit field name highlights
@@ -866,15 +866,15 @@ $(document).ready(function () {
                 .html(`${field}`);
 
             // Add mouse hover event
-            fieldName.on('mouseenter', function () {
+            fieldName.on('mouseenter', function() {
                 const start = parseInt($(this).attr('data-field-start'));
                 const end = parseInt($(this).attr('data-field-end'));
                 highlightField(start, end);
-            }).on('mouseleave', function () {
+            }).on('mouseleave', function() {
                 const start = parseInt($(this).attr('data-field-start'));
                 const end = parseInt($(this).attr('data-field-end'));
                 clearFieldHighlight(start, end);
-            }).on('click', function (e) {
+            }).on('click', function(e) {
                 // Get field range from data attributes
                 const start = parseInt($(this).attr('data-field-start'));
                 const end = parseInt($(this).attr('data-field-end'));
@@ -894,7 +894,7 @@ $(document).ready(function () {
                         // Add temporary highlight effect
                         $(targetElement).addClass('highlight-description')
                             .delay(1000)
-                            .queue(function () {
+                            .queue(function() {
                                 $(this).removeClass('highlight-description').dequeue();
                             });
                     }
@@ -1109,7 +1109,7 @@ $(document).ready(function () {
                     $('<button>')
                     .addClass('error-dialog-button')
                     .text('Confirm')
-                    .on('click', function () {
+                    .on('click', function() {
                         dialog.remove();
                         // Clear all marks and update display
                         clearModifiedBits();
@@ -1240,7 +1240,7 @@ $(document).ready(function () {
             </div>
         `);
 
-        dialog.find('.success-dialog-button').on('click', function () {
+        dialog.find('.success-dialog-button').on('click', function() {
             dialog.remove();
         });
 
@@ -1394,7 +1394,7 @@ $(document).ready(function () {
         .appendTo('head');
 
     // Update event listeners
-    $(document).ready(function () {
+    $(document).ready(function() {
         const modifyBtn = $('#modify-register-btn');
         if (modifyBtn) {
             modifyBtn.on('click', applyRegisterChanges);
@@ -1404,11 +1404,11 @@ $(document).ready(function () {
     });
 
     // Add event listeners for register value display editing
-    $(document).ready(function () {
+    $(document).ready(function() {
         const registerValueDisplay = $('#register-value-display');
 
         // Make the display editable on double click
-        registerValueDisplay.on('dblclick', function () {
+        registerValueDisplay.on('dblclick', function() {
             const currentValue = $(this).text();
             // Remove '0x' prefix for editing
             const valueWithoutPrefix = currentValue.substring(2);
@@ -1436,7 +1436,7 @@ $(document).ready(function () {
         });
 
         // Handle value changes
-        $(document).on('blur', '#register-value-display input', function () {
+        $(document).on('blur', '#register-value-display input', function() {
             const input = $(this);
             const display = input.parent();
             const newValue = input.val().trim();
@@ -1473,7 +1473,7 @@ $(document).ready(function () {
         });
 
         // Handle Enter key
-        $(document).on('keydown', '#register-value-display input', function (e) {
+        $(document).on('keydown', '#register-value-display input', function(e) {
             if (e.key === 'Enter') {
                 $(this).blur();
             } else if (e.key === 'Escape') {
@@ -1834,7 +1834,7 @@ $(document).ready(function () {
                         $('<button>')
                         .addClass('input-dialog-button confirm')
                         .text('Confirm')
-                        .on('click', function () {
+                        .on('click', function() {
                             const input = dialog.find('.input-dialog-input');
                             const error = dialog.find('.input-dialog-error');
                             const value = input.val().trim().toUpperCase();
@@ -1893,7 +1893,7 @@ $(document).ready(function () {
                         $('<button>')
                         .addClass('input-dialog-button cancel')
                         .text('Cancel')
-                        .on('click', function () {
+                        .on('click', function() {
                             dialog.remove();
                         })
                     )
@@ -1909,7 +1909,7 @@ $(document).ready(function () {
         input[0].select();
 
         // Handle Enter and Escape keys
-        input.on('keydown', function (e) {
+        input.on('keydown', function(e) {
             if (e.key === 'Enter') {
                 dialog.find('.input-dialog-button.confirm').click();
             } else if (e.key === 'Escape') {

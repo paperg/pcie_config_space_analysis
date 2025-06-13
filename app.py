@@ -261,7 +261,7 @@ from pydantic import BaseModel
 class RegisterUpdateRequest(BaseModel):
     bdf: str
     value: int
-    offset: Optional[str] = None
+    offset: Optional[int] = None
     name: Optional[str] = None
 
 
@@ -292,7 +292,14 @@ async def set_register(request: RegisterUpdateRequest):
 
         if name:
             try:
-                target_register = current_config_space_parser[name]
+                target_registers = current_config_space_parser[name]
+                if isinstance(target_registers, list):
+                    for register in target_registers:
+                        if register.offset == offset:
+                            target_register = register
+                            break
+                else:
+                    target_register = target_registers
             except KeyError:
                 pass
 
