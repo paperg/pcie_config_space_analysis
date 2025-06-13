@@ -289,6 +289,21 @@ body.dark-theme .line-dashed.highlight {
 .bit-box.modified.bit-1 {
   background-color: rgba(255, 152, 0, 0.15);
 }
+.bit-box.bit-readonly {
+  background-color: #f5f5f5;
+  border-color: #ddd;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+.bit-box.bit-readonly:hover {
+  background-color: #f5f5f5;
+  border-color: #ddd;
+}
+.bit-box.bit-readonly.bit-1 {
+  background-color: #e0e0e0;
+  border-color: #ccc;
+  color: #666;
+}
 body.dark-theme .bit-box {
   border-color: #ffffff;
 }
@@ -322,6 +337,20 @@ body.dark-theme .bit-box.bit-0:hover {
 body.dark-theme .bit-box.bit-1:hover {
   background-color: #1a3a5f;
   border-color: #4d8fcc;
+}
+body.dark-theme .bit-box.bit-readonly {
+  background-color: #2a2a2a;
+  border-color: #444;
+  opacity: 0.8;
+}
+body.dark-theme .bit-box.bit-readonly:hover {
+  background-color: #2a2a2a;
+  border-color: #444;
+}
+body.dark-theme .bit-box.bit-readonly.bit-1 {
+  background-color: #333;
+  border-color: #444;
+  color: #999;
 }
 .register-controls {
   display: flex;

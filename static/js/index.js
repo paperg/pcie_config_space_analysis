@@ -652,10 +652,15 @@ $(document).ready(function() {
             fieldRanges.push({
                 start,
                 end,
-                field: info.field || ''
+                field: info.field || '',
+                attributes: info.attributes || 'RW'
             });
-            for (let i = start; i <= end; i++) {
-                bitFieldMap.set(i, info.field || '');
+
+            for (let i = end; i <= start; i++) {
+                bitFieldMap.set(i, {
+                    field: info.field || '',
+                    attributes: info.attributes || 'RW'
+                });
             }
         });
 
@@ -684,12 +689,26 @@ $(document).ready(function() {
                 })
                 .text(i);
 
+            // Get bit field info
+            const bitFieldInfo = bitFieldMap.get(i);
+            const isReadOnly = bitFieldInfo &&
+                (Array.isArray(bitFieldInfo.attributes) ?
+                    bitFieldInfo.attributes.includes('RO') :
+                    bitFieldInfo.attributes === 'RO');
             // Create bit-box
             const bitBox = $('<div>')
                 .addClass('bit-box')
                 .attr('data-bit', i)
-                .text('0')
-                .on('click', function(e) {
+                .text('0');
+
+            // Add read-only class if applicable
+            if (isReadOnly) {
+                bitBox.addClass('bit-readonly');
+            }
+
+            // Only add click handler if not read-only
+            if (!isReadOnly) {
+                bitBox.on('click', function(e) {
                     // Check if Ctrl key is pressed
                     if (e.ctrlKey) {
                         // Find the bit field containing this bit
@@ -745,7 +764,6 @@ $(document).ready(function() {
                         // If value is restored to original, remove modified mark
                         modifiedBits.delete(bitIndex);
                         $(`.bit-box[data-bit="${bitIndex}"]`).removeClass('modified');
-
                     } else {
                         // If value is different from original, add modified mark
                         modifiedBits.add(bitIndex);
@@ -765,6 +783,7 @@ $(document).ready(function() {
                     // Update apply button state
                     updateApplyButtonState();
                 });
+            }
 
             // Add mouse hover event
             bitBox.on('mouseenter', function() {
@@ -779,7 +798,8 @@ $(document).ready(function() {
                 fieldRanges.forEach(({
                     start,
                     end,
-                    field
+                    field,
+                    attributes
                 }) => {
                     if (bitIndex >= end && bitIndex <= start) {
                         // Find corresponding bit field info
@@ -1577,7 +1597,6 @@ $(document).ready(function() {
     function updateRegister(registerValue, bitCount, bitRanges = {}, registerInfo = {}) {
         // Clear modified bits when register is updated
         clearModifiedBits();
-
         // Update global variables
         currentRegisterValue = registerValue;
         initialRegisterValue = registerValue;

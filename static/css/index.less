@@ -381,6 +381,24 @@ img {
         }
     }
 
+    &.bit-readonly {
+        background-color: #f5f5f5;
+        border-color: #ddd;
+        cursor: not-allowed;
+        opacity: 0.8;
+
+        &:hover {
+            background-color: #f5f5f5;
+            border-color: #ddd;
+        }
+
+        &.bit-1 {
+            background-color: #e0e0e0;
+            border-color: #ccc;
+            color: #666;
+        }
+    }
+
     body.dark-theme & {
         border-color: @dark-theme[border];
 
@@ -423,6 +441,23 @@ img {
         &.bit-1:hover {
             background-color: #1a3a5f;
             border-color: #4d8fcc;
+        }
+
+        &.bit-readonly {
+            background-color: #2a2a2a;
+            border-color: #444;
+            opacity: 0.8;
+
+            &:hover {
+                background-color: #2a2a2a;
+                border-color: #444;
+            }
+
+            &.bit-1 {
+                background-color: #333;
+                border-color: #444;
+                color: #999;
+            }
         }
     }
 }
