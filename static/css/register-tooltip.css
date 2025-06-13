@@ -209,7 +209,7 @@ body.dark-theme .tooltip-reg-details span {
 .block-info {
     display: flex;
     gap: 12px;
-    font-size: 11px;
+    font-size: 0.12rem;
     color: var(--text-secondary);
 }
 
@@ -245,7 +245,7 @@ body.dark-theme .tooltip-reg-details span {
     display: flex;
     gap: 8px;
     margin-bottom: 4px;
-    font-size: 11px;
+    font-size: 0.1rem;
 }
 
 .reg-details span {
@@ -267,7 +267,7 @@ body.dark-theme .tooltip-reg-details span {
     display: flex;
     justify-content: space-between;
     gap: 8px;
-    font-size: 10px;
+    font-size: 0.1rem;
     color: var(--text-tertiary);
     padding: 2px 4px;
     background: var(--bg-tertiary);
