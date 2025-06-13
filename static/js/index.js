@@ -233,10 +233,8 @@ $(document).ready(function() {
         if (!$('#back-btn-styles').length) {
             $('head').append(`
                 <style id="back-btn-styles">
-                    .back-button-container {
-                        position: absolute;
+                    .back-button-container {  
                         right: 0.2rem;
-                        top: 50%;
                         transform: translateY(-50%);
                         z-index: 10;
                     }
