@@ -1,305 +1,316 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const dataContainer = document.getElementById('data-container');
-    const loadingIndicator = document.getElementById('loading');
-    const registerMap = document.getElementById('register-map');
-    const registerCount = document.getElementById('register-count');
-    const deviceSearch = document.getElementById('deviceSearch');
-    const deviceDropdown = document.getElementById('deviceDropdown');
+            const dataContainer = document.getElementById('data-container');
+            const loadingIndicator = document.getElementById('loading');
+            const registerMap = document.getElementById('register-map');
+            const registerCount = document.getElementById('register-count');
+            const deviceSearch = document.getElementById('deviceSearch');
+            const deviceDropdown = document.getElementById('deviceDropdown');
 
-    // Theme toggle functionality (similar to index.js)
-    const themeToggle = $('#themeToggle');
+            // Theme toggle functionality (similar to index.js)
+            const themeToggle = $('#themeToggle');
 
-    // Responsive font size adjustment
-    function setFontSize() {
-        const whei = $(window).width();
-        $("html").css({
-            fontSize: whei / 20
-        });
-    }
-
-    // Initialize font size
-    setFontSize();
-
-    // Handle window resize
-    $(window).resize(function () {
-        setFontSize();
-    });
-
-    // Check theme setting in local storage
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-        $('body').addClass('dark-theme');
-    }
-
-    // Theme toggle button click event
-    themeToggle.on('click', function () {
-        const body = $('body');
-        if (body.hasClass('dark-theme')) {
-            body.removeClass('dark-theme');
-            localStorage.setItem('theme', 'light');
-        } else {
-            body.addClass('dark-theme');
-            localStorage.setItem('theme', 'dark');
-        }
-    });
-
-    // Current state
-    let currentRegion = null;
-    let currentRegisterData = []; // Array for register blocks
-    let currentRawData = []; // Array for raw memory data
-    let pcieDevices = [];
-    let selectedDevice = null;
-    let registerBlocks = [];
-    let selectedRegisterBlock = null;
-    let memoryRegions = [];
-    let currentRegionData = null;
-
-    // Load PCIe devices from lspci.txt
-    async function loadPCIeDevices() {
-        try {
-            const response = await fetch('/api/device');
-            if (response.ok) {
-                const jsonData = await response.json();
-                console.log('Loaded devices:', jsonData);
-                pcieDevices = jsonData.map(device => ({
-                    bdf: device.bdf,
-                    description: device.description || device.name || 'Unknown Device'
-                }));
-            }
-        } catch (error) {
-            console.error('Error loading PCIe devices:', error);
-            // Fallback to sample devices
-            pcieDevices = [{
-                bdf: '00:00.0',
-                description: 'Host bridge: Intel Corporation Ice Lake Host Bridge'
-            }];
-        }
-        populateDeviceDropdown();
-    }
-
-    // Populate device dropdown
-    function populateDeviceDropdown() {
-        deviceDropdown.innerHTML = '';
-        pcieDevices.forEach(device => {
-            const option = document.createElement('div');
-            option.className = 'device-option';
-            option.dataset.bdf = device.bdf;
-            option.innerHTML = `<span class="device-bdf">${device.bdf}</span> <span class="device-desc">${device.description}</span>`;
-            option.addEventListener('click', () => selectDevice(device));
-            deviceDropdown.appendChild(option);
-        });
-    }
-
-    // Filter devices based on search
-    function filterDevices(searchTerm) {
-        const filteredDevices = pcieDevices.filter(device =>
-            device.bdf.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            device.description.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-
-        deviceDropdown.innerHTML = '';
-        filteredDevices.forEach(device => {
-            const option = document.createElement('div');
-            option.className = 'device-option';
-            option.dataset.bdf = device.bdf;
-            option.innerHTML = `<span class="device-bdf">${device.bdf}</span> <span class="device-desc">${device.description}</span>`;
-            option.addEventListener('click', () => selectDevice(device));
-            deviceDropdown.appendChild(option);
-        });
-    }
-
-    // Select device
-    function selectDevice(device) {
-        selectedDevice = device;
-        deviceSearch.value = `${device.bdf} - ${device.description}`;
-        deviceDropdown.classList.remove('show');
-
-        // Update device info display
-        document.getElementById('device-name-value').textContent = device.description;
-        document.getElementById('device-bdf-value').textContent = device.bdf;
-
-        // Load device config space
-        loadDeviceConfigSpace(device.bdf);
-    }
-
-    // Device search event listeners with keyboard navigation
-    let selectedOptionIndex = -1;
-    let currentOptions = [];
-
-    const updateSelectedOption = (newIndex) => {
-        // Remove previous selection
-        const prevSelected = deviceDropdown.querySelector('.device-option.selected');
-        if (prevSelected) {
-            prevSelected.classList.remove('selected');
-        }
-
-        // Update index with cyclic bounds checking
-        if (currentOptions.length > 0) {
-            // Handle cyclic navigation
-            if (newIndex >= currentOptions.length) {
-                selectedOptionIndex = 0; // Wrap to first option
-            } else if (newIndex < 0) {
-                selectedOptionIndex = currentOptions.length - 1; // Wrap to last option
-            } else {
-                selectedOptionIndex = newIndex;
-            }
-
-            const selectedOption = currentOptions[selectedOptionIndex];
-            selectedOption.classList.add('selected');
-
-            // Scroll into view if needed
-            selectedOption.scrollIntoView({
-                block: 'nearest'
-            });
-        }
-    };
-
-    const refreshCurrentOptions = () => {
-        // Clear any previous keyboard selections
-        const prevSelected = deviceDropdown.querySelector('.device-option.selected');
-        if (prevSelected) {
-            prevSelected.classList.remove('selected');
-        }
-
-        currentOptions = Array.from(deviceDropdown.querySelectorAll('.device-option'));
-        selectedOptionIndex = -1;
-
-        console.log('Refreshed current options:', currentOptions.length, 'devices available');
-    };
-
-    deviceSearch.addEventListener('input', (e) => {
-        const searchTerm = e.target.value;
-        if (searchTerm.length > 0) {
-            filterDevices(searchTerm);
-            deviceDropdown.classList.add('show');
-        } else {
-            populateDeviceDropdown();
-            deviceDropdown.classList.add('show');
-        }
-        refreshCurrentOptions();
-    });
-
-    deviceSearch.addEventListener('keydown', (e) => {
-        if (!deviceDropdown.classList.contains('show')) return;
-
-        switch (e.key) {
-            case 'ArrowDown':
-                e.preventDefault();
-                if (currentOptions.length > 0) {
-                    // If no option is selected, start from -1 so next will be 0
-                    const nextIndex = selectedOptionIndex === -1 ? 0 : selectedOptionIndex + 1;
-                    updateSelectedOption(nextIndex);
-                }
-                break;
-            case 'ArrowUp':
-                e.preventDefault();
-                if (currentOptions.length > 0) {
-                    // If no option is selected, start from last option
-                    const nextIndex = selectedOptionIndex === -1 ? currentOptions.length - 1 : selectedOptionIndex - 1;
-                    updateSelectedOption(nextIndex);
-                }
-                break;
-            case 'Enter':
-                e.preventDefault();
-                if (selectedOptionIndex >= 0 && selectedOptionIndex < currentOptions.length) {
-                    const selectedOption = currentOptions[selectedOptionIndex];
-                    const bdf = selectedOption.dataset.bdf;
-                    const device = pcieDevices.find(d => d.bdf === bdf);
-                    if (device) {
-                        selectDevice(device);
-                    }
-                }
-                break;
-            case 'Escape':
-                deviceDropdown.classList.remove('show');
-                selectedOptionIndex = -1;
-                break;
-        }
-    });
-
-    deviceSearch.addEventListener('focus', () => {
-        deviceDropdown.classList.add('show');
-        refreshCurrentOptions();
-    });
-
-    deviceSearch.addEventListener('blur', () => {
-        // Delay hiding to allow clicks on dropdown
-        setTimeout(() => {
-            deviceDropdown.classList.remove('show');
-            selectedOptionIndex = -1;
-        }, 200);
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.device-search-container')) {
-            deviceDropdown.classList.remove('show');
-            selectedOptionIndex = -1;
-        }
-    });
-
-
-
-    // 格式化地址为4位十六进制 (改为2字节显示)
-    const formatAddress = (address) => {
-        return address.toString(16).padStart(4, '0').toUpperCase();
-    };
-
-    // 格式化字节为2位十六进制
-    const formatByte = (byte) => {
-        return byte.toString(16).padStart(2, '0').toUpperCase();
-    };
-
-    // Track the last hovered register block
-    let lastHoveredRegisterBlock = null;
-
-    // Generate memory layout
-    async function generateMemoryLayout(regionData) {
-        const container = document.getElementById('memory-regions-container');
-        if (!container) return;
-
-        container.innerHTML = '';
-
-        try {
-            console.log('Memory region data:', regionData);
-            const memoryRegions = regionData.regions || [];
-
-            // Create memory regions display (even if no regions from API)
-            if (memoryRegions.length === 0) {
-                return;
-            }
-
-            // Sort by start address (lowest first, will be reversed by CSS)
-            memoryRegions.sort((a, b) => a.startAddress - b.startAddress);
-
-            // Calculate total memory span
-            const maxAddress = Math.max(...memoryRegions.map(r => r.startAddress + r.size));
-            const minAddress = Math.min(...memoryRegions.map(r => r.startAddress));
-            const totalSpan = maxAddress - minAddress || 0x1000; // Fallback size
-            console.log('Total span:', totalSpan);
-            console.log('Memory regions:', memoryRegions);
-            memoryRegions.forEach((region, index) => {
-                const regionDiv = document.createElement('div');
-                regionDiv.className = `memory-region ${region.type === 'reserved' ? 'reserved' : `region-${index % 8}`}`;
-                regionDiv.dataset.region = region.type;
-
-                // Calculate relative height based on size
-                const relativeHeight = totalSpan > 0 ? (region.size / totalSpan) * 100 : 100;
-                regionDiv.style.height = `${Math.max(relativeHeight, 10)}%`; // Minimum 10% height
-
-                regionDiv.innerHTML = `
-                <div class="region-label">${region.name}</div>
-                <div class="region-address">0x${region.startAddress.toString(16).padStart(8, '0').toUpperCase()} - 0x${(region.startAddress + region.size).toString(16).padStart(8, '0').toUpperCase()}</div>
-                <div class="region-size">${formatSize(region.size)}</div>
-            `;
-
-                // Add click event
-                regionDiv.addEventListener('click', () => {
-                    handleRegionClick(index);
+            // Responsive font size adjustment
+            function setFontSize() {
+                const whei = $(window).width();
+                $("html").css({
+                    fontSize: whei / 20
                 });
+            }
 
-                container.appendChild(regionDiv);
+            // Initialize font size
+            setFontSize();
+
+            // Handle window resize
+            $(window).resize(function() {
+                setFontSize();
             });
+
+            // Check theme setting in local storage
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                $('body').addClass('dark-theme');
+            }
+
+            // Theme toggle button click event
+            themeToggle.on('click', function() {
+                const body = $('body');
+                if (body.hasClass('dark-theme')) {
+                    body.removeClass('dark-theme');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    body.addClass('dark-theme');
+                    localStorage.setItem('theme', 'dark');
+                }
+            });
+
+            // Current state
+            let currentRegion = null;
+            let currentRegisterData = []; // Array for register blocks
+            let currentRawData = []; // Array for raw memory data
+            let pcieDevices = [];
+            let selectedDevice = null;
+            let registerBlocks = [];
+            let selectedRegisterBlock = null;
+            let memoryRegions = [];
+            let currentRegionData = null;
+
+            // Load PCIe devices from lspci.txt
+            async function loadPCIeDevices() {
+                try {
+                    const response = await fetch('/api/device');
+                    if (response.ok) {
+                        const jsonData = await response.json();
+
+                        pcieDevices = jsonData.map(device => ({
+                            bdf: device.bdf,
+                            description: device.description || device.name || 'Unknown Device'
+                        }));
+                    }
+                } catch (error) {
+                    console.error('Error loading PCIe devices:', error);
+                    // Fallback to sample devices
+                    pcieDevices = [{
+                        bdf: '00:00.0',
+                        description: 'Host bridge: Intel Corporation Ice Lake Host Bridge'
+                    }];
+                }
+                populateDeviceDropdown();
+            }
+
+            // Populate device dropdown
+            function populateDeviceDropdown() {
+                deviceDropdown.innerHTML = '';
+                pcieDevices.forEach(device => {
+                    const option = document.createElement('div');
+                    option.className = 'device-option';
+                    option.dataset.bdf = device.bdf;
+                    option.innerHTML = `<span class="device-bdf">${device.bdf}</span> <span class="device-desc">${device.description}</span>`;
+                    option.addEventListener('click', () => selectDevice(device));
+                    deviceDropdown.appendChild(option);
+                });
+            }
+
+            // Filter devices based on search
+            function filterDevices(searchTerm) {
+                const filteredDevices = pcieDevices.filter(device =>
+                    device.bdf.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    device.description.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+
+                deviceDropdown.innerHTML = '';
+                filteredDevices.forEach(device => {
+                    const option = document.createElement('div');
+                    option.className = 'device-option';
+                    option.dataset.bdf = device.bdf;
+                    option.innerHTML = `<span class="device-bdf">${device.bdf}</span> <span class="device-desc">${device.description}</span>`;
+                    option.addEventListener('click', () => selectDevice(device));
+                    deviceDropdown.appendChild(option);
+                });
+            }
+
+            // Select device
+            function selectDevice(device) {
+                selectedDevice = device;
+                deviceSearch.value = `${device.bdf} - ${device.description}`;
+                deviceDropdown.classList.remove('show');
+
+                // Update device info display
+                document.getElementById('device-name-value').textContent = device.description;
+                document.getElementById('device-bdf-value').textContent = device.bdf;
+
+                // Load device config space
+                loadDeviceConfigSpace(device.bdf);
+            }
+
+            // Device search event listeners with keyboard navigation
+            let selectedOptionIndex = -1;
+            let currentOptions = [];
+
+            const updateSelectedOption = (newIndex) => {
+                // Remove previous selection
+                const prevSelected = deviceDropdown.querySelector('.device-option.selected');
+                if (prevSelected) {
+                    prevSelected.classList.remove('selected');
+                }
+
+                // Update index with cyclic bounds checking
+                if (currentOptions.length > 0) {
+                    // Handle cyclic navigation
+                    if (newIndex >= currentOptions.length) {
+                        selectedOptionIndex = 0; // Wrap to first option
+                    } else if (newIndex < 0) {
+                        selectedOptionIndex = currentOptions.length - 1; // Wrap to last option
+                    } else {
+                        selectedOptionIndex = newIndex;
+                    }
+
+                    const selectedOption = currentOptions[selectedOptionIndex];
+                    selectedOption.classList.add('selected');
+
+                    // Scroll into view if needed
+                    selectedOption.scrollIntoView({
+                        block: 'nearest'
+                    });
+                }
+            };
+
+            const refreshCurrentOptions = () => {
+                // Clear any previous keyboard selections
+                const prevSelected = deviceDropdown.querySelector('.device-option.selected');
+                if (prevSelected) {
+                    prevSelected.classList.remove('selected');
+                }
+
+                currentOptions = Array.from(deviceDropdown.querySelectorAll('.device-option'));
+                selectedOptionIndex = -1;
+
+                console.log('Refreshed current options:', currentOptions.length, 'devices available');
+            };
+
+            deviceSearch.addEventListener('input', (e) => {
+                const searchTerm = e.target.value;
+                if (searchTerm.length > 0) {
+                    filterDevices(searchTerm);
+                    deviceDropdown.classList.add('show');
+                } else {
+                    populateDeviceDropdown();
+                    deviceDropdown.classList.add('show');
+                }
+                refreshCurrentOptions();
+            });
+
+            deviceSearch.addEventListener('keydown', (e) => {
+                if (!deviceDropdown.classList.contains('show')) return;
+
+                switch (e.key) {
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        if (currentOptions.length > 0) {
+                            // If no option is selected, start from -1 so next will be 0
+                            const nextIndex = selectedOptionIndex === -1 ? 0 : selectedOptionIndex + 1;
+                            updateSelectedOption(nextIndex);
+                        }
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        if (currentOptions.length > 0) {
+                            // If no option is selected, start from last option
+                            const nextIndex = selectedOptionIndex === -1 ? currentOptions.length - 1 : selectedOptionIndex - 1;
+                            updateSelectedOption(nextIndex);
+                        }
+                        break;
+                    case 'Enter':
+                        e.preventDefault();
+                        if (selectedOptionIndex >= 0 && selectedOptionIndex < currentOptions.length) {
+                            const selectedOption = currentOptions[selectedOptionIndex];
+                            const bdf = selectedOption.dataset.bdf;
+                            const device = pcieDevices.find(d => d.bdf === bdf);
+                            if (device) {
+                                selectDevice(device);
+                            }
+                        }
+                        break;
+                    case 'Escape':
+                        deviceDropdown.classList.remove('show');
+                        selectedOptionIndex = -1;
+                        break;
+                }
+            });
+
+            deviceSearch.addEventListener('focus', () => {
+                deviceDropdown.classList.add('show');
+                refreshCurrentOptions();
+            });
+
+            deviceSearch.addEventListener('blur', () => {
+                // Delay hiding to allow clicks on dropdown
+                setTimeout(() => {
+                    deviceDropdown.classList.remove('show');
+                    selectedOptionIndex = -1;
+                }, 200);
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.device-search-container')) {
+                    deviceDropdown.classList.remove('show');
+                    selectedOptionIndex = -1;
+                }
+            });
+
+
+
+            // 格式化地址为4位十六进制 (改为2字节显示)
+            const formatAddress = (address) => {
+                return address.toString(16).padStart(4, '0').toUpperCase();
+            };
+
+            // 格式化字节为2位十六进制
+            const formatByte = (byte) => {
+                return byte.toString(16).padStart(2, '0').toUpperCase();
+            };
+
+            // Track the last hovered register block
+            let lastHoveredRegisterBlock = null;
+
+            // Generate memory layout
+            async function generateMemoryLayout(regionData) {
+                const container = document.getElementById('memory-regions-container');
+                if (!container) return;
+
+                container.innerHTML = '';
+
+                try {
+                    console.log('Memory region data:', regionData);
+                    const memoryRegions = regionData.regions || [];
+
+                    // Create memory regions display (even if no regions from API)
+                    if (memoryRegions.length === 0) {
+                        return;
+                    }
+
+                    // Sort by start address (lowest first, will be reversed by CSS)
+                    memoryRegions.sort((a, b) => a.startAddress - b.startAddress);
+
+                    // Calculate total memory span
+                    const maxAddress = Math.max(...memoryRegions.map(r => r.startAddress + r.size));
+                    const minAddress = Math.min(...memoryRegions.map(r => r.startAddress));
+                    const totalSpan = maxAddress - minAddress || 0x1000; // Fallback size
+                    console.log('Total span:', totalSpan);
+                    console.log('Memory regions:', memoryRegions);
+
+                    const MIN_HEIGHT = 8;
+                    const totalAvailableHeight = 100;
+                    const minTotal = MIN_HEIGHT * memoryRegions.length;
+                    const scalableHeight = Math.max(0, totalAvailableHeight - minTotal);
+                    const regionRatios = memoryRegions.map(r => r.size / totalSpan);
+                    const totalRatio = regionRatios.reduce((a, b) => a + b, 0);
+
+                    memoryRegions.forEach((region, index) => {
+                                const regionDiv = document.createElement('div');
+                                regionDiv.className = `memory-region ${region.type === 'reserved' ? 'reserved' : `region-${index % 8}`}`;
+                        regionDiv.dataset.region = region.type;
+
+                        const ratio = regionRatios[index] / totalRatio;
+                        const dynamicHeight = ratio * scalableHeight;
+                        const finalHeight = MIN_HEIGHT + dynamicHeight;
+
+                        // Calculate relative height based on size
+                        regionDiv.style.height = `${finalHeight}%`;
+                        
+                        regionDiv.innerHTML = `
+                        <div class="region-label">${region.name}</div>
+                        <div class="region-address">0x${region.startAddress.toString(16).padStart(8, '0').toUpperCase()} - 0x${(region.startAddress + region.size).toString(16).padStart(8, '0').toUpperCase()}</div>
+                        <div class="region-size">${formatSize(region.size)}</div>
+                    `;
+
+                        // Add click event
+                        regionDiv.addEventListener('click', () => {
+                            handleRegionClick(index);
+                        });
+
+                        container.appendChild(regionDiv);
+                    });
 
             // Auto-select the first region (PCIe config space)
             if (memoryRegions.length > 0) {
@@ -580,7 +591,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 生成 PCIe 规范样式的寄存器分布图
     const generateRegisterMap = (currentData = [], selectedBlock = null) => {
         // If a specific block is selected, only show that block's registers
-        console.log('generateRegisterMap', currentData, selectedBlock)
         if (selectedBlock && selectedBlock.registers) {
             generateSelectedBlockLayout(currentData, selectedBlock);
             return;
@@ -605,8 +615,6 @@ document.addEventListener('DOMContentLoaded', () => {
             registerMap.innerHTML = '<div class="no-registers">No register blocks data available</div>';
             return;
         }
-
-        console.log('Generating full 4K register map from blocks:', registerBlocks);
 
         // Create a complete 4K register layout
         generateFull4KLayout(registerBlocks);
@@ -810,7 +818,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Group registers by 4-byte (32-bit) aligned rows
         const registerRows = groupRegistersByRows(selectedBlock.registers);
-        console.log('registerRows', registerRows)
+        
         // Generate rows for this block's registers
         registerRows.forEach(row => {
             const rowElement = document.createElement('div');
