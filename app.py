@@ -309,7 +309,6 @@ async def set_register(request: RegisterUpdateRequest):
         if not target_register:
             raise HTTPException(status_code=404, detail="Register not found")
 
-        # 模拟写入
         print(f'Writing value 0x{value:08x} to register {target_register.name} at offset 0x{target_register.offset:03x} for device {bdf}')
         target_register.value = value
 
@@ -338,7 +337,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.server:
-        # 启动 FastAPI Web 服务器
         uvicorn.run(app, host="127.0.0.1", port=8000)
     elif args.bdf:
         try:
