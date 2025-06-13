@@ -55,9 +55,8 @@ body.dark-theme .memory-layout {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 .memory-layout .memory-layout-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  margin: auto;
+  text-align: center;
   padding: 0.12rem 0.15rem;
   background: #f8f9fa;
   border-bottom: 1px solid #ddd;
@@ -73,13 +72,6 @@ body.dark-theme .memory-layout .memory-layout-header {
 }
 body.dark-theme .memory-layout .memory-layout-header h3 {
   color: #66b3ff;
-}
-.memory-layout .memory-layout-header .memory-stats {
-  font-size: 0.16rem;
-  color: #666666;
-}
-body.dark-theme .memory-layout .memory-layout-header .memory-stats {
-  color: #999999;
 }
 .memory-layout .memory-regions-container {
   flex: 1;
