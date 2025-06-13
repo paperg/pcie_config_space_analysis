@@ -55,6 +55,7 @@ body.dark-theme .memory-layout {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 .memory-layout .memory-layout-header {
+  width: 100%;
   margin: auto;
   text-align: center;
   padding: 0.12rem 0.15rem;
@@ -66,7 +67,8 @@ body.dark-theme .memory-layout .memory-layout-header {
   border-bottom-color: #333333;
 }
 .memory-layout .memory-layout-header h3 {
-  margin: 0;
+  display: block;
+  width: 100%;
   color: #399bff;
   font-size: 0.16rem;
 }
